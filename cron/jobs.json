@@ -258,15 +258,15 @@
       "schedule_display": "every 25m",
       "repeat": {
         "times": null,
-        "completed": 698
+        "completed": 699
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-17T09:08:27.467715+08:00",
-      "next_run_at": "2026-07-29T12:28:50.483339+08:00",
-      "last_run_at": "2026-07-29T12:03:50.483339+08:00",
+      "next_run_at": "2026-07-29T12:53:50.795878+08:00",
+      "last_run_at": "2026-07-29T12:28:50.795878+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -513,8 +513,11 @@
       "origin": null,
       "enabled_toolsets": null,
       "workdir": null,
-      "fire_claim": null
+      "fire_claim": {
+        "at": "2026-07-29T12:23:47.472447+08:00",
+        "by": "VM-0-5-ubuntu:3019300"
+      }
     }
   ],
-  "updated_at": "2026-07-29T12:14:43.633036+08:00"
+  "updated_at": "2026-07-29T12:28:50.796728+08:00"
 }
