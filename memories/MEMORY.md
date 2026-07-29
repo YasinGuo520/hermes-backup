@@ -68,10 +68,4 @@ Mac端Hermes模型也是deepseek-v4-flash,SOUL.md已替换为深度思考版。�
 §
 量化系统v2: quant_ensemble.py全面重写(9维TA指标+资金流+Kronos本地缓存), quant_sectors.py板块推荐(行业分类+市值过滤>100亿+板块评分Top3)。cron 8:45合并推送选股+板块。
 §
-Holographic记忆已激活：`hermes memory setup holographic` 完成，provider=holographic，本地SQLite向量存储，零外部依赖。Kanban看板已初始化：`hermes kanban init` → ~/.hermes/kanban.db，gateway内嵌dispatcher已运行。Level 4 (GitHub备份)待配——等他提供GitHub用户名。
-§
-Holographic记忆已激活+Kanban看板已初始化+Dashboard已开8897端口(admin/kanban)。GitHub备份待配。
-§
-Dashboard绑非127.0.0.1需basic auth。config.yaml不能直接patch改（安全拦截），需python写yaml或terminal执行。
-§
-Holographic记忆：hermes memory setup holographic一键激活，本地SQLite零依赖。Kanban：hermes kanban init→配auth→dashboard启动。网关内嵌dispatcher自动跑。
+GitHub备份方案：SSH key（非PAT）更可靠，国内git push可能超时60-180s，`no_agent: true`脚本模式零token消耗。`git status --porcelain`检测未跟踪文件，`rsync --exclude='.git'`处理skills内嵌git仓库。hermes-advanced-setup和hermes-config-evolution两个skill已补全实战操作。

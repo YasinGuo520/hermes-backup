@@ -16,23 +16,71 @@ category: devops
 
 ## Level 4 — GitHub 自动备份
 
+### 方式 A：SSH 密钥 + 纯脚本（中国网络推荐）
+
+国内 GitHub HTTPS 很慢（可能超时 120s+），SSH 更稳定。
+
+**前置条件：**
+1. 用户 GitHub 账号 + 已建 private repo（如 `hermes-backup`）
+2. 用户配好 SSH key（`ssh-keygen` → 加到 GitHub Settings → SSH Keys）
+3. 验证：`ssh -T git@github.com` 返回用户名
+
+**备份脚本（`~/.hermes/scripts/github-backup.sh`）：**
 ```bash
-# 前置条件
-# 1. 用户提供 GitHub 用户名
-# 2. 创建一个 private repo（如 hermes-backup）
-# 3. 生成 fine-grained PAT（repo 权限: contents read/write）
+#!/bin/bash
+set -e
+source "${HOME}/.hermes/.env" 2>/dev/null || true
 
-# 设置 token（写入 .env，不出现在聊天记录）
-hermes config set GITHUB_TOKEN <token>
+REPO_URL="git@github.com:<USER>/<REPO>.git"
+BACKUP_DIR="/tmp/hermes-github-backup"
+HERMES_HOME="${HOME}/.hermes"
 
-# 创建 cron job（自然语言即可，Hermes 自动生成 skill + cron）
-# 或使用内置命令：
-hermes backup
+git clone --depth 1 "${REPO_URL}" "${BACKUP_DIR}"
+cd "${BACKUP_DIR}"
+
+cp "${HERMES_HOME}/config.yaml" "$BACKUP_DIR/"
+cp "${HERMES_HOME}/SOUL.md" "$BACKUP_DIR/"
+rsync -a --delete --exclude='.git' "${HERMES_HOME}/memories/" "$BACKUP_DIR/memories/"
+rsync -a --delete --exclude='.git' "${HERMES_HOME}/skills/" "$BACKUP_DIR/skills/"
+rsync -a --delete --exclude='.git' "${HERMES_HOME}/cron/" "$BACKUP_DIR/cron/"
+
+if git status --porcelain | grep -q .; then
+    git add -A && git commit -m "daily backup $(date -u +%Y-%m-%d)" --quiet
+    git push origin main 2>/dev/null || git push origin master 2>/dev/null
+    echo "Backed up: $(find . -type f -not -path '*/.git/*' | wc -l) files"
+else
+    echo "No changes"
+fi
+rm -rf "${BACKUP_DIR}"
 ```
 
-**注意：**
-- PAT 用 fine-grained，scope 到单个 private repo
-- 用 `hermes config set` 而不是在聊天中粘贴 token
+**cron job（零 token 消耗，`no_agent: true`）：**
+```bash
+cronjob action=create schedule="0 3 * * *" script="github-backup.sh" no_agent=true deliver=origin name=github-daily-backup
+```
+
+**关键细节：**
+- `rsync --exclude='.git'` 解决 skills/ 下嵌套 git repo 的问题
+- `git status --porcelain` 检测新文件（`git diff` 检测不到 untracked files）
+- SSH key 不能设密码（cron 无人值守无法输入）
+
+### 方式 B：内置 `hermes backup` 命令（便携归档）
+```bash
+hermes backup   # 输出 ~/.hermes/backups/hermes-YYYY-MM-DD-HHMMSS.tar.zst
+hermes import   # 恢复（交互式冲突解决）
+```
+- 默认脱敏 secrets
+- `--include-secrets` 迁移时用
+- 不需要 GitHub，可存本地磁盘
+
+### 安全要点
+- 备份仓库必须 **private**
+- 不用在聊天里粘贴 token，用 `hermes config set GITHUB_TOKEN <token>`
+- 如用 SSH key，确保 key 不加密码（cron 无法输入密码）
+- 国内服务器 git push 可能需要超过 120s 超时
+
+### 参考文件
+- `scripts/github-backup.sh` — 完整可部署的备份脚本模板
 
 ## Level 5 — Kanban 看板
 
@@ -83,6 +131,100 @@ hermes dashboard --port 8897 --host 0.0.0.0 --no-open
 - config.yaml **不能**用 patch/edit 工具修改（安全拦截拒绝写），必须用 python yaml 脚本或 terminal
 - 网关已经在跑的话，dispatcher 自动生效，每 60s 扫描看板
 - 看板 DB 位置：`~/.hermes/kanban.db`
+
+## Level 5a — Kanban 操作指南
+
+### 核心命令一览
+
+| 命令 | 用途 |
+|------|------|
+| `hermes kanban init` | 创建看板 DB（幂等） |
+| `hermes kanban boards` | 多看板管理（创建/切换/列表） |
+| `hermes kanban create` | 创建任务 |
+| `hermes kanban list / ls` | 列出任务（可按状态/assignee 过滤） |
+| `hermes kanban show <id>` | 查看任务详情+评论+事件 |
+| `hermes kanban claim <id>` | 认领任务（原子操作） |
+| `hermes kanban assign <id> <profile>` | 分配任务 |
+| `hermes kanban complete <id>` | 完成任务 |
+| `hermes kanban block <id>` | 标记阻塞 |
+| `hermes kanban unblock <id>` | 解除阻塞 |
+| `hermes kanban schedule <id>` | 定时任务（到期自动转 ready） |
+| `hermes kanban promote <id>` | 手动推至 ready |
+| `hermes kanban archive <id>` | 归档 |
+| `hermes kanban link / unlink <a> <b>` | 任务依赖链（parent→child） |
+| `hermes kanban comment <id> <text>` | 追加评论 |
+| `hermes kanban attach <id> <file>` | 附加文件 |
+| `hermes kanban swarm` | Swarm 模式（并行 worker→验证→合成） |
+| `hermes kanban decompose <id>` | 自动拆解复杂任务为子任务 |
+| `hermes kanban specify <id>` | 将 triage 任务具体化 |
+| `hermes kanban stats` | 按状态+assignee 计数+最久待办 |
+| `hermes kanban log <id>` | 查看 worker 运行日志 |
+| `hermes kanban context <id>` | 打印 worker 看到的完整上下文 |
+| `hermes kanban tail <id>` | 实时流式事件 |
+| `hermes kanban dispatch` | 手动触发一次调度 tick |
+| `hermes kanban watch` | 终端实时事件流 |
+| `hermes kanban gc` | 垃圾回收（清理已归档 workspace/日志/事件） |
+| `hermes kanban stats` | 所有列计数+最旧 ready 任务年龄 |
+
+### 多看板（boards）
+
+一个 board = 一个项目/工作流。数据隔离，每个 board 独立 DB 文件。
+
+```bash
+hermes kanban boards list                     # 列出所有看板
+hermes kanban boards create <slug>            # 新建看板
+hermes kanban boards switch <slug>            # 切换当前看板
+```
+
+默认 board slug 叫 `default`，即 `~/.hermes/kanban.db`。切换后操作针对新 board。
+
+### Dispatcher 工作原理
+
+- 跑在 Gateway 进程内，每 **60 秒** tick 一次
+- 每个 tick：reclaim 过期/僵死任务 → promote 子任务 → spawn 就绪任务
+- worker 是完整 Hermes Agent 进程（每个 worker 一个独立会话）
+- worker 必须至少 **每小时** 发一次 heartbeat，否则 dispatcher 会 reclaim
+
+### 并发限制（关键）
+
+每 spawn 一个 worker ≈ 一个完整 Hermes Agent 进程（200-500MB RAM）。
+
+三层控制（配在 `config.yaml`）：
+
+```yaml
+kanban:
+  # 全局同时 running 任务上限
+  max_in_progress: 3
+  
+  # 单个 profile 同时 running 上限（防止单 profile 被 fan-out 打爆）
+  max_in_progress_per_profile: 2
+  
+  # live 并发上限（不是 per-tick budget，是全局 running+spawn 的实时值）
+  max_spawn: 3
+```
+
+**资源参考（Yasin 的腾讯云轻量 2核/3.6G）**：
+- Gateway 已占 ~1.8G peak
+- 可用内存 ~1.8G
+- 建议同时跑 **2-3 个** kanban worker，压到 4-5 个会爆内存/swap
+
+### Swarm 模式
+
+```bash
+hermes kanban swarm create <slug> --workers 3 --verifier --synthesizer
+```
+
+流水线：并行 N 个 worker 分别执行 → verifier 校验 → synthesizer 合并结果。
+适合批量数据抓取、多角度分析、批量内容生成。
+
+### 任务依赖
+
+```bash
+hermes kanban link <parent_id> <child_id>     # child 依赖 parent
+hermes kanban unlink <parent_id> <child_id>
+```
+
+子任务在所有 parent 完成后自动 promote 到 ready。
 
 ## Level 6 — Holographic 记忆
 
