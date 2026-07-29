@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "installed": {
+    "stocks": {
+      "source": "official",
+      "identifier": "official/finance/stocks",
+      "trust_level": "builtin",
+      "scan_verdict": "dangerous",
+      "content_hash": "sha256:e2815063d9f88348",
+      "install_path": "finance/stocks",
+      "files": [
+        "SKILL.md",
+        "scripts/stocks_client.py"
+      ],
+      "metadata": {},
+      "installed_at": "2026-07-06T07:26:12.557874+00:00",
+      "updated_at": "2026-07-06T07:26:12.557891+00:00"
+    },
+    "blender-mcp": {
+      "source": "official",
+      "identifier": "official/creative/blender-mcp",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:078712858b3b6e95",
+      "install_path": "creative/blender-mcp",
+      "files": [
+        "SKILL.md"
+      ],
+      "metadata": {},
+      "installed_at": "2026-07-07T04:51:28.662587+00:00",
+      "updated_at": "2026-07-07T04:51:28.662607+00:00"
+    },
+    "pixel-art": {
+      "source": "official",
+      "identifier": "official/creative/pixel-art",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:b7ae08576dac501e",
+      "install_path": "creative/pixel-art",
+      "files": [
+        "ATTRIBUTION.md",
+        "SKILL.md",
+        "references/palettes.md",
+        "scripts/pixel_art_video.py",
+        "scripts/palettes.py",
+        "scripts/__init__.py",
+        "scripts/pixel_art.py"
+      ],
+      "metadata": {},
+      "installed_at": "2026-07-07T04:51:33.973720+00:00",
+      "updated_at": "2026-07-07T04:51:33.973737+00:00"
+    },
+    "drawio-skill": {
+      "source": "clawhub",
+      "identifier": "drawio-skill",
+      "trust_level": "community",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:619306550f13f109",
+      "install_path": "drawio-skill",
+      "files": [
+        "agents/openai.yaml",
+        "README.md",
+        "skill-card.md",
+        "SKILL.md",
+        "_meta.json"
+      ],
+      "metadata": {},
+      "installed_at": "2026-07-07T04:52:00.507424+00:00",
+      "updated_at": "2026-07-07T04:52:00.507444+00:00"
+    },
+    "stable-diffusion": {
+      "source": "official",
+      "identifier": "official/mlops/stable-diffusion",
+      "trust_level": "builtin",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:76697196c87f5514",
+      "install_path": "mlops/stable-diffusion",
+      "files": [
+        "SKILL.md",
+        "references/troubleshooting.md",
+        "references/advanced-usage.md"
+      ],
+      "metadata": {},
+      "installed_at": "2026-07-07T04:52:05.725262+00:00",
+      "updated_at": "2026-07-07T04:52:05.725281+00:00"
+    },
+    "deep-research": {
+      "source": "clawhub",
+      "identifier": "deep-research",
+      "trust_level": "community",
+      "scan_verdict": "safe",
+      "content_hash": "sha256:2a226b464a8f201b",
+      "install_path": "deep-research",
+      "files": [
+        "references/html-guide.md",
+        "references/writing-guide.md",
+        "skill-card.md",
+        "SKILL.md",
+        "_meta.json"
+      ],
+      "metadata": {},
+      "scan_provenance": {
+        "source": "deep-research",
+        "source_url": "deep-research",
+        "bundle_hash": "sha256:2a226b464a8f201b7b02131dac78c0f22a1f34bfdd628e0ec8f801b0d0c896e0",
+        "scanner_version": "skills-guard-v1",
+        "verdict": "safe",
+        "trust_level": "community",
+        "findings": [],
+        "rules": [],
+        "scanned_at": "2026-07-21T08:18:47.441477+00:00",
+        "summary": "deep-research: clean scan, no threats detected",
+        "fresh": false
+      },
+      "installed_at": "2026-07-21T08:19:09.063509+00:00",
+      "updated_at": "2026-07-21T08:19:09.063521+00:00"
+    }
+  }
+}

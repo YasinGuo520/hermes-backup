@@ -1,0 +1,85 @@
+model:
+  base_url: https://api.deepseek.com/v1
+  default: deepseek-v4-flash
+  provider: deepseek
+agent:
+  max_turns: 90
+  context_length: 32000
+terminal:
+  backend: local
+  cwd: .
+  timeout: 180
+web:
+  backend: ddgs
+compression:
+  enabled: true
+  threshold: 0.5
+  target_ratio: 0.2
+auxiliary:
+  vision:
+    provider: openai
+    model: Qwen/Qwen3-VL-8B-Instruct
+    base_url: https://api.siliconflow.cn/v1
+    api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
+  compression:
+    provider: deepseek
+    model: deepseek-v4-flash
+  session_search:
+    model: deepseek-v4-flash
+    provider: deepseek
+display:
+  language: zh
+  platforms:
+    lightclawbot:
+      streaming: true
+memory:
+  memory_char_limit: 5000
+  user_char_limit: 3000
+  provider: holographic
+delegation:
+  max_iterations: 50
+skills:
+  external_dirs:
+  - ~/.agents/skills
+curator:
+  consolidate: true
+approvals:
+  mode: false
+  destructive_slash_confirm: false
+security:
+  redact_secrets: false
+gateway:
+  platforms:
+  - feishu
+  - qqbot
+onboarding:
+  seen:
+    busy_input_prompt: true
+_config_version: 33
+mcp_servers:
+  anysearch:
+    enabled: true
+    headers:
+      Authorization: Bearer as_sk_7659b7d7e81a54402fe036477f1d17a0
+    url: https://api.anysearch.com/mcp
+platforms:
+  lightclawbot:
+    enabled: true
+  qqbot:
+    enabled: true
+    extra:
+      app_id: '1905201206'
+      client_secret: nW4PYT9azCD0lKfX
+      dm_policy: allowlist
+      group_policy: allowlist
+      markdown_support: true
+plugins:
+  disabled: []
+  enabled:
+  - agency-agents-router
+  - web/ddgs
+  - lightclawbot
+dashboard:
+  basic_auth:
+    username: admin
+    password_hash: scrypt$16384$8$1$CrDOncKnZTLF/vYoDu7/+A==$q2RHI2eGO0OY7Tq4Ma0VT/F+26RsZ/llqBvI4GnsrA4=

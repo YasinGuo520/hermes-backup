@@ -1,0 +1,6 @@
+2026-07-06T07:26:12Z INSTALL stocks official:builtin dangerous sha256:e2815063d9f88348
+2026-07-07T04:51:28Z INSTALL blender-mcp official:builtin safe sha256:078712858b3b6e95
+2026-07-07T04:51:33Z INSTALL pixel-art official:builtin safe sha256:b7ae08576dac501e
+2026-07-07T04:52:00Z INSTALL drawio-skill clawhub:community safe sha256:619306550f13f109
+2026-07-07T04:52:05Z INSTALL stable-diffusion official:builtin safe sha256:76697196c87f5514
+2026-07-21T08:19:09Z INSTALL deep-research clawhub:community safe sha256:2a226b464a8f201b

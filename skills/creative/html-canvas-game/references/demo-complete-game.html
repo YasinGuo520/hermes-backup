@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>棺中新娘 - DEMO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#050302;font-family:'Noto Serif SC',serif;
+  display:flex;justify-content:center;align-items:center;
+  min-height:100vh;overflow:hidden;user-select:none;
+}
+#game{
+  width:1000px;height:700px;position:relative;
+  background:#1a0e08;border:1px solid #3d2b1f;
+  box-shadow:0 0 80px rgba(80,20,0,0.3);
+  overflow:hidden;border-radius:4px;
+}
+canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%}
+
+#title{
+  position:absolute;inset:0;z-index:100;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  background:radial-gradient(ellipse at center,rgba(20,8,4,0.95),rgba(0,0,0,0.98));
+}
+#title h1{
+  font-size:64px;color:#8b0000;letter-spacing:16px;
+  text-shadow:0 0 60px rgba(139,0,0,0.5),0 4px 12px rgba(0,0,0,0.8);
+  margin-bottom:8px;font-weight:900;
+}
+.btn{
+  padding:14px 60px;background:transparent;border:1px solid #6a3a2a;
+  color:#c8a878;font-size:15px;cursor:pointer;letter-spacing:6px;
+  transition:all .4s;font-family:inherit;
+}
+.btn:hover{background:#6a3a2a;color:#fff;border-color:#8b0000;}
+
+#inventory{
+  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:10;
+}
+.inv-slot{
+  width:64px;height:64px;background:rgba(10,5,3,0.85);
+  border:1px solid #3d2b1f;border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;color:#c8a878;transition:all .3s;
+}
+.inv-slot.filled{border-color:#8b0000;background:rgba(40,10,5,0.9)}
+
+#dialogue{
+  position:absolute;bottom:0;left:0;right:0;z-index:20;
+  background:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.7) 70%,transparent);
+  padding:24px 40px 30px;cursor:pointer;display:none;min-height:140px;
+}
+#d-text{color:#c8b898;font-size:16px;line-height:1.9;letter-spacing:1px}
+#d-hint{color:#555;font-size:11px;text-align:right;margin-top:8px;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+#scene-name{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  color:#5a3a2a;font-size:13px;letter-spacing:3px;z-index:10;
+  background:rgba(0,0,0,.6);padding:4px 20px;border:1px solid #2a1a10;opacity:.7;
+}
+#loading{
+  position:absolute;inset:0;z-index:200;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  background:#050302;transition:opacity .6s;
+}
+#loading.hidden{opacity:0;pointer-events:none}
+.spinner{
+  width:30px;height:30px;border:2px solid #2a1a10;
+  border-top-color:#8b0000;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <canvas id="gc"></canvas>
+
+  <div id="title">
+    <h1>棺 中 新 娘</h1>
+    <div style="font-size:14px;color:#5a3a2a;letter-spacing:6px;margin-bottom:6px;">─ 纸嫁衣 · 同人试作 ─</div>
+    <div style="font-size:13px;color:#7a5a3a;letter-spacing:3px;margin-bottom:50px;">中 式 民 俗 恐 怖 解 谜</div>
+    <button class="btn" onclick="startGame()">焚 香 入 村</button>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <p style="color:#5a3a2a;font-size:13px;letter-spacing:4px;">纸 钱 纷 飞</p>
+  </div>
+
+  <div id="scene-name">─ 奘铃村 · 废弃祠堂 ─</div>
+
+  <div id="inventory">
+    <div class="inv-slot" id="i0"></div>
+    <div class="inv-slot" id="i1"></div>
+    <div class="inv-slot" id="i2"></div>
+    <div class="inv-slot" id="i3"></div>
+  </div>
+
+  <div id="dialogue" onclick="nextLine()">
+    <div id="d-name" style="color:#c0392b;font-size:13px;margin-bottom:4px;letter-spacing:2px;opacity:.8;"></div>
+    <div id="d-text"></div>
+    <div id="d-hint">▸ 点击继续</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════  GAME ENGINE  ═══════════════════════
+
+const canvas = document.getElementById('gc');
+const ctx = canvas.getContext('2d');
+canvas.width = 1000; canvas.height = 700;
+
+const G = {
+  state: 'title', scene: 'hall', phase: 0,
+  inventory: [], maxInv: 4, flags: {},
+  mouseX: 0, mouseY: 0, hoverItem: null, clock: 0,
+};
+
+// ═══════════════════════  SCENES  ═══════════════════════
+
+const SCENES = {
+  hall: {
+    name: '废弃祠堂',
+    bg: {r:20,g:12,b:8},
+    items: [
+      {id:'candle', x:418,y:260,w:16,h:50, label:'红烛'},
+      {id:'curtain', x:790,y:50,w:180,h:320, label:'帷幔'},
+      {id:'incense', x:340,y:290,w:80,h:40, label:'香炉'},
+    ],
+  },
+  shrine: {
+    name: '偏殿 · 六葬菩萨',
+    bg: {r:15,g:8,b:5},
+    items: [
+      {id:'scroll', x:500,y:340,w:30,h:60, label:'卷轴'},
+      {id:'bell', x:698,y:140,w:12,h:40, label:'铜铃'},
+    ],
+  },
+  yard: {
+    name: '后院 · 槐树林',
+    bg: {r:10,g:12,b:10},
+    items: [
+      {id:'gate', x:440,y:140,w:120,h:220, label:'院门'},
+    ],
+  },
+};
+
+const EXITS = {
+  hall_to_shrine: {x:920,y:320,w:60,h:120, go:'shrine', label:'→ 偏殿'},
+  hall_to_yard:   {x:10,y:200,w:50,h:200, go:'yard', label:'← 后院'},
+  shrine_to_hall: {x:10,y:320,w:60,h:120, go:'hall', label:'→ 祠堂'},
+  yard_to_hall:   {x:10,y:320,w:60,h:120, go:'hall', label:'→ 祠堂'},
+};
+
+function getExits(scene) {
+  const map = {
+    hall:   [EXITS.hall_to_shrine, EXITS.hall_to_yard],
+    shrine: [EXITS.shrine_to_hall],
+    yard:   [EXITS.yard_to_hall],
+  };
+  return map[scene] || [];
+}
+
+// ═══════════════════════  PUZZLE LOGIC  ═══════════════════════
+
+function checkPuzzle(itemId) {
+  switch(itemId) {
+    case 'incense':
+      if (!G.flags.ashChecked) {
+        G.flags.ashChecked = true;
+        if (G.inventory.length < G.maxInv) {
+          G.inventory.push('matches');
+          updateInv();
+          return {type:'talk', lines:['你将手探入香灰，摸到了一盒火柴。']};
+        }
+        return {type:'talk', lines:['道具已满。']};
+      }
+      return null;
+
+    case 'candle':
+      if (!G.flags.candleLit && G.inventory.includes('matches')) {
+        G.flags.candleLit = true;
+        return {type:'talk', lines:['你擦亮火柴，点燃了红烛。昏黄的火光照亮了祠堂。']};
+      }
+      if (!G.inventory.includes('matches'))
+        return {type:'talk', lines:['你需要能点火的东西。']};
+      return null;
+
+    case 'curtain':
+      if (G.flags.candleLit && !G.flags.curtainChecked) {
+        G.flags.curtainChecked = true;
+        if (G.inventory.length < G.maxInv) {
+          G.inventory.push('talisman');
+          updateInv();
+          return {type:'talk', lines:['你掀开帷幔，在墙角发现了一道黄色符纸，朱砂符文隐隐发光。']};
+        }
+        return {type:'talk', lines:['道具已满。']};
+      }
+      if (!G.flags.candleLit)
+        return {type:'talk', lines:['帷幔后面太暗了，需要一些光亮。']};
+      return null;
+
+    case 'scroll':
+      if (!G.flags.scrollRead) {
+        G.flags.scrollRead = true;
+        return {type:'talk', lines:[
+          '「葬经·残卷」',
+          '一曰明灯照路，二曰血符镇邪，三曰金铃引魂。',
+          '三法齐备，天门自开。',
+          '——这似乎是破局的关键指引！'
+        ]};
+      }
+      return null;
+
+    case 'bell':
+      if (G.inventory.includes('talisman') && !G.flags.gateOpen) {
+        G.flags.gateOpen = true;
+        return {type:'talk', lines:[
+          '你用符纸触碰铜铃，铃铛发出一声清响——',
+          '远处传来铁链坠地的声音！'
+        ]};
+      }
+      if (!G.inventory.includes('talisman'))
+        return {type:'talk', lines:['铜铃无风自鸣。你感觉需要一件法器来应对。']};
+      return null;
+
+    case 'gate':
+      if (G.flags.gateOpen) return {type:'ending'};
+      return {type:'talk', lines:['铁链紧锁，仅凭人力无法打开。你需要找到开启它的方法。']};
+
+    default:
+      return null;
+  }
+}
+
+// ═══════════════════════  RENDER  ═══════════════════════
+
+function drawScene() {
+  const scene = SCENES[G.scene];
+  const bg = scene.bg;
+  const grad = ctx.createRadialGradient(500,350,0,500,350,500);
+  grad.addColorStop(0, `rgb(${bg.r*1.5},${bg.g*1.5},${bg.b*1.5})`);
+  grad.addColorStop(1, `rgb(${bg.r},${bg.g},${bg.b})`);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,1000,700);
+
+  // Floor texture
+  ctx.globalAlpha = 0.03;
+  for (let i=0;i<40;i++) {
+    ctx.fillStyle='#8b7355';
+    ctx.fillRect(Math.sin(i*13)*400+400, Math.cos(i*7)*300+300, 3, 1);
+  }
+  ctx.globalAlpha = 1;
+
+  // === HALL ===
+  if (G.scene === 'hall') {
+    // Altar table
+    ctx.fillStyle='#3d2818'; ctx.fillRect(340,220,220,80);
+    ctx.fillStyle='#4a3020'; ctx.fillRect(340,260,10,40); ctx.fillRect(550,260,10,40);
+    // Candle
+    if (G.flags.candleLit) {
+      ctx.fillStyle='#d4a060'; ctx.fillRect(418,250,12,30);
+      ctx.fillStyle='#ffcc44'; ctx.beginPath(); ctx.arc(424,242,8,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(255,180,40,0.1)'; ctx.beginPath(); ctx.arc(424,232,30,0,Math.PI*2); ctx.fill();
+    } else { ctx.fillStyle='#5a3a2a'; ctx.fillRect(418,260,12,40); }
+    // Curtain
+    ctx.fillStyle='rgba(100,30,20,0.4)'; ctx.fillRect(790,50,180,320);
+    // Beam
+    ctx.fillStyle='#2a1a10'; ctx.fillRect(0,10,1000,6); ctx.fillRect(0,100,1000,3);
+  }
+
+  // === SHRINE ===
+  if (G.scene === 'shrine') {
+    // Statue
+    ctx.fillStyle='#2a1a14'; ctx.beginPath(); ctx.arc(500,180,60,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#3d2a20'; ctx.fillRect(470,220,60,120);
+    const arms = [[-60,-20],[-50,-40],[-40,20],[50,-40],[60,-20],[40,20]];
+    ctx.strokeStyle='#3d2a20'; ctx.lineWidth=6;
+    arms.forEach(([dx,dy])=>{ ctx.beginPath(); ctx.moveTo(500,170); ctx.lineTo(500+dx,170+dy); ctx.stroke(); });
+    // Bell
+    ctx.fillStyle='#8a7a5a'; ctx.beginPath(); ctx.arc(704,173,6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#6a5a3a'; ctx.fillRect(698,140,4,33);
+    // Incense burner
+    ctx.fillStyle='#4a3a2a'; ctx.fillRect(340,290,80,40);
+    ctx.fillStyle='#2a1a10'; ctx.fillRect(345,295,70,30);
+    // Scroll
+    ctx.fillStyle='#c8b890'; ctx.fillRect(505,335,6,40);
+  }
+
+  // === YARD ===
+  if (G.scene === 'yard') {
+    // Gate
+    ctx.fillStyle='#2a1a10'; ctx.fillRect(440,140,120,220);
+    ctx.fillStyle='#1a0e08'; ctx.fillRect(445,145,55,210); ctx.fillRect(500,145,55,210);
+    ctx.strokeStyle='#5a5a5a'; ctx.lineWidth=3;
+    if (!G.flags.gateOpen) {
+      ctx.beginPath(); ctx.moveTo(480,250); ctx.lineTo(520,250); ctx.stroke();
+      ctx.fillStyle='#6a5a4a'; ctx.fillRect(492,248,16,20);
+    }
+    // Well
+    ctx.fillStyle='#3a2a20'; ctx.fillRect(150,310,90,70);
+    ctx.fillStyle='#1a1a1a'; ctx.fillRect(160,325,70,40);
+    // Tree
+    ctx.strokeStyle='#2a1a10'; ctx.lineWidth=20;
+    ctx.beginPath(); ctx.moveTo(780,280); ctx.lineTo(800,100); ctx.stroke();
+    ctx.fillStyle='#1a1208'; ctx.beginPath(); ctx.arc(800,100,80,0,Math.PI*2); ctx.fill();
+    for (let i=0;i<6;i++) {
+      ctx.fillStyle='rgba(100,20,10,0.3)';
+      ctx.fillRect(770+Math.sin(i)*25,90+i*25,4,20);
+    }
+    // Fire pit
+    ctx.fillStyle='rgba(30,15,8,0.8)';
+    ctx.beginPath(); ctx.arc(350,360,40,0,Math.PI*2); ctx.fill();
+  }
+
+  // Item hover glow
+  (scene.items||[]).forEach(item => {
+    if (item.id === G.hoverItem) {
+      ctx.fillStyle='rgba(200,100,50,0.08)';
+      ctx.beginPath(); ctx.arc(item.x+item.w/2, item.y+item.h/2, Math.max(item.w,item.h)*0.8, 0, Math.PI*2);
+      ctx.fill();
+    }
+  });
+
+  // Exit labels
+  getExits(G.scene).forEach(ex => {
+    ctx.fillStyle = ex.label === G.hoverItem ? 'rgba(100,180,100,0.1)' : 'transparent';
+    ctx.fillRect(ex.x,ex.y,ex.w,ex.h);
+    ctx.fillStyle='rgba(60,120,60,0.3)'; ctx.font='12px serif'; ctx.textAlign='center';
+    ctx.fillText(ex.label, ex.x+ex.w/2, ex.y+30);
+  });
+
+  // Fog
+  const fog = ctx.createRadialGradient(500,350,100,500,350,600);
+  fog.addColorStop(0,'rgba(0,0,0,0)'); fog.addColorStop(1,'rgba(0,0,0,0.4)');
+  ctx.fillStyle=fog; ctx.fillRect(0,0,1000,700);
+
+  // Ash particles
+  G.clock++; ctx.globalAlpha=0.08;
+  for (let i=0;i<8;i++) {
+    const x=(G.clock*0.3+i*117)%1000, y=(G.clock*0.2+i*93+G.clock*Math.sin(i)*0.5)%700;
+    ctx.fillStyle='#8a7a5a'; ctx.beginPath(); ctx.arc(x,y,2+Math.sin(G.clock*0.01+i)*1,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+}
+
+// ═══════════════════════  INTERACTION  ═══════════════════════
+
+function getHit(mx, my) {
+  for (const item of (SCENES[G.scene]?.items||[]))
+    if (mx>=item.x&&mx<=item.x+item.w && my>=item.y&&my<=item.y+item.h)
+      return {type:'item', id:item.id, label:item.label};
+  for (const ex of getExits(G.scene))
+    if (mx>=ex.x&&mx<=ex.x+ex.w && my>=ex.y&&my<=ex.y+ex.h)
+      return {type:'exit', id:ex.go, label:ex.label};
+  return null;
+}
+
+function interactItem(itemId) {
+  const puzzle = checkPuzzle(itemId);
+  if (puzzle?.type === 'talk') {
+    textQueue = puzzle.lines.map(l=>({text:l}));
+    document.getElementById('dialogue').style.display='block';
+    nextLine();
+    return;
+  }
+  if (puzzle?.type === 'ending') {
+    textQueue = [
+      '铁链应声坠地，沉重的木门缓缓打开。',
+      '你踏出门槛，身后传来若有若无的叹息...',
+      '',
+      '— 棺中新娘 · DEMO完结 —',
+    ];
+    document.getElementById('dialogue').style.display='block';
+    nextLine();
+    setTimeout(()=>location.reload(), 6000);
+    G.state = 'ending';
+    return;
+  }
+}
+
+// ═══════════════════════  DIALOGUE  ═══════════════════════
+
+let textQueue = [];
+
+function nextLine() {
+  if (textQueue.length === 0) {
+    document.getElementById('dialogue').style.display = 'none';
+    return;
+  }
+  const cur = textQueue.shift();
+  document.getElementById('d-text').textContent = cur.text;
+}
+
+// ═══════════════════════  INVENTORY  ═══════════════════════
+
+function updateInv() {
+  const icons = { matches:'🎯', talisman:'🟥', key:'🗝️' };
+  for (let i=0;i<G.maxInv;i++) {
+    const slot = document.getElementById('i'+i);
+    if (i < G.inventory.length) {
+      slot.textContent = icons[G.inventory[i]] || '📦';
+      slot.className = 'inv-slot filled';
+    } else { slot.textContent = ''; slot.className = 'inv-slot'; }
+  }
+}
+
+// ═══════════════════════  EVENTS  ═══════════════════════
+
+canvas.addEventListener('mousemove', e => {
+  const r=canvas.getBoundingClientRect();
+  G.mouseX=(e.clientX-r.left)*1000/r.width;
+  G.mouseY=(e.clientY-r.top)*700/r.height;
+  G.hoverItem = getHit(G.mouseX, G.mouseY)?.label || null;
+});
+
+canvas.addEventListener('click', e => {
+  if (G.state!=='play' || textQueue.length>0) return;
+  const r=canvas.getBoundingClientRect();
+  const mx=(e.clientX-r.left)*1000/r.width, my=(e.clientY-r.top)*700/r.height;
+  const hit=getHit(mx,my);
+  if (!hit) return;
+  if (hit.type==='item') interactItem(hit.id);
+  if (hit.type==='exit') { G.scene=hit.id; document.getElementById('scene-name').textContent = `─ ${SCENES[hit.id].name} ─`; }
+});
+
+// ═══════════════════════  LOOP  ═══════════════════════
+
+function startGame() {
+  document.getElementById('title').style.display='none';
+  setTimeout(()=>document.getElementById('loading').classList.add('hidden'), 800);
+  G.state='play';
+  textQueue=[{text:'你从昏迷中醒来，发现自己置身于一座荒废的祠堂。'},
+             {text:'空气中弥漫纸钱和灰尘的气味。你必须找到离开这里的方法。'}];
+  document.getElementById('dialogue').style.display='block';
+  nextLine();
+  loop();
+}
+
+function loop() { drawScene(); requestAnimationFrame(loop); }
+</script>
+</body>
+</html>
