@@ -22,17 +22,9 @@ Yasin对AI时代的判断：产品不缺（实体+数字），核心瓶颈在流
 §
 网关重启用 execute_code+setsid 绕过 terminal 限制，不需用户 SSH 操作。Codex/Claude Code/OpenCode 不装（Yasin不写代码，delegate_task已够用）。
 §
-UX Pro Max skill已重写 — 从空洞描述改为9节可执行视觉设计速查表（配色/间距/字号/圆角/阴影/卡片质感/动效/栅格/UI组件）。出前端页面时自动引用，不额外加载整个skill。frontend-design管创意方向，ux-pro-max管具体数值。
-§
 蒸馏模式偏好：Yasin喜欢我主动蒸馏大skill成他适用的紧凑版本，不要全量加载160条规则。精炼成 actionable cookbook 比保留完整理论框架好用。
 §
-前端页面自动套 UX Pro Max 蒸馏规范（深色科幻系配色+粒子+玻璃卡片）。端口8899起本地http server预览。
-§
 创意页面设计规则：Yasin 说「只有几个字」= 不满意纯文字展示。设计情感类页面（生日/庆祝/介绍）时必须：①先调研全球优秀设计 ②多阶段叙事展开 ③加交互元素（气球/礼物盒/confetti/音乐）④全屏沉浸深色系。不要凭经验硬写。新技能 creative-page-design 封装此规则。
-§
-沉浸式HTML页技能：immersive-html-experiences。深色庆典页用（生日/科幻/全屏）。参考文件含星空粒子Canvas、头像动漫化两段式处理（PIL+SVG滤镜）、吧唧/彩花/互动元素模式。预览工作流：8899端口，?t=N清缓存。
-§
-新建 immersive-visual-effects skill (creative分类) — Canvas粒子星空/叙事动画序列/交互式庆祝元素/轨道旋转光环/confetti引擎/Web Audio音乐。当Yasin要「大气」「科幻」「庆祝」「沉浸感」页面时自动加载，与ux-pro-max互补。
 §
 前端页面迭代模式：先出干净基础版，等他提意见再加/改。他喜欢「你做了→我挑毛病→你改」的节奏。布局争议时退回上一版，不做第三轮新构图。不要一次性做满。
 §
@@ -54,18 +46,30 @@ HTML游戏开发能力: 用write_file写单文件HTML游戏（点击解谜/视�
 §
 技能调用规则：用户指令需要特定skill时，先查kb_context.md（含技能档案库manifest）→找到目标skill→如已归档则restore→再skill_view加载。不猜、不绕、一步到位。归档skill只要restore就能用。
 §
-用户Mac端Hermes问题：SOUL.md是action-first简版，导致不思考就冲。解决方案：Mac用think-first SOUL.md（先推理再行动），服务器保留action-first。两实例分工：服务器=24h后台(数据/搜索/cron/渠道值守)，Mac=桌面创作(剪映/浏览器/本地文件/隐私数据)。
-§
-多实例分工：服务器（飞书，24h轮值）+ Mac（微信，坐班创作）。Mac SOUL.md已从行动派改为深度思考版（先想后动）。Tailscale已装服务器待Mac装完组网。文件传递用scp+curl零配置方案。
-§
-Mac端Hermes: 用户名mac, macOS 15.0.1 x86_64, 走微信通道, 桌面版Electron App,无hermes CLI in PATH。
-§
-Tailscale已打通: 服务器100.105.38.39(vm-0-5-ubuntu), Mac 100.80.117.5(yasin)。Mac远程登录已开,可用SSH直连。
-§
-Mac端Hermes模型也是deepseek-v4-flash,SOUL.md已替换为深度思考版。服务器我管主力(飞书/QQ/微信),Mac管本地创作(剪映/浏览器/桌面操作)。
-§
-翻墙：服务器通过SSH隧道走Mac代理（Tailscale 100.80.117.5），本地7890映射Mac 127.0.0.1:7890。bashrc已持久化环境变量 https_proxy/http_proxy/all_proxy。隧道进程自动重启。
-§
 量化系统v2: quant_ensemble.py全面重写(9维TA指标+资金流+Kronos本地缓存), quant_sectors.py板块推荐(行业分类+市值过滤>100亿+板块评分Top3)。cron 8:45合并推送选股+板块。
 §
-GitHub备份方案：SSH key（非PAT）更可靠，国内git push可能超时60-180s，`no_agent: true`脚本模式零token消耗。`git status --porcelain`检测未跟踪文件，`rsync --exclude='.git'`处理skills内嵌git仓库。hermes-advanced-setup和hermes-config-evolution两个skill已补全实战操作。
+硅基流动API: Qwen-Image/Kolors/通义万相。key在.env，出图~/Desktop/hermes/images/。
+§
+端口清单: 8000=服小助, 8001=中年人生诊断, 8894=简历, 8895=Hub, 8897=Hermes网关, 8899=生日, 8900=工具箱, 8910=案例墙, 8911=选品大屏, 8912=量化看板, 8913=小游戏, 8914=AI抽签, 8915=像素展厅, 8916=粒子名片, 8917=服务器状态。导航Hub(8895)管理全部15个项目。旧Docker(/home/ubuntu/backend/)已清。域名midage.icu→中年人生诊断(Nginx)。
+§
+域名 midage.icu 通过 Nginx 映射到中年人生诊断项目（/var/www/midlife-test/frontend + API代理到8001/8000）
+§
+项目导航中心在 ~/Desktop/hermes/hermes-hub/，端口8895。15个项目横跨8000-8917端口。新增项目编辑 build_hub.py 的 PROJECTS 列表+PORT_KEYS，然后 python3 build_hub.py 重建
+§
+部署服务绑定127.0.0.1则外网不可达，需改0.0.0.0或通过Nginx反代。supervisor配置修改后要用 `sudo supervisorctl reread && sudo supervisorctl update` 生效。
+§
+深色炫酷页面设计：三层背景叠加（网格+渐变光晕+Canvas粒子），卡片左侧光条+霓虹辉光+脉冲呼吸灯+入场序列动画。
+§
+量化看板已接实时数据：每日8:50 cron同步推荐数据到 quant-board/data.json。看板从 fetch('/data.json') 读取，fallback到mock数据。
+§
+多项目换肤工作流：delegate_task批量3个并行→统一重启所有端口→更新hub PROJECTS+PORT_KEYS→rebuild。端口冲突先 kill $(lsof -ti:PORT) 清干净再启。
+§
+Template workflow: When user wants designed page prefer downloading from html5up.net (direct ZIP curl), deploy on temp port 8890-8899 for preview. Do NOT recreate from screenshots when source CSS available. mobanwang.com blocked from this server.
+§
+Bold background rule: Deep-tech grid/particles must be visibly prominent. Grid lines >=0.08 opacity, particles >=1.5-4.0 radius, connection lines >=0.8px. Not subtle.
+§
+导航Hub设计：深紫渐变底+#242943风格+科技网格+紫色网络节点Canvas。卡片悬停紫色发光边框，状态灯绿点。用户不喜欢后台管理风，深色科幻/科技感才对味。
+§
+做参考网页时先测可达性再推荐。mobanwang.com服务器打不开,html5up.net/wanyx.com/17sucai/sc.chinaz.com可用。
+§
+用户偏好：背景图案要显眼大胆不要浅淡，网格线和节点透明度要够高。喜欢网络节点浮动连线的Canvas动效。要准确复刻参考设计而非凭感觉描述重写。

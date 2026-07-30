@@ -1,7 +1,7 @@
 ---
 name: a-share-stock-selection-methodology
 description: A股短线选股方法论 — 多因子量化分析 × 板块轮动 × 风控。涵盖从技术面到资金面的完整分析框架，以及命中率优化方案。
-version: 2.0.0
+version: 2.1.0
 tags: [finance, a-share, stock-selection, quantitative, short-term]
 ---
 
@@ -10,6 +10,19 @@ tags: [finance, a-share, stock-selection, quantitative, short-term]
 ## 触发条件
 
 用户要求"推荐股票""分析板块""选股""明天哪些会涨""量化选股"时加载此 Skill。
+
+## 中国A股显示规范
+
+任何包含A股涨跌数据的界面（看板/表格/图表），必须使用中国标准配色：
+- 红色 = 上涨 `#ef4444`
+- 绿色 = 下跌 `#22c55e`
+- 与西方惯例相反（西方绿涨红跌）
+
+应用到：表格涨跌列、K线蜡烛、板块热力图、涨跌幅标签、盈亏显示。
+
+```css
+:root { --rise:#ef4444; --fall:#22c55e; --rise-dim:rgba(239,68,68,.12); --fall-dim:rgba(34,197,94,.12); }
+```
 
 ## 分析框架（六大维度）
 
@@ -208,10 +221,14 @@ Softmax风格更新: 表现好的信号源加权重, 差的减权重.
 | 问题 | 表现 | 修复 |
 |:----|:-----|:-----|
 | Kronos加载失败 | Connection reset | `local_files_only=True` 优先加载缓存 |
+| **Kronos信号饱和** | **对所有股票都预测+1.0，失去区分度** | **检查Kronos是否退化为默认输出。如果连续3天>90%推荐kronos=+1.0，需降权重或重训模型** |
 | baostock stock_basic | 格式要求 `sh.600000`(9位) | 加前缀 + `bs.login()` |
+| **baostock API间歇性完全不可用** | **`bs.login()` 超时（9秒+），返回"网络接收错误"** | **几分钟后重试；切换到新浪财经K线API (`money.finance.sina.com.cn`) 作临时备选** |
 | name字段索引 | 名称显示IPO日期 | 索引1是名称, 2是IPO日期 |
 | 东方财富资金流API | 盘后空返回 | 加Referer头+重试2次; 失败降级 |
+| **东方财富资金流API持续数天不可用** | **flow_score=0.0持续4+天，0.25权重完全浪费** | **加入自动检测：flow API连续N次失败则将其权重重新分配给tech/kronos，等API恢复再调回** |
 | 技术分集中 | [-0.1,+0.1]无区分度 | z-score归一化+tanh放大 |
+| **自进化验证门槛过高** | **`>=5`行行情记录的硬要求，新系统运行不足5天时永远无法触发调权** | **初始期（<10个交易日）把阈值降到`>=2`，积累足够数据后再升回`>=5`** |
 
 ## 风险提示模板（每次必须带）
 

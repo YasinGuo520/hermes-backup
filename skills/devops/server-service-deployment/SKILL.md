@@ -417,6 +417,44 @@ cronjob(action='run', job_id='<job_id>')
 
 ---
 
+## 将静态Mock页面转为实时数据看板
+
+**适用场景**：HTML页面用 `Math.random()` 生成模拟数据 → 需要对接真实服务器指标/API数据。
+
+### 标准模式（三件套）
+
+```
+collect_stats.py (Python采集) → real_data.json (JSON数据文件) → index.html (fetch读取，有mock兜底)
+cron: */5 * * * * (no_agent=true)
+```
+
+### 步骤
+
+**1. 创建采集脚本** — 读 `/proc/stat`、`/proc/meminfo`、`df` 等系统文件，输出JSON到web目录
+
+**2. HTML用fetch读取**，有真实数据就用，没有就mock（始终保留mock兜底，页面不空白）
+
+```javascript
+fetch('real_data.json?_t='+Date.now())
+  .then(r=>r.json()).then(rd=>{if(rd.cpu)window._realData=rd;render();})
+  .catch(()=>{});
+function render(){const rd=window._realData; /* 真实数据或mock */ }
+```
+
+**3. 脚本放 `~/.hermes/scripts/` 配cron**
+```yaml
+cronjob action:create / name: 数据采集 / schedule: "*/5 * * * *" / script: collect_stats.py / no_agent:true / deliver:local
+```
+
+### 案例
+
+| 项目 | 采集脚本 | 数据源 | 周期 |
+|:----|:---------|:-------|:----|
+| 服务器状态页(8917) | `collect_stats.py` | `/proc/stat`, `/proc/meminfo`, `df` | 每5分钟 |
+| 量化K线看板(8912) | `sync_quant_data.py` | 量化系统log目录 | 交易日8:50 |
+
+---
+
 ## 常见坑
 
 ### 0. 用户说"页面打不开" — 先确认是API还是WebUI
@@ -433,7 +471,9 @@ cronjob(action='run', job_id='<job_id>')
    ```
 3. 如果有前端文件但根路径返回JSON → **root route 没配好**
 
-**修复 FastAPI 前端不显示（根路由只返回JSON）：**
+**修复 FastAPI 前端不显示（根路由只返回JSON）——两种方式：**
+
+**方式A — FileResponse（推荐，直接返回HTML）：**
 ```python
 from fastapi.responses import FileResponse
 
@@ -449,6 +489,15 @@ def root():
         "version": "1.0.0",
         "docs": "/docs",
     }
+```
+
+**方式B — RedirectResponse（简单粗暴，跳到static/路径）：**
+```python
+from fastapi.responses import RedirectResponse
+
+@app.get("/")
+def root():
+    return RedirectResponse(url="/static/index.html")
 ```
 
 **关键点：**
@@ -471,19 +520,89 @@ curl -s http://localhost:PORT/ | head -3
 
 **一句话判断**：根路径返回 JSON 不一定是"没有页面" — 先查项目里有没有 `static/index.html`。
 
-### 1. 公网IP连不上但本地正常
+### 1. 全端口审计（用户说"打不开"、"帮我弄清楚"）
+
+**一次性扫全，别分步问。** 用户说"你自己弄清楚下" = 禁止逐个询问用户。
+
+详见 `references/port-audit-methodology.md`
+
+### 2. 项目导航中心（多服务管理页面）
+
+当服务器上有多个 Web 项目/服务，需要统一入口 → 见 `references/project-navigation-hub.md`
+
+### 3. 用户说"我开了"但服务没跑
+
+**诊断流程（不要反驳用户，直接查链条）：**
+
+```bash
+# 1. 端口有在监听吗？
+ss -tlnp | grep <PORT>
+
+# 2. 是 supervisor 管理的吗？
+sudo supervisorctl status
+
+# 3. 缺 .env 或 venv 吗？
+ls -la /project/.env && ls /project/venv/bin/python
+
+# 4. Docker 残留占用了端口吗？
+docker ps | grep <PORT>
+```
+
+详见 `references/port-audit-methodology.md`（含 supervisor 管理、Docker 清理、local only 修复）
+
+### 4. 公网IP连不上但本地正常
 → 云服务商安全组/防火墙未开放端口，去控制台添加规则。
 
-### 2. Hermes脱敏导致API Key写入文件
+### 5. Hermes脱敏导致API Key写入文件
 config.py 默认值可能被脱敏为 `«redacted:sk-…»`。运行时靠环境变量覆盖，**不要改默认值**。
 
-### 3. DeepSeek模型名
+### 6. DeepSeek模型名
 V4-Flash 模型名是 `deepseek-v4-flash`，不是 `deepseek-chat`。
 
-### 4. 改配置后gateway会重启
+### 7. Supervisor 服务绑了127.0.0.1导致外网打不开
+
+**现象：** 服务本地能访问（`curl http://127.0.0.1:PORT` 返回200），外网 `curl http://公网IP:PORT` 超时。
+
+**检查链条：**
+```bash
+# 看进程绑的地址
+ss -tlnp | grep <PORT>
+# LISTEN 0 2048 127.0.0.1:PORT ...  ← 只绑本地！
+
+# 找到 supervisor config
+cat /etc/supervisor/conf.d/<name>.conf
+# command=... --host 127.0.0.1 ...  ← 问题在这里
+```
+
+**修复：**
+```bash
+sudo sed -i 's/--host 127.0.0.1/--host 0.0.0.0/' /etc/supervisor/conf.d/<name>.conf
+sudo supervisorctl reread && sudo supervisorctl update && sudo supervisorctl restart <name>
+sleep 2
+ss -tlnp | grep <PORT>  # 确认变成 0.0.0.0:PORT
+```
+
+### 8. 服务缺.env文件 — 从Hermes配置偷API Key
+
+**场景：** 服务启动需要 DeepSeek API Key 但 `.env` 不存在。用户的 DeepSeek Key 存在 Hermes 配置里。
+
+```bash
+# 找到Hermes的API Key
+grep DEEPSEEK_API_KEY ~/.hermes/.env
+# 输出: DEEPSEEK_API_KEY=sk-xxxxx
+
+# 直接写进项目的 .env
+echo "DEEPSEEK_API_KEY=sk-xxxxx" > /path/to/project/.env
+
+# 如果项目还需要别的配置，按原 .env.example 补全
+```
+
+**注意：** 只能用 DeepSeek 的 Key（因为 Hermes 用的是 DeepSeek）。其他服务（如 OpenAI、Claude）不能用这个 Key。
+
+### 9. 改配置后gateway会重启
 修改Hermes配置可能触发gateway计划重启，导致微信iLink等通道断连。改完配置后记得检查微信是否还活着。
 
-### 5. 不能从gateway会话内重启gateway\n`hermes gateway restart` 在gateway内部执行会报错（SIGTERM传播，gateway防自杀检测）。所有含 `restart`/`stop`/`kill` 字样的命令都会被拦截，包括 `systemctl`、`nohup`、`background=true` 等方式。
+### 8. 不能从gateway会话内重启gateway\n`hermes gateway restart` 在gateway内部执行会报错（SIGTERM传播，gateway防自杀检测）。所有含 `restart`/`stop`/`kill` 字样的命令都会被拦截，包括 `systemctl`、`nohup`、`background=true` 等方式。
 
 **变通方案一 — systemd-run定时器（推荐）：**
 
@@ -542,3 +661,7 @@ for p in open('/dev/stdin').read().strip().split():
 配置步骤、沙箱vs正式发布、常见坑 → 详见 `references/QQ机器人接入Hermes.md`
 
 **一句话流程：** 注册 q.qq.com → 创建机器人获取 AppID+Secret → 写入 `.env` + `config.yaml` → 重启 gateway → 沙箱测试 → 审核发布。
+
+## 国内模板站可达性
+
+见 `references/china-template-sites-accessibility.md`

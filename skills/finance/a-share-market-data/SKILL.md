@@ -325,9 +325,7 @@ finance/a-share-market-data/
 └── baostock-data-guide.md     # Baostock数据源指南（HTTP API被屏蔽时的备选）
 
 
-## Pitfalls
-
-- curl 必须加 `Referer: https://finance.sina.com.cn` 头，否则403
+## Pitfalls\n\n- **⚠️ 新浪字段索引易混淆：索引1=开盘价，索引2=昨收价，索引3=当前价**。常见错误是把索引1当当前价、索引3当开盘价。涨跌幅必须用 (当前价 - 昨收) / 昨收，不是 (当前价 - 开盘)/开盘。索引从0开始计数，确认清楚再写代码。\n- curl 必须加 `Referer: https://finance.sina.com.cn` 头，否则403
 - GBK编码问题：用 `iconv -f GBK -t UTF-8` 或 Python 的 `.decode('gbk')`
 - **subprocess.run获取新浪行情时不要用text=True**：会强制utf-8解码失败，正确做法是 `capture_output=True` 不加text参数，再 `.decode('gbk')`
 - **curl的-H参数必须带 Referer: 前缀**：正确格式 `-H "Referer: https://finance.sina.com.cn"`，错误格式 `-H "https://finance.sina.com.cn"`（缺少 `Referer: ` 头字段名）。后者在shell中看似工作但实际没传正确的HTTP头，导致403

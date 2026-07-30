@@ -174,6 +174,12 @@ result.slice(0,15).join('\\n');
 7. **误判过滤结果**：中国搜索引擎对敏感内容（PUA/情感陪聊灰色地带）有过滤，搜索结果可能不完整。
 8. **国际站点超时**：从中国服务器访问 Google/Wikipedia 经常会超时，不要依赖。
 
+## Codex 视频生态 Skills 对标
+
+当用户问到「Codex 有什么视频 Skills」或对比 Hermes 与 Codex 的视频能力时，见 `references/codex-video-skills-landscape.md`。
+
+涵盖 HyperFrames / video-use / Remotion / Generative Media / videocut-skills / seedance2-skill 的完整对标。
+
 ## 抖音/中文短视频内容提取
 
 当调研对象的信息存在于抖音/小红书等中文短视频平台时，见 `references/douyin-video-analysis-workflow.md`。

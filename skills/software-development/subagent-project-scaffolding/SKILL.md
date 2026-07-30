@@ -110,7 +110,65 @@ The sub-agent's summary is **self-reported** — always verify:
 | LLM calls all return degraded | The API key env var isn't reaching the subprocess. Source it: `export $(grep -v '^#' ~/.hermes/.env \| xargs)` before starting. |
 | Token redacted in verification scripts | Write token to a file, then read it back from Python to avoid Hermes secret redaction in tool output. |
 
-## Related
+## 批量 HTML 单文件并行生成模式
 
-- `autonomous-ai-agents` — general multi-agent workflows
-- `hermes-agent` skill docs — `delegate_task` tool reference, security/approval settings
+**触发场景：** 用户说\"上面的都有兴趣，全部搞出来\"——一次性产出多个独立 HTML 单文件项目。
+
+### 架构模式
+
+```
+主会话（你）
+├── delegate_task 批次1: 游戏 + 3D名片 + 像素画展厅  (并行3个)
+├── delegate_task 批次2: 案例墙 + AI抽签 + 服务器状态  (并行3个)
+└── delegate_task 批次3: 选品大屏 + 量化看板  (并行2个)
+    └── 主会话统一收尾: 更新导航Hub + 启动服务
+```
+
+### 批次分配原则
+
+| 因素 | 做法 |
+|:-----|:-----|
+| **delegate_task 上限** | 一次最多 3 个（配置限制），分多批次 |
+| **从简单到复杂** | 第1批放复杂度低/文件小的项目 |
+| **同类不撞** | 同一批内的项目不要都用 Three.js/CDN 重资源 |
+| **端口连续** | 统一端口段，方便记忆和 hub 管理 |
+
+### 子Agent 任务清单模板
+
+每个子任务需要以下内容（复制粘贴到 task 的 `goal` 和 `context`）：
+
+```text
+context 必须包含：
+1. 文件保存路径（~/Desktop/hermes/<project-name>/index.html）
+2. 单文件HTML限制（所有CSS/JS内嵌，零外部依赖或CDN加载）
+3. 关键视觉/功能要求
+4. 启动HTTP服务器的完整命令（background=true）
+5. 确认服务器启动后返回文件路径和端口
+```
+
+### 收尾工作流
+
+所有批次完成后：
+
+```text
+1. 检查所有端口的服务是否启动（lsof -ti:<PORT>）
+2. 对没启动的服务，先检查文件是否存在，再手动启动
+3. 更新导航Hub的 PROJECTS 列表
+4. 把新端口加入 PORT_KEYS
+5. 重新生成导航页
+6. 浏览器逐个验证
+```
+
+### Pitfalls
+
+| 坑 | 表现 | 处理 |
+|:---|:-----|:-----|
+| 子Agent沉默/卡住 | live transcript 停在 todo 步骤 | 直接手动接管创建 HTML 文件 + 启动服务 |
+| 文件被覆盖 | 你写文件时子Agent也写同一路径 | 查看 write_file 返回的 _warning 确认 |
+| 端口被占用 | HTTP 服务报 Address already in use | 换端口或用 kill 旧进程 |
+| 子Agent不启动服务 | 任务说完成但端口没监听 | 手动执行 start 命令 |
+
+## 相关
+
+- `autonomous-ai-agents` — 通用多Agent工作流编排
+- `server-service-deployment` — 服务部署运维
