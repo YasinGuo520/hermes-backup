@@ -1,0 +1,15 @@
+[Unit]
+Description=<project> API (port <PORT>)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/Desktop/hermes/<project>
+ExecStart=/home/ubuntu/Desktop/hermes/<project>/venv/bin/python server.py
+Restart=always
+RestartSec=3
+User=ubuntu
+Environment=PORT=<PORT>
+
+[Install]
+WantedBy=multi-user.target

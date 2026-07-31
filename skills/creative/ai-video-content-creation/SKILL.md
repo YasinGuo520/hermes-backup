@@ -260,3 +260,23 @@ asyncio.run(c.save("voice.mp3"))
 | 人物/物体形态不稳定 | 缩短单段时长（3s→2s），减少动作复杂性 |
 | 多段合成颜色不统一 | 所有片段提示词统一加同一组调色关键词 |
 | 平台限免额度不够 | 多个平台切换使用（小云雀→即梦→可灵轮流） |
+
+## 🆕 火山引擎/即梦 API 程序化调用（Seedance/豆包系）
+
+除了网页版手搓，Seedance/即梦视频生成可走火山引擎 API 接入流水线（产品图→I2V→带货视频）。
+
+**⚠️ Key 类型是最大坑（2026-07 实测踩坑）：**
+- 火山引擎 = 字节云全家桶；**火山方舟** = 其中的大模型服务平台；即梦/Seedance = 独立产品线（同一账号分开开通）
+- 三种凭证别搞混：Access Key（云API签名）/ 普通 API Key（数据面 Bearer）/ **方舟大模型专用 API Key**
+- ⚠️ **普通 API Key 调方舟接口必 401**（`ark.cn-beijing.volces.com/api/v3/models` 和 `contents/generators/tasks` 都拒绝）——视频生成/豆包大模型要走「方舟大模型专用 API Key」，控制台页面提示链接里创建
+- 配置位置：`/home/ubuntu/backend/.env` 的 `ARK_API_KEY`（字段已建，待正确 key 填入）
+- 价格：Seedance 1.0 Pro-fast 720P 最便宜（0.08元/秒，15秒≈1.2元）；1.5 Pro 720P 无声 0.17元/秒；2.0 约1元/秒；新手先买 100元/月 基础体验版（1000算点）测试
+- 详细 API 端点、计费表、验证命令见 `references/volcengine-ark-api.md`
+
+## 模型平台生态速查（2026-07）
+
+| 平台 | 能调什么 | 不能调什么 |
+|------|---------|-----------|
+| 硅基流动 SiliconFlow | 开源模型全家桶（Kimi K3 已上线、DeepSeek、Qwen、GLM、FLUX、Wan2.2） | 闭源商用模型（GPT/Claude/Gemini 一律没有） |
+| 火山引擎/方舟 | 豆包系、Seedance/即梦视频、K3（官方） | − |
+| OpenRouter | 开源+闭源全都要 | 国内网络不稳定 |

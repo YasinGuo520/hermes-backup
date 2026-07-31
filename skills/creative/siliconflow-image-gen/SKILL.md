@@ -110,3 +110,14 @@ curl -s -o /path/to/output.png "<image_url>"
 2. **中文 prompt 可正常**：不用强制转英文，Qwen-Image 对中文理解好
 3. **部分模型（如 Flux/SD3）当前不可用**：如果用户问为什么不用更好模型，解释受限于硅基的模型接入范围
 4. **图片有 watermark / 审查限制**：如果被拦截，API 返回 error，需调整 prompt
+5. **用 curl 调 API，不要用 python urllib**：本环境 urllib 会 `Connection reset by peer`（curl 稳定成功）。批量生成脚本要逐张 + 每张重试最多 4 次 + 失败 sleep 4s，一次性并发循环常失败
+6. **Qwen-Image 每次生成背景色值略有不同**：需要抠图时，必须逐图采样角落像素（四角均值）作背景色，不能写死一个色值
+
+## 角色立绘 → 抠图 → HTML 贴纸集成
+
+需要「有质感的页面角色/吉祥物」时（CSS 手绘不够），走完整工作流：
+1. 生成：固定 STYLE_TAIL 风格后缀，多角色只改前面描述（保持风格统一）
+2. 抠图：**色键法零依赖**（ffmpeg 编解码 + numpy RGB 距离阈值），不要装 rembg；ffmpeg 的 chromakey 滤镜按色度匹配会误扣角色主体，不可用
+3. 集成：AI 立绘 + CSS 动效外壳（浮动/霓虹呼吸光晕/点击互动气泡）
+
+详见 `references/character-sticker-workflow.md`，抠图脚本 `scripts/chroma_cut.py`。

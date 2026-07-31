@@ -86,3 +86,30 @@ vc --mode A --product "..." --category "..." --price 89
 - **旧管线不做首选**，只做故障应急。
 - 带货视频字幕放 **底部**（H-180），不要居中。
 - 转场必须 **淡入淡出**，不要硬切。
+
+## Manim 程序化动画（2026-07 像素画展厅沉淀）
+
+Manim CE 适合像素画/几何/数学类确定性动画。环境：`~/Desktop/hermes/manim-venv`（已装 v0.20.1）。当用户要「动画展示」「数学/像素动画」「展厅动画」时考虑 Manim。
+
+### 环境（Ubuntu/腾讯云）
+
+```bash
+sudo apt-get install -y pkg-config libcairo2-dev libpango1.0-dev libffi-dev  # 先装，否则 pip 装 pycairo 报 pkg-config not found
+python3 -m venv ~/Desktop/hermes/manim-venv && ~/Desktop/hermes/manim-venv/bin/pip install manim
+```
+
+中文文本需要系统 CJK 字体：`fc-list :lang=zh`（腾讯云有 WenQuanYi Zen Hei），`Text("勇者", font="WenQuanYi Zen Hei")`。没有则 `apt install fonts-wqy-zenhei`。
+
+### 四个必踩的坑
+
+1. **默认画幅会静默裁掉大元素**：Manim 默认 frame 14.22x8（16:9），画布/金框/标题大于画幅会**静默裁剪**——不报错，渲染出来元素消失（视觉模型会说"缺金框缺标题"）。修复：`construct()` 开头显式扩画幅 `self.camera.frame_width=16.0; self.camera.frame_height=9.0`，元素尺寸必须小于画幅。
+2. **`-s` 预览黑帧**：`manim -ql -s` 存的是**最后一帧**，场景以 FadeOut 收尾时预览纯黑，会误判渲染失败。正确预览：渲染完视频后 `ffmpeg -ss 6 -i out.mp4 -frames:v 1 preview.png` 抽中间帧。
+3. **多场景批量渲染**：10个场景一次 `manim -qm script.py Art01_XX Art02_YY ...`，后台跑 + notify_on_complete，720p30 每场景约1分钟（2核机）。
+4. **动画验收用中间帧**：视觉模型检查渲染结果时，抽动画中部帧（像素点亮完毕、浮动开始处）而不是首尾帧。
+
+### 展厅/展示页动画设计模式（用户拍板方向）
+
+- ❌ 不要做成「10个独立课件式动画」——用户反馈「像课件演示，不够炫酷」
+- ✅ 页面侧走沉浸式：深色星空粒子 + 3D环形画廊（CSS perspective + rotateY 环形排列 + 拖拽旋转 + 玻璃卡片 hover 弹出），完整组件见 `visual-component-patterns` 的 3D 环形展厅
+- ✅ 视频侧更炫方向：展厅巡游大片（MovingCameraScene 镜头推拉扫作品墙）/ 像素进化链 morph / 粒子汇聚成形 / 沉浸式3D页面（用户已选 D）
+- 交付节奏：用户说「直接生成就可以」= 别再中途多轮预览确认，一次做完渲染+页面+验证再交付

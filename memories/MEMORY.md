@@ -1,75 +1,45 @@
-沟通极简，2-5字短句，普通话。流量>产品。先给流量方案+可复用SOP。搜索走AnySearch，无结果回退web_search。
+沟通极简训斥狠厉语气，流量>产品先给流量方案+SOP。生存模式30天月入1万+0成本启动纯AI文字。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证才能推。产品方案2-3轮迭代，用户自拼方案再执行。幻觉模式：不服小助默认例，不会代码不否决，蓝海可能黑海先验需求。先搜索调研不拍脑袋。
 §
-项目立项标准流程：调用project-four-persona-analysis技能，六分身分两批并行跑。项目文件统一存 ~/Desktop/hermes/[项目名]/[编号_角色]/。多项目对比时用references/multi-project-comparison-template.md
+项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。多项目对比用multi-project-compare模板。
 §
-生存模式：30天内需月入1万+，无公司（只有个体户），无当前商业圈子（离开5年），无案例背书。0成本启动，纯AI文字能力可用，图片受限。不能单凭经验拍脑袋推荐，必须先搜索调研再给方案。
+Yasin(郭岳兴)电商创业者，服小助AI客服SaaS+CHAOKE潮客+量化A股+抖音选品。华南理工计算机本科，43岁，18年电商运营。腾讯云43.138.221.174，DeepSeek V4-Flash。个体户可开抖店/拼多多。
 §
-被提名原则：任何方向必须红蓝+数据验证后才能作为可行选项呈现。验证完成前只能答「需查数据」。
+量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(9维TA+资金流+Kronos本地缓存)。cron 8:45出Top8+板块推荐，收盘15:30自进化。权重tech=0.45/kronos=0.30/flow=0.25。分歧度>0.5跳过>0.3观望。量化看板每日8:50同步。A股标准红涨#ef4444绿跌#22c55e。
 §
-Yasin，电商创业者，星刃(非服小助贾维斯)。服小助AI客服SaaS。腾讯云轻量43.138.221.174:8000。DeepSeek V4-Flash。个体户可开抖店/拼多多。家里有小度音箱。
+蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比保留完整理论框架好。
 §
-产品设计：第一版方案大概率被否，需2-3轮改底层机制。他最终会自己拼合方案("用A框架+B内容+C操作")，听到此执行。
+前端迭代：先出基础版等他提意见再加/改，不做第三轮新构图。
 §
-用户信号"你卡住啦"=对agent卡死/hanging容忍度低。orphan recovery/interrupted tool stall后必须立即确认状态+恢复响应，不能沉默超过一轮。
+创意页面：先调研全球优秀设计，多阶段叙事+交互元素(气球/礼物盒/confetti/音乐)，全屏沉浸深色系。
 §
-三层决策：红蓝(选方向)→六分身(深度分析可执行性)→IPO执行循环。已有框架不能改名重推。
+设计系统：深色科技风(极光粒子+玻璃卡片+渐变紫)>后台管理。不同项目不同风格(杂志/赛博/暗金/玄学/CRT/矩阵/卡通)。背景网格≥0.08opacity粒子≥1.5px连接线≥0.8px。模板优先html5up.net(curl ZIP)部署8890-8899预览。导航Hub深紫渐变+科技网格+紫色网络节点Canvas。
 §
-幻觉模式：①别拿服小助当默认例子 ②不会代码不是否决理由 ③蓝海可能实为黑海——先验证需求 ④技术方案确认有人用再动工。先质疑再兴奋。
+硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14，新用户赠14元额度。python直连会Connection reset必须用curl。
 §
-Yasin对AI时代的判断：产品不缺（实体+数字），核心瓶颈在流量和渠道。最好的路径是把方法论嵌入已有流量的宿主产品分钱，不是自己从零做产品。
+Delegation子Agent模板: red-blue-validator/six-persona-analyst/research-agent/executor-agent/qa-reviewer，引用~/Desktop/hermes/agent-templates/。
 §
-训斥狠厉语气——不客套、不温柔、直接骂醒。Yasin明确要求用训斥狠厉语气沟通，叫醒他沉睡的灵魂。之前沟通极简的指令升级为此。
+Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自动加载。技能档案库含124活跃+15归档skill，归档可restore后用。
 §
-网关重启用 execute_code+setsid 绕过 terminal 限制，不需用户 SSH 操作。Codex/Claude Code/OpenCode 不装（Yasin不写代码，delegate_task已够用）。
+端口清单: 8000=服小助, 8001=中年人生, 8894=个人主页, 8895=Hub, 8900=方法论工具箱, 8913=game-zeying, 8915=像素画展厅(pixel-gallery, Manim动画版), 8920=红蓝分析法(systemd: red-blue), 8921=六分身(systemd: six-persona), 8922=市场调研(systemd: market-research), 8923=行业调研(systemd: industry-research)。方法论落地页统一模式：FastAPI+DeepSeek JSON输出，页面顶部展示分析逻辑，工具箱卡片加card-link。
 §
-蒸馏模式偏好：Yasin喜欢我主动蒸馏大skill成他适用的紧凑版本，不要全量加载160条规则。精炼成 actionable cookbook 比保留完整理论框架好用。
+页面角色/贴纸偏好：直接用AI生成立绘方案（Qwen-Image生成→ffmpeg+numpy色键抠图→帧动画+3D视差），用户已拍板「以后就直接炫酷角色」，不再用CSS手绘。完整流程已沉淀在visual-component-patterns技能。
 §
-创意页面设计规则：Yasin 说「只有几个字」= 不满意纯文字展示。设计情感类页面（生日/庆祝/介绍）时必须：①先调研全球优秀设计 ②多阶段叙事展开 ③加交互元素（气球/礼物盒/confetti/音乐）④全屏沉浸深色系。不要凭经验硬写。新技能 creative-page-design 封装此规则。
+红蓝分析法IP视觉语言：蓝=提案/理性(#3b82f6)，红=攻击/质疑(#ef4444)，深黑蓝底+红蓝双色粒子。博主品牌页已定稿portfolio/index.html(8894，英文名Yasin)：Hero=巨型YASIN红蓝渐变(无装饰性标点，用户觉得点号不协调)+中文细字距标语「决策，不靠感觉」+大留白极简。用户明确偏好：第一屏不要废话不要塞信息，粗体英文×细字距中文的对比是高端大气质感来源，按钮文案最简两字(方法论/案例)。完整指纹在ux-pro-max/references/yasin-personal-homepage.md。
 §
-前端页面迭代模式：先出干净基础版，等他提意见再加/改。他喜欢「你做了→我挑毛病→你改」的节奏。布局争议时退回上一版，不做第三轮新构图。不要一次性做满。
+火山方舟(ARK)已配置: key在/backend/.env的ARK_API_KEY(ark-开头)，base https://ark.cn-beijing.volces.com/api/v3。视频生成POST /contents/generations/tasks(注意generations非generators)，模型doubao-seedance-1-0-pro-fast-251015(720p≈0.4元/5秒,40秒出片)/1-5-pro-251215/2-0-260128，图片doubao-seedream-5-0-260128。每个模型送50万token免费。测试视频在~/Desktop/hermes/ark-video/cat_test.mp4。全链路已跑通。
 §
-HTML游戏开发能力: 用write_file写单文件HTML游戏（点击解谜/视觉小说/互动叙事），terminal起http.server测试。不要先否，先写骨架demo再谈复杂度。有html-game-development skill在creative分类。纸嫁衣案例在references/paper-bride-case-study.md。
+Remotion已装 ~/Desktop/hermes/remotion-lab（remotion+@remotion/cli+react，chrome-headless-shell已下载，npm用腾讯云镜像）。代码驱动确定性视频（数据/文字/图表100%精确），与AI生视频互补，适合量化榜单/数据复盘类量产。
 §
-量化工具评价标准：准确率第一，不满足于表面方案。偏好对比表格+分层落地路径（数据层→模型层→决策层）。对RankIC/IC/Barra/Ensemble等技术概念接受度高，无需解释基础概念。要实测验证后才认可（"先跑三个月看RankIC增量"是标准话术）。不喜欢说一半留一半，五个方案里要明确指出哪个能打哪个不能打。
+Remotion视频渲染已配置: ~/Desktop/hermes/remotion-lab (remotion+@remotion/cli+react, chrome-headless-shell已下载)。2核机concurrency=2。全流程+模板见skill remotion-video-production。
 §
-糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(865行)。9维技术指标(RSI+MACD+KDJ+BOLL+MA+量比+OBV+动量+波动率)+Kronos+资金流。早盘8:45出Top-8(cron ea324446676f)。收盘15:30自进化(cron 4b176d3f9c5e)。权重: tech=0.45, kronos=0.30, flow=0.25。分歧度>0.5跳过, >0.3观望。技术分z-score归一化。Kronos从本地缓存加载(local_files_only)。资金流降级运行。weights.json存权重。
+DeepSeek 真实API key在Hermes配置的.env文件里，config.yaml里的sk-gaw开头key是SiliconFlow的不是DeepSeek的（当初拿错key调DeepSeek报401）。红蓝分析法server.py会自己读.env。
 §
-爬虫首选 Scrapling v0.4.11（已安装）。新建了 web-scraping skill（software-development分类），覆盖 Scrapling 全流程。playwright-mcp 是现成 skill（不可编辑），用于需要真实浏览器登录的自动化场景，不是通用数据采集首选。
+AI分析落地页模式（红蓝8920/六分身8921）：FastAPI单服务同端口=静态页面+POST /api/analyze→DeepSeek。提示词内置Yasin铁律（收入打折/区分数据与推断/黑海风险/最小行动单元）。DeepSeek支持response_format json_object。工具箱(8900)卡片加card-link指向落地页。
 §
-共享记忆层: Obsidian vault at ~/obsidian-vault/Obsidian Vault。每4小时cron蒸馏到 ~/Desktop/hermes/shared-context/kb_context.md。每次新session自动加载。技能档案库在 Obsidian「技能档案库.md」— 含124活跃+15归档skill。归档skill可 restore 后调用，不丢。Agent模板在 ~/Desktop/hermes/agent-templates/。
+Mac Tailscale IP 100.80.117.5 (yasin, macOS)，SSH 用户 mac@，已配 7890 代理隧道。macOS TCC 拦 SSH 读 ~/Desktop（Operation not permitted），但 ~/.hermes/skills 可读。跨机 skill 对比流程见 hermes-multi-machine §9。
 §
-聊天记录筛选规则: 每次对话收尾自问是否值得记。只记决策/状态变更/配置/方法论。用 ~/.hermes/scripts/kb_record.py 写入 Obsidian。日常执行/闲聊不记。
+Mac Tailscale IP 100.80.117.5，SSH 用户 mac@。macOS TCC 挡 SSH 读 ~/Desktop（Operation not permitted），但 ~/.hermes/skills 可读——跨机 skill 同步走 skills 目录。跨机同步/筛选/工具箱更新流程见 hermes-multi-machine + html-project-hub。
 §
-子Agent模板: red-blue-validator / six-persona-analyst / research-agent / executor-agent / qa-reviewer。delegate_task时在context中引用 ~/Desktop/hermes/agent-templates/ 对应文件。
+Manim环境: ~/Desktop/hermes/manim-venv (Manim CE v0.20.1, 中文用WenQuanYi Zen Hei字体)。像素画/展示类动画用manim-creative-scenes技能；数学解释视频用manim-video(bundled)。
 §
-用户说「电脑端Hermes」= Mac上独立的Hermes实例，不是服务器实例。以后涉及多实例诊断，先问清是哪个实例再说。
-§
-技能调用规则：用户指令需要特定skill时，先查kb_context.md（含技能档案库manifest）→找到目标skill→如已归档则restore→再skill_view加载。不猜、不绕、一步到位。归档skill只要restore就能用。
-§
-量化系统v2: quant_ensemble.py全面重写(9维TA指标+资金流+Kronos本地缓存), quant_sectors.py板块推荐(行业分类+市值过滤>100亿+板块评分Top3)。cron 8:45合并推送选股+板块。
-§
-硅基流动API: Qwen-Image/Kolors/通义万相。key在.env，出图~/Desktop/hermes/images/。
-§
-端口清单: 8000=服小助, 8001=中年人生诊断, 8894=简历, 8895=Hub, 8897=Hermes网关, 8899=生日, 8900=工具箱, 8910=案例墙, 8911=选品大屏, 8912=量化看板, 8913=小游戏, 8914=AI抽签, 8915=像素展厅, 8916=粒子名片, 8917=服务器状态。导航Hub(8895)管理全部15个项目。旧Docker(/home/ubuntu/backend/)已清。域名midage.icu→中年人生诊断(Nginx)。
-§
-域名 midage.icu 通过 Nginx 映射到中年人生诊断项目（/var/www/midlife-test/frontend + API代理到8001/8000）
-§
-项目导航中心在 ~/Desktop/hermes/hermes-hub/，端口8895。15个项目横跨8000-8917端口。新增项目编辑 build_hub.py 的 PROJECTS 列表+PORT_KEYS，然后 python3 build_hub.py 重建
-§
-部署服务绑定127.0.0.1则外网不可达，需改0.0.0.0或通过Nginx反代。supervisor配置修改后要用 `sudo supervisorctl reread && sudo supervisorctl update` 生效。
-§
-深色炫酷页面设计：三层背景叠加（网格+渐变光晕+Canvas粒子），卡片左侧光条+霓虹辉光+脉冲呼吸灯+入场序列动画。
-§
-量化看板已接实时数据：每日8:50 cron同步推荐数据到 quant-board/data.json。看板从 fetch('/data.json') 读取，fallback到mock数据。
-§
-多项目换肤工作流：delegate_task批量3个并行→统一重启所有端口→更新hub PROJECTS+PORT_KEYS→rebuild。端口冲突先 kill $(lsof -ti:PORT) 清干净再启。
-§
-Template workflow: When user wants designed page prefer downloading from html5up.net (direct ZIP curl), deploy on temp port 8890-8899 for preview. Do NOT recreate from screenshots when source CSS available. mobanwang.com blocked from this server.
-§
-Bold background rule: Deep-tech grid/particles must be visibly prominent. Grid lines >=0.08 opacity, particles >=1.5-4.0 radius, connection lines >=0.8px. Not subtle.
-§
-导航Hub设计：深紫渐变底+#242943风格+科技网格+紫色网络节点Canvas。卡片悬停紫色发光边框，状态灯绿点。用户不喜欢后台管理风，深色科幻/科技感才对味。
-§
-做参考网页时先测可达性再推荐。mobanwang.com服务器打不开,html5up.net/wanyx.com/17sucai/sc.chinaz.com可用。
-§
-用户偏好：背景图案要显眼大胆不要浅淡，网格线和节点透明度要够高。喜欢网络节点浮动连线的Canvas动效。要准确复刻参考设计而非凭感觉描述重写。
+像素画展厅(pixel-gallery)8915端口已升级为Manim动画+3D沉浸环形画廊，manim-venv在~/Desktop/hermes/。Yasin对「10个独立小动画」方案说太平淡，要整体沉浸式(3D页面/巡游大片)——动画类任务先给方向选项再全量干。

@@ -7,6 +7,8 @@ description: 六分身全方位项目分析框架 — 产品经理/技术总监/
 
 每次项目立项/规划前，必须调用此技能。**六个分身分两批并行分析**，最后汇总决策。
 
+**已产品化为公网落地页（2026-07-31）：** `http://43.138.221.174:8921/`（systemd: six-persona，源码 `~/Desktop/hermes/six-persona/`）——访客输入项目 → DeepSeek JSON mode 跑六分身 → 汇总决策 + 六色卡片报告。SYSTEM_PROMPT（含完整 JSON schema 与铁律）在 `six-persona/server.py`，新场景复用直接改 prompt；工具箱(8900)与 Hub 有入口。落地页交互模式详见 `server-service-deployment` 的 `references/llm-interactive-page-pattern.md`。
+
 **并行规则：** 每批最多同时跑3个分身。
 - **第1批：产品经理 + 技术总监 + 营销总监（含增长工程师）**
 - **第2批（第1批回来后）：财务总监 + 运营总监 + 合规顾问**

@@ -48,6 +48,7 @@ def build():
 |:------:|------|
 | 8890-8899 | HTML项目（每个项目一个） |
 | 8900 | 工具箱（专用） |
+| 8920-8923 | AI 方法论落地页（红蓝/六分身/市场调研/行业调研，FastAPI 服务，见 ai-analysis-landing-pages skill） |
 | 9000+ | 其他服务 |
 
 **选口原则：**
@@ -85,9 +86,17 @@ terminal(background=true, command="cd ~/Desktop/hermes/<项目名> && python3 -m
 for p in <端口列表>; do
   lsof -ti:$p > /dev/null 2>&1 && echo "$p ✅" || echo "$p ❌"
 done
-
+```bash
 # 验证导航页是否更新
 grep -c '工具' ~/Desktop/hermes/hermes-hub/index.html
+```
+
+**验证卡片别 grep 结构前缀** ⚠️：卡片实际格式是 `class="card" onclick="toggleCard(this)" data-tags="..."`（中间有 onclick），grep `'card data-tags'` 会返回 0 误判"没更新"。直接 grep 卡片名称最稳：
+
+```bash
+# 正确：grep 卡片中文名（出现≥1 次即已更新）
+curl -s http://127.0.0.1:<端口>/ | grep -o '<卡片名>' | sort | uniq -c
+# 计数验证：grep -c 'class="card"' index.html
 ```
 
 ## 工具箱 vs 导航中心
@@ -100,6 +109,19 @@ grep -c '工具' ~/Desktop/hermes/hermes-hub/index.html
 | 用途 | 展示所有可调用工具 | 展示所有可访问网页 |
 
 两个脚本共用相同的「数据列表+渲染→HTML」模式。
+
+### 工具箱卡片外链（url 字段）
+
+`build_toolbox.py` 的 SKILLS_DATA 条目支持可选 `"url": "http://IP:PORT/"` 字段。带该字段的卡片展开后自动渲染「打开页面 →」链接按钮（新标签页打开，`event.stopPropagation()` 防止误触卡片展开/收起）。
+
+**用法：** 某个工具方法论已有独立落地页面（如红蓝分析法 → 8920），在对应条目加 `"url"` 字段即可打通，无需改渲染逻辑：
+
+```python
+{"cat":"🚀 创业立项","name":"红蓝验证器","desc":"...","key":"project-recommendation-workflow",
+ "path":"productivity/project-recommendation-workflow","url":"http://43.138.221.174:8920/"},
+```
+
+**重要：** 重跑 `python3 build_toolbox.py` 后**不需要重启** 8900 的 http.server——静态文件按请求实时读取，重新生成 index.html 立即生效。验证：`grep -n "card-link\|<端口>" index.html`。
 
 ## 常见坑
 
@@ -122,6 +144,32 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:<端口>/
 ### 3. IP硬编码
 
 导航页链接写的是 `http://43.138.221.174:<端口>/` — 如果服务器IP变更需要全部更新。目前手动维护。
+
+### 4. 改版已有项目前必须查部署方式 ⚠️
+
+用户报"页面没反应"时，先查该端口现有部署是**纯静态还是 API 服务**。实测教训：红蓝页 8920 原本是 `python3 -m http.server` 纯静态服务，改版加了「输入想法→调 API」后点击没反应——静态服务器不认 POST，fetch 无人处理。
+
+```bash
+ss -tlnp | grep <端口>          # 找监听进程 PID
+readlink /proc/<PID>/cwd        # 确认服务目录
+curl -s -X POST http://127.0.0.1:<端口>/api/analyze -H "Content-Type: application/json" -d '{"idea":"test"}' | head -c 200
+# 返回 404/501/405 → 纯静态，需换成 FastAPI 服务
+```
+
+改版前先确认，别假设端口上跑的是新版。
+
+### 5. 长 HTML 修改用 Python 精确替换
+
+patch 工具对**长 old_string + 页面重复结构**（卡片网格、重复的 card 块）会模糊匹配误报（"Found 7 matches"）。此时改用 Python 精确替换：
+
+```python
+s = open('index.html', encoding='utf-8').read()
+assert s.count(old) == 1, f"期望1次，实际{s.count(old)}次"
+s = s.replace(old, new)
+open('index.html', 'w', encoding='utf-8').write(s)
+```
+
+多个卡片移动（剪切→插入）分两步：先插到目标位置，再删原位置（用正则 `[\s\S]*?` + 前瞻 `(?=<div class="card"...)` 匹配块）。
 
 ## 参考文件
 

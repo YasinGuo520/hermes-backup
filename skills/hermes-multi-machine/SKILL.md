@@ -232,3 +232,53 @@ fi
 | 总直接冲不先想 | 温度太高 | config.yaml 中 temperature 调低到 0.3-0.5 |
 | 消息不到 | 渠道配置丢失 | config.yaml > channels 段 |
 | SSH连不上Mac | Tailscale 未运行/未登录 | tailscale status |
+
+---
+
+## 9. 跨机 Skill 库对比与同步
+
+场景：用户问「Mac 的 skill 哪些服务器没有/需要」或反过来。
+
+### macOS TCC 权限坑（必踩）
+SSH 会话读 Mac 的 `~/Desktop`（含 `~/Desktop/hermes/`）会报 `Operation not permitted`——macOS TCC 隐私保护，SSH 进程没有桌面权限。**别卡在这**：`~/.hermes/skills/`、home 其他目录通常可读，skill 库直接走这里，不用碰 Desktop。
+
+### 对比命令
+```bash
+# Mac 端列表
+ssh mac@<mac-ip> "find ~/.hermes/skills -name 'SKILL.md' | sed 's|.*/skills/||; s|/SKILL.md||'" | sort > mac_sorted.txt
+# 服务器端列表
+find ~/.hermes/skills -name 'SKILL.md' | sed 's|.*/skills/||; s|/SKILL.md||' | sort > srv_sorted.txt
+# Mac 有服务器无（注意：comm 要求两边先 sort，否则输出错乱）
+comm -23 mac_sorted.txt srv_sorted.txt | grep -v '^\.archive'
+```
+
+### 批量查 description 判断重复/深度
+```bash
+ssh mac@<mac-ip> 'for s in <skill路径...>; do f="$HOME/.hermes/skills/$s/SKILL.md"; [ -f "$f" ] && grep -m1 "^description" "$f" | cut -c14- | head -c 150; done'
+```
+
+### 筛选原则（用户已明确要求：主动去重+查深度，不堆数量）
+1. 跟服务器已有 skill 同主题 → 剔除（例：Mac 的 `project-validation-3agent` = 服务器 `project-four-persona-analysis` 六分身）
+2. 服务器 `.archive/` 里已归档过 → 说明以前评估过，谨慎
+3. Mac 专属（`apple/*`、`macos-*`、`smart-home`）→ 剔除
+4. 服务器跑不动/用不了（mlops 重模型、需 GUI 的浏览器自动化、墙外服务）→ 剔除
+5. 服务器已内置工具对应的 skill（anysearch、agency-agents）→ 剔除
+6. 同类 N 选 1（如三个「AI 测评小程序」skill 只留一个）
+7. **已自动化/已配置好的功能 → 不拉对应 skill**（例：服务器已有 `github-backup.sh` 在跑 → github-auth/repo-management 不需要）
+8. **跟既有决策流程交叠 → 不拉**（例：product-need-discovery 跟红蓝验证的数据验证环节交叠；business-opportunity-scanning 跟每日变现案例日报重叠）
+9. **跟当前业务路线无关 → 不拉**（例：小程序方向已砍 → miniprogram 系全剔）
+
+**对话模式：** 用户收到第一版"需要清单"会反问「有没有重复的/不够深度的，可以再筛选一次」。主动逐项读 SKILL.md 描述验证再给最终清单，不要凭名字/分类直接拍板。
+
+### 传输与改名
+
+```bash
+# tar over ssh 保留目录结构（含 references/）
+cd ~/.hermes/skills && ssh mac@<mac-ip> 'cd ~/.hermes/skills && tar czf - <skill1> <skill2>...' | tar xzf -
+# 验证每个 skill 的 description 到位
+for s in <skill1> <skill2>...; do grep -m1 "^description" ~/.hermes/skills/$s/SKILL.md | cut -c14- | head -c 80; done
+```
+
+**品牌名清理：** 同步后用户会要求去掉 skill 里的品牌名（实测：海纳《直播话术》→ 直播话术体系）。patch 前先 `grep -rn "品牌名" ~/.hermes/skills/<skill>/` 找全所有出现位置——不只 description，正文引用行也要改。
+
+**同步后更新方法论工具箱：** 新 skill 加入 `~/Desktop/hermes/toolbox/build_toolbox.py` 的 SKILLS_DATA（按分类插行，name/desc/key/path）→ `python3 build_toolbox.py` → 8900 http.server 无需重启（见 html-project-hub skill）。验证线上：`curl -s http://127.0.0.1:8900/ | grep -o '<卡片名>'`。

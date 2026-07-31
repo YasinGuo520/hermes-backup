@@ -190,6 +190,32 @@ python -m app.main
 
 后台运行用 `terminal(background=true)`，不要用 nohup/setsid。
 
+**生产持久化用 systemd**（服务器重启自动拉起，nohup 裸进程会丢）：
+```ini
+# /etc/systemd/system/<name>.service
+[Unit]
+Description=<name>
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/project
+ExecStart=/path/to/project/venv/bin/python server.py
+Restart=always
+RestartSec=3
+User=ubuntu
+Environment=PORT=8918
+
+[Install]
+WantedBy=multi-user.target
+```
+```bash
+sudo cp /tmp/<name>.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now <name>
+sudo systemctl is-active <name>
+```
+切换 systemd 前先 kill 掉 nohup 裸进程，否则端口冲突。验证：`curl -s http://127.0.0.1:PORT/health`
+
 ## 防火墙与端口管理
 
 ### 腾讯云轻量服务器
@@ -203,6 +229,35 @@ python -m app.main
 | 80 | HTTP | TCP |
 | 443 | HTTPS | TCP |
 | 8000 | FastAPI开发 | TCP |
+
+### 免开安全组端口：Nginx IP直连反代（新端口免控制台）
+
+**场景：** 新服务起了新端口（如8918），但腾讯云控制台安全组没开这个端口，公网连不上。80端口必然已通。**不用去控制台开端口**，用 Nginx 按公网IP直连反代：
+
+```nginx
+# /etc/nginx/sites-enabled/<name>
+server {
+    listen 80;
+    server_name 43.138.221.174;   # 匹配 Host: 公网IP 的请求
+    location / {
+        proxy_pass http://127.0.0.1:8918;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 120s;   # LLM接口可能慢，必须加大
+    }
+}
+```
+
+```bash
+sudo nginx -t && sudo nginx -s reload
+```
+
+**效果**：`http://43.138.221.174/` 直接打开新服务，页面和 API 同源（无 CORS），不用动安全组。
+
+**注意：**
+- `server_name` 用 IP 合法（按 Host 头匹配）；不加 `default_server` 不影响已有域名块
+- 页面内 `fetch('/api/...')` 相对路径在反代下原样工作；**不要**用子路径 location（如 `/rbl/`）——会跟现有 `/api/` 等 location 冲突且页面资源相对路径全乱
+- 裸IP:80 原来落到默认server块的行为会被新块接管（红蓝页面案例中这正是想要的）
 
 ## TCP保活配置（防NAT 4h超时）
 
@@ -316,6 +371,8 @@ DeepSeek API Key 存储在 `~/.hermes/.env`，格式 `DEEPSEEK_API_KEY=sk-xxx`�
 ```bash
 export $(grep -v '^#' ~/.hermes/.env | xargs)
 ```
+
+**⚠️ 别拿错Key**：`~/.hermes/config.yaml` 里 auxiliary.vision 下的 `sk-gaw...` 是 **SiliconFlow** 的 Key（base_url `api.siliconflow.cn`），不是 DeepSeek 的。拿它调 `api.deepseek.com` 直接 401。DeepSeek 的 Key 只在 `~/.hermes/.env` 的 `DEEPSEEK_API_KEY`。服务端读取时优先读 .env（`os.environ` → `~/.hermes/.env` → 内置默认值三级回退）。
 
 ### 检查状态
 ```bash
@@ -551,7 +608,46 @@ docker ps | grep <PORT>
 详见 `references/port-audit-methodology.md`（含 supervisor 管理、Docker 清理、local only 修复）
 
 ### 4. 公网IP连不上但本地正常
-→ 云服务商安全组/防火墙未开放端口，去控制台添加规则。
+→ 云服务商安全组/防火墙未开放端口，去控制台添加规则。**或免开端口**：Nginx IP直连反代（见「免开安全组端口」节）。
+
+### 4.1 FastAPI StaticFiles 目录不存在 → 启动即崩
+
+`app.mount("/static", StaticFiles(directory="static"))` 在目录不存在时启动直接 `RuntimeError`，服务起不来。新项目先 `mkdir -p static/`，或 mount 前判断目录存在。
+
+### 4.2 pkill -f 会匹配当前 shell 自己
+
+`pkill -f "server.py"` 在命令行里含同样字符串时，会 SIGTERM 到当前 shell（exit -15），后续命令全废。用进程列表+awk：
+```bash
+ps aux | grep "[s]erver.py" | awk '{print $2}' | xargs -r kill
+```
+（`[s]erver.py` 中括号技巧避免 grep 匹配自身）
+
+### 4.3 交互式 LLM 页面模式（静态页 + LLM 后端）
+
+方法论页/营销页加"输入想法→AI出结论"交互 → 见 `references/llm-interactive-page-pattern.md`（红蓝分析法页面完整案例：FastAPI单端口页面+API、四段式结构化输出、加载态轮播；六分身页面 8921 的 DeepSeek JSON mode 复杂结构输出 + 字段级渲染也记录在内）。
+
+### 4.4 改版已有页面：先查端口占用，保持用户已知端口不变 ⚠️
+
+**红蓝页面踩坑实录（2026-07-31）：** 页面早已部署在 **8920**（`python3 -m http.server 8920`，用户已知并访问这个地址）。改版时没查端口，把新版 API 服务搭在 8918 + Nginx IP 反代，结果用户访问的还是 8920 旧静态版——**"点击开始验证没反应"**（静态服务器不认 POST）。
+
+**铁律：改版/升级已有页面前，第一步查它现在跑在哪个端口、怎么跑的：**
+```bash
+ss -tlnp | grep -E "89[0-9]{2}|80[0-9]{2}"          # 找监听端口
+PID=$(ss -tlnp | grep <PORT> | grep -oP 'pid=\K[0-9]+' | head -1)
+readlink /proc/$PID/cwd                             # 看是哪个项目目录
+curl -s http://127.0.0.1:<PORT>/ | grep -o "<title>[^<]*</title>"   # 确认是不是目标页面
+ps aux | grep "[h]ttp.server"                       # 是不是纯静态服务
+```
+- 已部署的端口 = 用户已知入口 = **改版必须原地升级**，不要开新端口让用户换地址
+- 用户报"点了没反应/功能没生效"时，优先怀疑：**访问的是旧服务**（换端口部署 = 用户还在旧地址）或**浏览器缓存旧版**（Ctrl+F5 强刷）
+
+### 4.5 纯静态 http.server 没有 API — 前端 fetch 静默失败
+
+`python3 -m http.server` 只支持 GET/HEAD，POST 返回 501。页面 JS 里 `fetch('/api/...')` 打到它 → 点击按钮"没反应"（无报错弹窗，就是不动）。
+
+**判断：** `ps aux | grep "[h]ttp.server"` 看到进程 + `curl -sI http://IP:PORT/api/xxx` 返回 501/404 → 就是这个坑。
+
+**修复：** 停掉 http.server，换带 API 的 FastAPI/uvicorn 服务监听**同一个端口**（见 4.3 的 llm-interactive-page-pattern）。
 
 ### 5. Hermes脱敏导致API Key写入文件
 config.py 默认值可能被脱敏为 `«redacted:sk-…»`。运行时靠环境变量覆盖，**不要改默认值**。

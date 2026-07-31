@@ -141,3 +141,40 @@ delegate_task(tasks=[
 当项目需要展示每日更新的数据（量化推荐、日报、选品）时，用 `data.json` 桥接模式：Python同步脚本 → 输出data.json → HTML用fetch读取。
 
 详见 `references/data-bridge-pattern.md`
+
+## 嵌入渲染视频（Manim/Remotion 产物）
+
+Yasin 会把「10个独立小动画」这种批量逐项动画视为**平淡课件感，会要求重做成整体沉浸式**（单支大片或 3D 页面）。当页面需要嵌入渲染好的视频（mp4）时：
+
+- 视频文件放 `videos/`、海报帧放 `posters/`（ffmpeg 从 mp4 抽帧，路径用英文名避免中文 URL 问题）
+- 弹窗播放用 `<video controls autoplay loop playsinline>`，**必须有 `.video-frame` 包裹层**
+- **16:9 视频溢出修复（实测坑）**：给 `<video>` 直接设 `width:100% + max-height` 会先按容器宽算高再强压，比例崩成 2.4:1 元素溢出弹窗。正确姿势：
+```css
+.video-frame{
+  width:auto;margin:0 auto;
+  aspect-ratio:16/9;
+  max-width:min(100%,880px,calc((100dvh - 210px)/0.5625)); /* 视口高度换算成16:9宽度 */
+  max-height:calc(100dvh - 210px);
+  border-radius:10px;overflow:hidden;background:#0c0d18;
+}
+.video-frame video{width:100%;height:100%;object-fit:contain;display:block;}
+```
+- 弹窗容器加 `max-height:100dvh;overflow-y:auto` 兜底，任何窗口尺寸不溢出
+- Manim 渲染管线（像素画矩阵→动画→抽帧）见 `references/manim-video-integration.md`
+
+## 3D 环形画廊（CSS 3D 展厅）
+
+作品/卡片环绕 3D 空间、可拖拽旋转的展厅效果（`perspective` + `preserve-3d` + `rotateY(a) translateZ(R)`）：
+
+- 每张卡片 `position:absolute; transform:rotateY(var(--a)) translateZ(680px) translate(-50%,-50%)`，`--a = (360/N)*i`
+- 容器 `.ring{transform-style:preserve-3d; transform:rotateX(10deg) rotateY(var(--ry))}`
+- 鼠标/触屏拖拽更新 `--ry`（`mousedown` 记录基线 + `mousemove` 增量），松手后 setInterval 每50ms 慢速自转（拖拽时暂停）
+- 每卡片各自浮动动画（错峰 `--delay`），hover 时 `translateZ(46px)` 弹出 + 金色扫光 `::after` 线性扫过
+- 背景三层：透视网格地板（`rotateX(58deg)` + mask 径向渐隐）+ 极光光晕 + Canvas 星空粒子
+- 完整可复制实现见 `references/3d-ring-gallery.md`
+
+## 用户偏好（动画/视频类）
+
+- **批量逐项小动画 = 平淡课件感，会被否**。要做整体沉浸式：单支主视觉大片（展厅巡游/变形链/粒子汇聚）或 3D 交互页面
+- 视频/动画类任务先给 2-4 个方向选项（A巡游大片 / B morph链 / C粒子汇聚 / D 3D页面）让 Yasin 拍板，他选完直接全量干，不要中途反复确认
+- 弹窗/遮罩内视频必须实测尺寸，不要只靠代码逻辑判断

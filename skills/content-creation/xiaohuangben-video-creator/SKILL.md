@@ -12,6 +12,7 @@ triggers:
   - 聊观点
   - 讲故事
 related:
+  - product-video-director
   - chaoke-i2v-product-video
   - ai-video-production
   - llm-video-maker
@@ -71,7 +72,7 @@ platforms: [macos, linux]
 | 推荐爆款元素 | 从8大元素中选最适合的2-3个 |
 | 推荐钩子技巧 | 从6个技巧中选最匹配的1-2个 |
 | 推荐AI管线 | 见下方映射表，**需先问用户确认再跑花钱的管线** |
-| 预估成本 | ¥0 (Ken Burns) / ¥2/条 (硅基Wan2.2) / ¥0.54-0.90/秒 (百炼) |
+| 预估成本 | ¥0 (Ken Burns) / ¥0.4/条5s (Seedance pro-fast) / ¥0.54-0.90/秒 (百炼) |
 | 建议时长 | 10-12s / 15-20s / 20-30s |
 
 **8大爆款元素：** 成本的 / 人群的 / 奇葩的 / 最差的 / 反差的 / 怀旧的 / 荷尔蒙的 / 头牌的
@@ -103,10 +104,16 @@ platforms: [macos, linux]
 
 | 内容类型 | 推荐管线 | 具体步骤 | 成本 |
 |---------|---------|---------|------|
-| **晒过程** | **三选一（按预算）** | ①零成本Ken Burns（静态图+ffmpeg缩放缩放）②I2V动效（硅基¥2/条）③I2V动效（百炼¥0.54-0.90/秒） | ¥0 / ¥4-6 / ¥8-14 |
+| **晒过程** | **首选 Seedance**（火山方舟） | 分镜每镜指定运镜 → `product-video-director` skill 逐镜图生视频 → xfade拼接+字幕+配音 | ¥0.4/条5s |
+| **晒过程** | 降级①Ken Burns | 静态图+ffmpeg缩放 | ¥0 |
+| **晒过程** | 降级②百炼 I2V | happyhorse-1.1-i2v | ¥0.54-0.90/秒 |
 | **教知识** | `ai-video-production` 文字视频 | LLM出文案→边缘TTS→moviepy渐变背景文字→合成 | ¥0 |
 | **聊观点** | `ai-video-production` 文字视频 | LLM出观点文案→edge-tts→moviepy深色背景+大字→合成 | ¥0 |
 | **讲故事** | `llm-video-maker` 或 `ai-video-production` | LLM出叙事脚本→HTML动画或文字视频+配音→合成 | ¥0 |
+
+> **Seedance 细节**：走火山方舟 ARK（Key 在 `~/backend/.env` 的 ARK_API_KEY）。
+> 模型 `doubao-seedance-1-0-pro-fast-251015` 720p ≈¥0.4/5秒、40秒出片。
+> 15秒+ 视频必须拆 ≥3 镜、每镜不同运镜（推近/环绕/上升/平移/微距...），调用 `product-video-director` 的分镜+生成+拼接脚本。
 
 ---
 
@@ -159,6 +166,8 @@ S5: 限时行动指令
 镜4 (8-10s) 黑底或全幅→价格CTA → 催单
 
 【文案技巧】描述法(镜1) → 对比法(镜2-3) → 力量感(镜4)
+
+> 15秒+ 版本：每镜扩到 5s，运镜强制不重复（推近→环绕→上升→平移），镜头不够时按「卖点拆解」加镜。
 ```
 
 ### 模板2：晒过程→测评产品
@@ -452,5 +461,5 @@ S4: 事件的批判/回怼/感悟/呼吁
 
 - `~/Desktop/hermes/小黄本课程_AI短视频创作流程.md`（完整流程文档）
 - `~/Documents/Obsidian Vault/_kb/raw/articles/小黄本课程_AI短视频创作流程.md`（Obsidian副本）
-- 关联Skill：chaoke-i2v-product-video / ai-video-production / llm-video-maker / domestic-video-distribution / jianying-batch-editor
+- 关联Skill：product-video-director（Seedance逐镜生成+拼接执行器）/ chaoke-i2v-product-video / ai-video-production / llm-video-maker / domestic-video-distribution / jianying-batch-editor
 - `chaoke-i2v-product-video references/xiaohuangben-content-framework.md` — 小黄本4脚本类型框架（本引擎的模板来源）

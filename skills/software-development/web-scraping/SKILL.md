@@ -109,3 +109,4 @@ MySpider().start()
 - GitHub：https://github.com/D4Vinci/Scrapling（70k+ stars）
 - 浏览器自动化（需登录/交互的场景）：见 `playwright-mcp` skill
 - 抖音精选联盟选品脚本：`playwright-mcp` skill 的 `references/douyin-scraper.md`
+- 抖音视频页内容提取（无需登录，拆解/分析视频用）：`references/douyin-page-extraction.md`
