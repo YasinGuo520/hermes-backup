@@ -42,6 +42,13 @@ def build():
 
 **加新项目 = 编辑 `PROJECTS` 列表加一行 → `python3 build_hub.py`**
 
+## ⚠️ 改导航页前必读（用户铁律，2026-08 血泪教训）
+
+1. **先备份**：改 `build_hub.py` 前先 `cp build_hub.py build_hub.py.bak && cp index.html index.html.bak`。曾因直接重建覆盖了用户喜欢的深紫科技风版本（Forty风格是旧版，别覆盖成它）。
+2. **只动导航页**：改导航页严禁连带重启/影响其他端口服务。曾因跑 `build_hub.py` + 手动拉服务把 10+ 个 background 服务搞挂，用户明确要求「改动导航页不要全部都挂」。
+3. **服务挂了用保活**：全站服务由 `~/Desktop/hermes/scripts/keepalive.sh` 管理（crontab 每3分钟 + @reboot 自动恢复）。需要手动查状态用 `keepalive.sh check`，恢复用 `keepalive.sh start`，不要逐个手动起 http.server。
+4. **端口映射现状**：8000 已删（爆款主图已弃，Docker down + socat 杀 + 导航删卡 + 保活移除）；8002=服小助AI客服；8897=Hermes Dashboard（nginx 反代到 8896，hermes serve 是 headless 无 UI 不能直接反代）。
+
 ## 端口分配规则
 
 | 端口段 | 用途 |
@@ -123,7 +130,31 @@ curl -s http://127.0.0.1:<端口>/ | grep -o '<卡片名>' | sort | uniq -c
 
 **重要：** 重跑 `python3 build_toolbox.py` 后**不需要重启** 8900 的 http.server——静态文件按请求实时读取，重新生成 index.html 立即生效。验证：`grep -n "card-link\|<端口>" index.html`。
 
+**⚠️ 卡片链接是手写死的话，改数据源不生效（2026-08 实测）：** 如果工具箱 index.html 里的 `<a class="card-link" href="http://IP:PORT/">` 是**手工写死的**（不是 build_toolbox.py 渲染的），那加新落地页后卡片不会自动带链接。症状：卡片展开没有「打开页面 →」按钮。修复：直接在 index.html 里给对应卡片的 `card-meta` 后 patch 插入 `<a class="card-link" ...>打开页面 →</a>`（红蓝8920有、六分身8921/市场调研8922/行业调研8923 曾漏，就是这个坑）。
+
 ## 常见坑
+
+### 0. 重建前必须备份原版 index.html ⚠️ 血泪教训
+
+**教训（2026-08实测）：** 加了新项目后直接跑 `python3 build_hub.py`，把线上正在用的**深紫科技风** index.html 覆盖成了模板里的 **Forty 风格**（深蓝硬卡片），用户直接说「不好看，还是原来的好看」。没有备份=无法恢复，只能从 skill 模板反推重做。
+
+**规则：**
+1. **任何重建前先备份**：`cp index.html index.html.bak_$(date +%s)`（或先 git init 提交一次）
+2. 确认当前线上 index.html 的样式版本，**别假设 build_hub.py 生成的样式 = 用户喜欢的样式**——线上可能被手工改过、或模板版本已过期
+3. 改 build_hub.py 前先读完整文件 + 读 references 模板，判断哪个才是当前线上版本
+
+### 0.1 导航页用户偏好（已定稿）
+
+用户喜欢的导航 Hub 风格是**深紫科技风**，不是 Forty 深蓝硬卡片：
+- 背景：深黑 `#0a0a0f` + **紫色网络节点 Canvas 粒子**（70节点+连线，粒子要明显不能太淡）
+- 标题：紫色渐变 `linear-gradient(135deg,#a78bfa,#6c5ce7,#3b82f6)` 文字
+- 卡片：圆角玻璃卡片 + 左侧 hover 发光条 + hover 上浮阴影
+- 排版：**按分类分组**（🌐页面/🆕新项目/🔗外部服务），每类下卡片**多列网格**（`grid-template-columns:repeat(auto-fill,minmax(320px,1fr))`），**不要竖排直排**（用户原话「直排的不好看」）
+- 分类标题带渐变分隔线（`::after` 横向渐变线）
+
+### 0.2 模板版本说明
+
+`references/build_hub_template.py` 是深紫科技风模板（竖排列表版）。当前生产版 ~/Desktop/hermes/hermes-hub/build_hub.py 已是**分类网格版**（深紫科技+分类+多列网格）。新项目直接参考生产版 build_hub.py 的 PROJECTS 结构（带 cat 字段的分组列表），**不要用 references 模板直接覆盖**。
 
 ### 1. 端口被占用（OSError: Address already in use）
 
@@ -157,6 +188,60 @@ curl -s -X POST http://127.0.0.1:<端口>/api/analyze -H "Content-Type: applicat
 ```
 
 改版前先确认，别假设端口上跑的是新版。
+
+### 6. 网关重启会杀光所有 background http.server ⚠️ 批量恢复流程
+
+**教训（2026-08实测）：** Hermes 网关重启/会话结束后，所有用 `terminal(background=true)` 启动的 `python3 -m http.server` 进程会**全部被带走**（同批启动的子进程随会话生命周期结束）。实测 15 个端口只剩 4 个活着（8915/8931/8895/8930），导航页所有卡片点击全挂——用户报「每个项目的跳转链接都没有了」。
+
+**诊断命令（先扫全端口）：**
+```bash
+for p in 8000 8897 8900 8899 8894 8910 8911 8912 8913 8914 8915 8916 8917 8931 8895; do
+  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "http://127.0.0.1:$p/" 2>/dev/null)
+  echo "$p -> $code"
+done
+# 000 = 死了；404 = 活着但根路径无内容（如API服务，正常）
+```
+
+**批量恢复：** 每个项目目录一个 `terminal(background=true)` 启动（一次性并行发多个）：
+```bash
+cd ~/Desktop/hermes/<项目目录> && python3 -m http.server <端口> --bind 0.0.0.0
+```
+项目目录→端口映射（实测生产）：
+- 8900=toolbox, 8899=birthday-zeying, 8894=portfolio, 8910=cases-wall, 8911=product-dashboard, 8912=quant-board, 8913=game-zeying, 8914=fortune-wheel, 8915=pixel-gallery, 8916=particle-card, 8917=server-status, 8931=mecha3d/web
+
+**非纯静态服务的特殊处理：**
+- **8000 = AI爆款主图生成器**（Docker Compose 栈，~/backend），`docker compose up -d`；compose 端口映射是 **8080:8000**（对外仍 8000 需 socat 转发：`socat TCP-LISTEN:8000,fork,reuseaddr TCP:127.0.0.1:8080`）
+- **8002 = 服小助AI客服**（~/Desktop/hermes/ai_cs_package，独立 venv，`python -m app.main`，DeepSeek 驱动）——不是 8000！8000 是爆款主图生成器，导航链接曾错误指向 8000 显示 JSON API
+- **Hermes 网关 8897 实际跑在 9119**（`hermes serve --port 9119`，仅绑 127.0.0.1）
+- **8897 反代用 nginx 不要用 socat** ⚠️：socat 是纯 TCP 转发不改写 Host header，hermes 网关校验 Host 会返回 `Invalid Host header. Dashboard requests must use the hostname...` 400。正确做法是 nginx 反代并改写 Host：
+```nginx
+# /etc/nginx/sites-enabled/hermes-gateway
+server {
+    listen 8897;
+    server_name 43.138.221.174;
+    location / {
+        proxy_pass http://127.0.0.1:9119;
+        proxy_set_header Host 127.0.0.1:9119;   # 关键：改写 Host 通过校验
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 3600s;
+    }
+}
+```
+- 服小助前端如果 HTTPS 页面调 HTTP 接口会 **mixed content 拦截**（浏览器 "Failed to fetch"）——前端 API 地址必须用相对路径 `const API = '';` 而不是硬编码 `http://IP`（实测 midage.icu 踩坑）。⚠️ 修完 JS 后 **nginx 静态缓存（expires 7d）会让用户端继续拿到旧文件**——浏览器强刷/重开仍报错。验证/临时绕过：URL 加版本参数 `?v=20260801`；用户端最终靠 `sudo nginx -s reload` + 浏览器硬刷。排查时先确认浏览器实际执行的 JS 内容（browser_console 读 script 文本），别信"我改了文件"——可能缓存里还是旧的。
+
+**腾讯云轻量安全组**：新端口公网访问要在控制台防火墙加规则（如 8002），本地 200 但公网 000 = 安全组没开。
+
+**根治建议：** 全部服务做开机自启/保活（systemd 或 supervisor），否则每次网关重启都要手动恢复。恢复后记得重新跑 `python3 build_hub.py` 刷新在线统计（alive() 会重新探测）。
+
+**保活系统已上线（2026-08）：** `scripts/keepalive.sh` 是生产版保活脚本（已部署到 ~/Desktop/hermes/scripts/keepalive.sh + crontab `*/3 * * * *` + `@reboot`）。新机器部署时直接复制该脚本，改 STATIC_PROJECTS/FASTAPI_PROJECTS/SOCAT_PROJECTS 三个数组即可。crontab 配置：
+```
+*/3 * * * * /home/ubuntu/Desktop/hermes/scripts/keepalive.sh start >> /var/log/keepalive.log 2>&1
+@reboot /home/ubuntu/Desktop/hermes/scripts/keepalive.sh start >> /var/log/keepalive.log 2>&1
+```
+验证幂等性：全在线时再跑一次 `start`，日志应 0 次"启动"（全部跳过）。
 
 ### 5. 长 HTML 修改用 Python 精确替换
 

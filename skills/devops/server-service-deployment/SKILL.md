@@ -280,6 +280,38 @@ sudo sysctl -p
 
 ## Hermes Dashboard 部署（看板/Web UI）
 
+### ⚠️ 区分 hermes serve vs hermes dashboard（8897 网关打不开的根因）
+
+`hermes serve` 是 **headless 后端**（JSON-RPC/WebSocket 网关，给飞书/QQ机器人连），**没有网页 UI**。浏览器访问它只返回：
+```json
+{"error":"Headless backend (hermes serve): web UI disabled — use `hermes dashboard` for the browser UI."}
+```
+要有网页界面必须跑 `hermes dashboard`。两者默认同端口 9119，不能同时起在 9119。
+
+**服务器实际方案（8897 有 UI）**：
+- serve 留在 9119（机器人通道依赖，别动）
+- dashboard 起在独立端口 8896（127.0.0.1）：`hermes dashboard --port 8896 --host 127.0.0.1 --skip-build --no-open`
+- nginx 反代 8897 → 8896，**proxy_set_header Host 127.0.0.1:8896**（解决 Host header 校验）：
+
+```nginx
+server {
+    listen 8897;
+    server_name 43.138.221.174;
+    location / {
+        proxy_pass http://127.0.0.1:8896;
+        proxy_set_header Host 127.0.0.1:8896;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+### ⚠️ socat 转发 Web 服务会撞 Host header 校验（改用 nginx）
+
+socat 是裸 TCP 转发，不改 HTTP Host 头。目标服务校验 Host（uvicorn/heroku 风格）时返回 `400 Invalid Host header`。**Web 服务用 nginx 反代而不是 socat**；socat 只适合不需要 Host 校验的 TCP 直连场景（端口转发、隧道）。
+
 ### 常见坑：Dashboard 绑公网必须配密码
 
 Dashboard 默认绑定 `127.0.0.1`（仅本机可访问）。绑 `0.0.0.0`（公网可访）必须配认证，否则拒绝启动：
@@ -511,6 +543,44 @@ cronjob action:create / name: 数据采集 / schedule: "*/5 * * * *" / script: c
 | 量化K线看板(8912) | `sync_quant_data.py` | 量化系统log目录 | 交易日8:50 |
 
 ---
+
+## 全站服务保活（keepalive.sh + crontab）
+
+**背景：** 多个 `python3 -m http.server` 用 `terminal(background=true)` 启动后，**网关重启/服务器重启会把全部 background 进程杀掉**（实测 15 个端口一次全挂，用户反馈「点击进去无法显示」）。必须做自动保活。
+
+**生产方案：** `~/Desktop/hermes/scripts/keepalive.sh`（四类服务统一管理）+ crontab。
+
+```
+crontab:
+  */3 * * * *  keepalive.sh start   # 每3分钟补拉挂掉的服务（幂等，在线跳过）
+  @reboot      keepalive.sh start   # 开机全量拉起
+```
+
+**四类服务配置（脚本内数组）：**
+| 类型 | 数组名 | 条目格式 | 例子 |
+|------|--------|---------|------|
+| 静态项目 | STATIC_PROJECTS | `目录\|端口` | `$HOME_DIR/toolbox\|8900` |
+| FastAPI落地页 | FASTAPI_PROJECTS | `目录\|端口` | `$HOME_DIR/red-blue-method\|8920` |
+| socat转发 | SOCAT_PROJECTS | `监听口\|目标` | 已弃用（Web服务改nginx） |
+| Python服务 | PYTHON_SERVICES | `目录\|端口\|启动命令` | `ai_cs_package\|8002\|source venv/bin/activate && python -m app.main`；无目录服务用空目录 `\|8896\|hermes dashboard ...` |
+
+**关键设计：**
+- `is_up()` 用 curl 探活，`000`=挂，`200/404/30x` 都算活
+- 所有 start_* 函数先查活，在线直接 return（幂等，crontab 每3分钟跑不会重复启动）
+- 启动用 `nohup ... &`（crontab 环境没有 hermes background 管理）
+- 日志 `/var/log/keepalive.log`（`sudo touch && chmod 666`）
+
+**新服务上线必须同步加进 keepalive.sh**（否则下轮网关重启又挂）。
+
+## HTTPS 页面调 HTTP API 被 mixed content 拦截（Failed to fetch）
+
+**现象：** 页面能打开，但 JS 调接口报 `TypeError: Failed to fetch`，curl 直测接口却 200。
+
+**根因：** 前端硬编码 `const API = 'http://43.138.221.174'`，而用户从 `https://midage.icu` 访问——HTTPS 页面调 HTTP 接口被浏览器 mixed content 策略拦截。**本地 curl 永远测不出来**（curl 没有该限制），必须浏览器实测。
+
+**修复：** 前端 API 改相对路径 `const API = ''`（同源自动走 https://midage.icu，nginx 已反代好接口路径）。改完注意 **nginx 静态缓存**（`expires 7d`）会让用户端还是旧版——用 `?v=时间戳` 参数绕过，或 `nginx -s reload`。
+
+**排查链：** 浏览器 console 里 `document.querySelectorAll('script:not([src])')` 看实际加载的 JS 是否还是旧值（缓存）；`apiStatus` 元素文本可直读「✅ 正常 / ❌ 加载失败」。
 
 ## 常见坑
 
