@@ -209,6 +209,21 @@ hermes chat -s humanizer -q "把我刚刚生成的剧本全文去AI化，逐句�
 
 ---
 
+## 阶段四：视觉制作（百炼出图 + 图生视频成片，合并自 aliang-shortvideo）
+
+当剧本/分镜定稿后要出**可播短剧成片**时，走百炼 bl CLI 五段流水线（**视频生成费钱：①~④可放心跑，⑤ i2v 默认只产命令不实跑，需用户显式确认付费**）：
+
+```
+① 剧情大纲 → ② 分集剧本(台词) → ③ 分镜表(枢纽) → ④ 批量出关键帧图 → ⑤ 图生视频成片
+```
+
+- **开工确认4件事**：一句话灵感（必问）+ 题材（8大题材爽点库见 `references/genres.md`，用 AskUserQuestion 给3-4项）+ 总时长（15s/30s/60s，**图片张数 ≈ 总时长÷5**，每5s一镜一张）+ 画风（22种预设见 `references/styles.md`，分写实/动漫/3D-CG/插画/风格化5类，**画风是画面质量头号变量必须开工就定**；用户甩参考图时用 `bl vision` 读成 style 串 + `bl image edit` 迁移画风）
+- **分镜表 + storyboard.json 双产物**：给人看的分镜表格（镜号/时长/景别/运镜/画面/台词/情绪）+ 给脚本的 `storyboard.json`（全片统一 style、固定 `characters[].desc`、每镜 `image_prompt`，结构见 `references/storyboard.md`）。单镜时长可逐镜调（10s/15s 按5s拆子镜）
+- **批量出图**：`python3 scripts/gen_images.py --storyboard <项目>/storyboard.json --outdir <项目>`（自动拼 style+角色desc）；**先验主角脸**（`--only 1,2` 只出前2镜确认长相再全量）；`--dry-run` 只看命令不烧额度；主角基准图设 `characters[].ref` 自动切 `bl image edit` 参考图模式
+- **图生视频（💰 确认后逐段跑）**：每张关键帧 `bl video generate --image shot_NN.png --ratio 9:16 --duration 5`（运镜 prompt 取分镜表 camera+动作），ffmpeg 按镜号拼接成片
+- **爽点抽取**：`python3 scripts/pick_beats.py --genre <题材>` 真随机抽8-12个爽点避免套路雷同（题材爽点库+结构模板+内容红线见 `references/genres.md`）
+- 每阶段产出后**暂停等用户确认**再进下一阶段；项目目录：outline.md / script.md / storyboard.md / storyboard.json / images/shot_NN.png / video/shot_NN.mp4
+
 ## 自动化调度（Cron 批量任务）
 
 ```bash

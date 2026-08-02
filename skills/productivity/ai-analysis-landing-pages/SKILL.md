@@ -104,6 +104,24 @@ location /<名>/ { proxy_pass http://127.0.0.1:892X/; proxy_read_timeout 180s; }
 5. **vite/uvicorn 命令被误判为长驻进程**：终端工具看到命令含 uvicorn 关键词会拦截。拆开跑（venv 创建、pip install、import 验证分开）
 6. **kill 后 systemd restart 顺序**：先停旧进程（nohup 起的），再 `systemctl daemon-reload && restart`
 
+## 支持文件（合并自 ai-analyzer-landing-page）
+
+- `templates/server.py` — 后端标准脚手架（.env key 读取 / JSON模式 / parse_json / health / 静态挂载）
+- `templates/systemd.service` — systemd 单元模板（WorkingDirectory + ExecStart + Environment=PORT=892X）
+- `references/red-blue-server-pattern.py` — 红蓝分析法 server.py 完整骨架（四段式文本解析版，改提示词即用）
+- `references/six-persona-server-pattern.py` — 六分身 JSON 版骨架（response_format json_object）
+
+工具箱卡片链接（加在 card-meta 之后）：
+```html
+<a class="card-link" href="http://43.138.221.174:<port>/" target="_blank" onclick="event.stopPropagation()">打开页面 →</a>
+```
+
+**附加陷阱（已验证 4 次：8920红蓝/8921六分身/8922市场/8923行业）**：
+- **点击没反应 = 静态服务器**：`python3 -m http.server` 服务的页面 POST /api/analyze 无人处理（501）。修法：把静态服务换成带 API 的 FastAPI（同端口）。改版前先 `ss -tlnp | grep <端口>` + `readlink /proc/<PID>/cwd` 确认现有部署是静态还是 API 服务。
+- **config.yaml 的 key 不是 DeepSeek 的**：401 时先查 ~/.hermes/.env 的 DEEPSEEK_API_KEY。
+- DeepSeek URL：`DEEPSEEK_BASE_URL`（https://api.deepseek.com/v1）+ `/chat/completions`；模型 `deepseek-chat`；max_tokens 按内容量：单段结论 1600，六分身/多段 4500。
+- Nginx 子路径反代后 `nginx -t` + `curl | grep <title>` 验证。
+
 ## 参考
 
 - `references/red-blue-server-pattern.py` — 红蓝分析法 server.py 完整骨架（四段式文本解析版，改提示词即用）

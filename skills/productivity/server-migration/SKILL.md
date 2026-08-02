@@ -156,6 +156,27 @@ software development, note-taking (obsidian), media, hermes-agent, computer-use.
 ⚠️ Skill changes take effect after a **session restart** (`/reset`).
 The gateway service does NOT need a restart.
 
+## Cron 迁移专节（合并自 hermes-cron-migration）
+
+当迁移重点是**定时任务**时（用户说「把本地的定时任务迁移上去」「换了机器」），补充细节：
+
+**获取配置**：`cat ~/.hermes/cron/jobs.json` 最可靠（`hermes cron job view <id>` 某些版本不存在）。提取字段：id/name/prompt/schedule/deliver/origin/model_snapshot/repeat/script/no_agent/enabled_toolsets。
+
+**迁移判断规则**：
+- 备份/本地专属脚本（macOS 外置盘备份、hermes-backup.sh）→ 跳过
+- 纯 prompt 任务（无 script 字段）→ 直接 `cronjob action=create` 重建
+- 脚本任务（script 引用本地路径）→ 获取脚本 + 调整路径
+
+**脚本任务要点**：
+- 用户拖文件到聊天 → 文件存 `~/.hermes/cache/documents/`，需要 copy 到项目目录
+- 路径调整表：`~/Desktop/hermes/xxx.json` → `~/projects/xxx.json`；`/Users/mac/Desktop/hermes/` → `~/projects/`；Mac 的 `/Volumes/` 映射到 Linux 路径
+- **shebang 行**：macOS 默认 `/usr/bin/python3`，Linux 可能是 `/usr/bin/python3.11`，确保兼容
+- **文件权限**：复制脚本后 `chmod +x`
+- **repeat.times**：源任务有次数限制（如 30 次/600 次）要一致，`cronjob create` 用 `repeat` 参数设置
+- **性能提示**：prompt 中注明脚本运行时间（「需要约45-60秒」），避免 agent 超时
+- **`~` 在双引号内不展开**：cron prompt 里 `~/projects/xxx.py` 会被 Hermes 解析，但 terminal 命令要用完整路径 `/home/ubuntu/projects/`
+- **delivery 重定向**：目标机器 chat_id 从 `gateway_state.json` 查；脚本依赖包（openpyxl/playwright/openai）先在目标机器安装
+
 ## Common Pitfalls
 
 1. **Script paths from macOS** — scripts saved to `~/Desktop/hermes/` won't

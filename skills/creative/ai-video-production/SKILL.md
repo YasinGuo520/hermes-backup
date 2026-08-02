@@ -620,6 +620,18 @@ echo "全部生成完成"
 
 详见 `references/bailian-i2v-session.md` 和 `references/jianying-capcut-compatibility.md`。
 
+### 百炼 I2V 补充坑（合并自 chaoke-i2v-product-video）
+- **并行生成中断 `exit 130`**：`bl video generate` 是同步阻塞调用，并行跑2条以上时第二条被中断。**逐条串行生成**，每次等前一条完成再跑下一条（单条约60-90秒）。
+- **用户问"为什么走百炼不是硅基"**：生成前先告知「视频生成走百炼 DashScope ¥0.06/条，不是硅基」。硅基（SiliconFlow）没有 happyhorse 模型，其 Wan2.2-I2V-A14B 要 $0.29/条（≈¥2.1）。
+- **账单查询限制**：`bl usage stats` 需要 console login，查余额/欠费去百炼控制台 https://bailian.console.aliyun.com（后付费，欠费仍返回200但费用累积）。详细账单对比见 `references/bailian-billing.md`。
+- 完整可运行合成脚本：`scripts/build_final.py`（修改配音+字幕配置后直接 `python3 build_final.py` 出片）。
+- 出片参数：832×1108 / 24fps / H.264 CRF18 / preset slow / AAC 192k / 总成本 ¥0.18（3条I2V）。
+
+### Wan2.2 背景补充（合并自 ai-video-full-pipeline）
+- **淡入淡出不要用 FadeIn/FadeOut**（与 VideoFileClip 兼容问题 `NoneType get_frame`）。除 CrossFadeIn 外，另一可行法：手动创建黑帧遮罩叠加（`np.full((H,W,3), 255*alpha)` 的 VideoClip 叠在 composite 上）。
+- Wan2.2 T2V 提交 `POST https://api.siliconflow.cn/v1/video/submit`（参数名是 `image_size` 不是 size），轮询 `POST .../v1/video/status`（POST 不是 GET，`{"requestId": ...}`），状态 InQueue→InProgress→Succeed/Failed，10s 间隔最长10分钟，生成约8-9分钟（排队+推理）。
+- 已知限制：Wan2.2 目前只能生成氛围画面（科技感动态背景），无法生成带具体角色/叙事逻辑的内容视频。
+
 ## 🚀 执行清单 Cheat Sheet（一条接一条）
 
 从拿到产品图到出片，按顺序执行：

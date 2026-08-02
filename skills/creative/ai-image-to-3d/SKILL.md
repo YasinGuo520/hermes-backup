@@ -116,6 +116,33 @@ js/
 5. `hunyuan3d.py` 提交+轮询+下载 OBJ zip
 6. obj2gltf 转 GLB → Three.js 太空页展示，浏览器验证
 
+## 多会话实战补充（合并自 ai-3d-model-pipeline / ai-3d-web-showcase / hunyuan-3d-image-to-model / image-to-3d-web）
+
+### 报错诊断速查
+- `ResourceUnavailable.NotExist 计费状态未知` = 服务没开通 → 去 product/ai3d 开通
+- `ResourceInsufficient 资源不足` = 已开通但没领免费额度/没开后付费
+- `AuthFailure.InvalidAuthorization` = 用了非签名认证方式（如 Bearer sk-）
+- 子账户密钥需主账户授权 `QcloudAIA3DFullAccess`（或 QcloudAI3DFullAccess）
+
+### 轮询与下载的坑（2026-08 实测）
+- **长轮询循环会 Connection reset**：后台脚本连续 Query（每15s）实测反复挂 `ClientNetworkError ConnectionResetError(104)`。改成**单次查询+间隔重试**（每次新建请求、sleep 5-15s、重试3次）反而稳定。轮询代码要 catch ConnectionReset 后继续，别让循环中断。
+- **签名下载URL含 `&` 会被 shell 截断**：COS 签名 URL 长串带 `&q-sign-*`，`curl -sL "$URL"` 会被截断 → 下载到几百字节假 zip（`unzip` 报 End-of-central-directory not found）。**必须用 Python `subprocess.run(['curl','-sL','-o',out,url])` 传列表参数**（不经 shell），或在 Python 里直接拿响应 dict 的 `Url` 字段再下载。
+- DONE 响应 `ResultFile3Ds` 可能含多条（OBJ zip + 预览图），按 `Type == 'OBJ'` 取。
+- 提交成功返回 JobId；生成要几分钟，后台轮询脚本设长超时（900s+）。
+
+### 下载失败特征与页面细节
+- jsdelivr 404 页只有几百字节（GLTFLoader.js 77 字节 = 404 页）：用 `stat -c%s` 检查文件大小。
+- 模型体积：混元极速版 OBJ 转 GLB 约 15MB，加载 8-10 秒，loader 进度条用 xhr 回调（`xhr.loaded/total`）。
+- 模型加载后 Box3 算包围盒 → scale 适配 → 平移居中；ACESFilmic tone mapping。
+- 背景粒子用户偏好「明显不能太淡」：70粒子、alpha 0.15-0.35、连线距离140px。
+- 交付前验证：`browser_navigate` + `browser_console` 查 canvas 存在、loader 隐藏、model.glb 资源被请求；`browser_vision` 确认模型完整无破面；公网 curl 200 才算上线。
+- 成品页挂导航 Hub（8895）/ 工具箱（8900）入口，见 html-project-hub skill。
+
+### 现成模板（可直接改）
+- `templates/space-showcase.html` — 深空星空粒子+星云背景+机甲悬浮+拖拽旋转+滚轮缩放+触屏（完整可改模板）
+- `templates/threejs_showcase_index.html` — 深空3D展示页模板（importmap 已配好）
+- 两者都基于 r160 ES module 本地 js 结构，复制到项目改模型路径即可。
+
 ## 参考文件
 - `scripts/hunyuan3d.py` — 可复用图生3D脚本（提交+轮询+下载，环境变量读密钥）
 - `references/threejs-space-showcase.md` — Three.js 太空展示舱完整要点（本地js结构/importmap/场景/相机控制，实例 mecha3d/web/index.html）

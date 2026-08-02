@@ -43,6 +43,32 @@ Read the individual rule files for specific tasks and constraints:
 
 ## 🎯 Agent Quick Routing
 
+### 批量剪辑 config.json 格式（合并自 jianying-batch-editor）
+
+`~/Desktop/hermes/jianying_batch.py`（模板复制+JSON修改+meta同步一体）的配置格式：
+
+```json
+{
+  "drafts": [
+    {
+      "name": "草稿名称", "width": 832, "height": 1108, "fps": 24,
+      "videos": ["/path/to/video1.mp4", "/path/to/video2.mp4"],
+      "transitions": ["叠化", "模糊"],        // 逐段转场，可选
+      "transition": "叠化",                    // 统一转场（transitions为空时用）
+      "transition_duration": 0.5,
+      "bgm": "/path/to/bgm.mp3", "bgm_volume": 0.25,
+      "subtitle": "底部字幕文字", "subtitle_duration": 3
+    }
+  ]
+}
+```
+
+**常用转场名**：`叠化`（通用柔和）/ `模糊`（产品展示）/ `闪白` `闪黑`（快节奏）/ `向左` `向右` `向上` `向下`（方向滑动）/ `旋转模糊` `缩放`（动感）/ `故障` `信号故障`（科技感）。完整列表见 pyJianYingDraft TransitionType 枚举。
+
+**工作原理**：① 复制 TEMPLATE 目录（含剪映加密 meta）→ ② 视频素材复制到草稿内 `Resources/materials/` 解决沙盒权限 → ③ 写 draft_info.json（视频轨道+转场+BGM+字幕）→ ④ 同步 draft_meta_info.json + draft_info.json.bak → ⑤ 删 .locked 解锁 → 剪映内直接打开。
+
+**常见问题**：「暂无访问权限/链接媒体」→ 脚本已自动复制视频到草稿内部目录，仍不行查文件路径；「草稿打开为空白」→ 检查 TEMPLATE 是否最新创建的空白草稿。
+
 - 批量剪辑/多段拼接：用 `~/Desktop/hermes/jianying_batch.py`（模板复制+JSON修改，见 [references/direct-json-manipulation.md](references/direct-json-manipulation.md)）
 
 - 云端视频 + 云端音乐：`rules/media.md` + `rules/audio-voice.md` -> `examples/cloud_video_music_tts_demo.py`

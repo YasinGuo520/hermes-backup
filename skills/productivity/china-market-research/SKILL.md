@@ -200,6 +200,39 @@ result.slice(0,15).join('\\n');
 
 核心技巧：API限频时走浏览器路线；描述太短时结合评论区补全；关注up主其他平台内容交叉验证。
 
+## 行业调研方法（合并自 china-industry-research）
+
+### 并行调研（推荐策略）
+多方向/跨赛道调研用 `delegate_task` 并行派遣子Agent（最多3个并行）：
+1. 父Agent定义调研范围和输出格式模板 → 2. 每方向派一个子Agent（context 字段带全用户背景/语言/格式要求，子Agent不记得会话上下文）→ 3. 子Agent独立执行搜索→采集→输出 → 4. 父Agent「全景整合」：横向对比各赛道市场规模/竞争度/AI契合度 → 按「人欲」分类（男性赚钱好色、女性爱美育儿、老年养生陪伴）重组 → 算各赛道年入千万路径（客单价×所需客户数）→ 输出终极TOP5一页对比表。
+⚠️ 子Agent结果不完全是事实：收到完成通知后用 `read_file` 验证文件存在且内容正确再引用。
+
+### 搜索降级链路（比上面更深的兜底层）
+```
+第1层 搜索引擎：DuckDuckGo lite (lite.duckduckgo.com/lite/?q=) ← 最可靠纯文本 → SearXNG/Brave → Baidu(受限跳过) → Google(可能超时)
+第2层 Python搜索库：pip install ddgs（老版 duckduckgo_search 已改名 ddgs）→ DDGS().text(query)
+第3层 直接抓已知数据源：baike.baidu.com / sohu.com / 163.com/dy/ / askci.com / iresearch.cn
+第4层 36氪/知乎单文章URL直访（搜索页是SPA curl拿不到，但 /p/文章ID 服务端渲染可直访）
+第5层 产品官网/垂直媒体直访（hequapp.com / iresearch.com.cn / wo.com.cn 等）
+第6层 知识综合兜底：盘点已知知识 → 引用可靠基线数据（标注"估算"）→ 竞品格局绘制 → 赛道拆分3-6个 → 路径推荐 → 所有非一手数据标注"估算/仅供参考" → 输出 .md 报告
+```
+核心原则：**不因搜索受限而拒绝输出，降级到知识综合并明确标注数据性质**。一轮搜索（Bing/DDG/百度）返回无关或空结果立即降级到下一层，不要同一引擎重试3次以上。Bing 国际版从中国IP永远被重定向到 cn.bing.com（`cc=US&setlang=en-US` 也绕不过），且 cn.bing.com 的浏览器AX树不呈现结果链接——要用 curl 抓 HTML 正则解析。
+
+### 行业报告模板与评分标准
+报告结构：`{年份}_{市场方向}创业机会调研报告.md` → 每方向(市场规模与趋势/现有玩家表/创业机会+商业模式+天花板/入局难度) → 综合评分矩阵（市场/竞争/AI契合/冷启动/年入千万难度，各⭐1-5）→ TOP3推荐（含行动路径）→ 附录(数据来源+免责声明)。
+年入千万公式：**年入千万 = 月入83万 ÷ ARPU**（¥99/月需841家，¥10万/年只需10家）。
+紧凑版用「全景对比表」（赛道|市场空间|客单价|年入千万路径|评估）打包；收尾用一页 TOP5 推荐表（排名|赛道|启动时间|第一年目标|核心优势）。可选 Obsidian 落地：写 `_kb/raw/articles/` + 更新 `_kb/index.md` + `[[相关笔记]]` Wikilink。
+
+## 竞品深度调研（合并自 competitive-analysis）
+
+对**已知竞品**做七维度扒皮（公司基本面/产品技术/定价/营销/客户/财务/弱点）：
+- **判断真LLM还是规则引擎**（电商AI客服类）：问「官宣称AI还是LLM」「多SKU能处理吗」「有没有RAG/知识库关键词」「部署要多久」（30分钟-1小时=真，需培训配置调试=假）
+- **定价优先级**：官网明码标价 > 阿里云市场/淘宝服务市场 > 行业评测 > 同类区间推算
+- **财务推算**：`营收 ≈ 付费客户数 × 平均客单价`；`成本 ≈ 团队规模 × 平均薪资 × 1.5 + 算力`；IPO前AI SaaS大概率亏损 = 无降价空间
+- **弱点识别是最重要输出**：价格贵？功能复杂？客户太大？渠道依赖单一？（渠道壁垒比技术壁垒更难破）
+- **陷阱**：客户量注水（区分触达 vs 付费）、案例数据选优、技术夸大（用七问矩阵拆穿）
+- 完整维度表/输出规范/Checklist见 `references/ecommerce-cs-competitors.md`（电商AI客服赛道竞品矩阵）+ `references/fukeai-deep-dive.md`（福客AI深度扒皮案例）+ 行业调研报告 `references/2024-2025_china_saas_startup_opportunities.md` / `references/2024-2025_silver_economy_elderly_care_report.md` / `references/2025_china_niche_market_billion_revenue_report.md`
+
 ## 输出格式
 
 写完调研内容后，保存为结构化 Markdown 报告。建议包含：

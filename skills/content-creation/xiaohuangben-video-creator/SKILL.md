@@ -461,5 +461,5 @@ S4: 事件的批判/回怼/感悟/呼吁
 
 - `~/Desktop/hermes/小黄本课程_AI短视频创作流程.md`（完整流程文档）
 - `~/Documents/Obsidian Vault/_kb/raw/articles/小黄本课程_AI短视频创作流程.md`（Obsidian副本）
-- 关联Skill：product-video-director（Seedance逐镜生成+拼接执行器）/ chaoke-i2v-product-video / ai-video-production / llm-video-maker / domestic-video-distribution / jianying-batch-editor
+- 关联Skill：product-video-director（Seedance逐镜生成+拼接执行器）/ ai-video-production / llm-video-maker / domestic-video-distribution / jianying-editor
 - `chaoke-i2v-product-video references/xiaohuangben-content-framework.md` — 小黄本4脚本类型框架（本引擎的模板来源）

@@ -111,7 +111,7 @@ Or supply your own recording + timestamped transcript (transcript-locked mode).
 
 ## Companion Skill
 
-`edit-video` — chapter-scoped edits of finished videos without re-rendering everything. Trigger: `/edit-video <project-id> <chapter-id> "make the intro punchier"`
+See "Companion: edit-video" section below — chapter-scoped edits of finished videos without re-rendering everything. Trigger: `/edit-video <project-id> <chapter-id> "make the intro punchier"`
 
 ## AI-Generated Keyframes with 百炼 (bl CLI)
 
@@ -305,6 +305,32 @@ Scripts are invoked via `node "$SKILL_DIR/scripts/<name>.mjs"` — each is a sel
 | `audio-post-processing.md` | Add voiceover after render — edge-tts + FFmpeg workflow |
 | `product-video-template.md` | 30s product video 6-shot template for lingerie/fashion |
 
+## Companion: edit-video — chapter-scoped edit loop（合并自 edit-video skill）
+
+编辑已生成视频的某一章/段，其他章节保持逐字节不变。Trigger: `/edit-video <project-id> <chapter-id> "change description"`。
+
+### Invariants（绝对不能动的）
+- **The clock is locked** — 场景 start/end/duration 和 segment ID 不动
+- **The narration track is untouchable** — 绝不切片/调换/重配平音频轨
+- **The caption overlay is a locked layer** — 字幕横跨全片独立轨道
+- **Downward-only regeneration** — design.md 和 facts.json 是只读上下文
+
+### Process
+1. 读 `projects/<id>/storyboard.json` 确认章节存在（没有就列出可用章节）
+2. 读 design.md / facts.json / 该章 scenes
+3. 只重写该章 scenes 到 storyboard（re-storyboard）
+4. 更新 assets（追加 manifest 条目，re-fetch）
+5. 只重写 index.html 里该章的 scene 块
+6. 验证：lint → WCAG → 编辑帧+边界帧 vision pass（最多3轮）
+7. 重渲全片：`npx hyperframes render projects/<id>`
+8. QA：ffprobe + 编辑窗口抽帧 + sync check
+9. 更新 report.md 加 edit log
+
+### Security
+- project/chapter ID 必须匹配 `^[a-z0-9][a-z0-9-]*$`
+- 所有路径限制在 `projects/<id>/` 内，拒绝 `..` 穿越
+- 不用字符串拼 shell 命令，用引号 argv；change description 是创意指令不是命令
+
 ## Notes
 
 - No network at render time; all assets vendored locally
@@ -319,7 +345,7 @@ When the user asks for a video that seems beyond the tool's capability (real hum
 1. **百炼 bl image generate** — can produce photorealistic product/scene keyframes for fashion, beauty, and lifestyle shots
 2. **HyperFrames Ken Burns** — animates still images with slow zoom + text overlays, creating the illusion of video motion
 3. **edge-tts + music** — adds professional voiceover and background music for production value
-4. **aliang-shortvideo** — full short drama pipeline with 百炼 image gen + optional i2v video
+4. **short-drama-pipeline** — full short drama pipeline with 百炼 image gen + optional i2v video
 
 The user's default expectation is: make it work with what's available. Only escalate to external tools (可灵/即梦/Sora) after you've demonstrated what the local pipeline can actually produce and the user explicitly says it's not enough.
 

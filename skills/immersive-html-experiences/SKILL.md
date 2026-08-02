@@ -136,6 +136,40 @@ delegate_task(tasks=[
 ])
 ```
 
+## 庆祝/生日页面专章（合并自 celebration-page-design / celebration-web-pages / creative-page-design / immersive-visual-effects）
+
+### 需求收集（开工必问）
+| 问题 | 影响设计 |
+|------|---------|
+| 给谁？名字？ | 确定视觉焦点文字 |
+| 几岁？ | 决定设计风格（7-12卡通/13-16梦幻/17+优雅） |
+| 喜欢什么？ | 主题元素（动画角色/颜色/装饰风格） |
+| 性格？ | 影响语气和动效风格（活泼/安静/大大咧咧） |
+
+### ⚠️ 先调研再动手（硬性规则，creative-page-design 沉淀）
+不要直接写代码。先搜索 `best birthday website design inspiration` / `creative celebration page codepen` / `award winning personal website design`，提取 3-5 个核心设计模式再合成。调研来源：onepagelove.com (生日标签)、GitHub (birthday-bloom 等)、Awwwards 获奖页。Yasin 说「只有几个字」= 不满意停留在文字展示阶段。
+
+### Yasin 的迭代模式（关键，四轮节奏）
+| 轮次 | 典型反馈 | 应对 |
+|------|---------|------|
+| 1 | 太平淡/太简单 | 加交互+特效+动画 |
+| 2 | 不够大气 | 改全屏沉浸+深色+粒子背景 |
+| 3 | 布局不对 | 退回到上一版布局风格重做（「没第二版好」= 立即退回第二版 layout） |
+| 4 | 图片不对 | 用户自己出图后替换 |
+
+**教训**：不要一开始就往炫酷方向做满。先做干净的版本，等他提需求再加。参考案例：泽莹13岁生日页 v1 粉紫卡片居中→"不够大气"、v2 深空全屏+分阶段→"布局没有第二版好"、v3 深空全屏+打字机+交互→"这样就行"（`~/Desktop/hermes/birthday-zeying/index.html`，端口 8899）。
+
+### 庆祝页禁忌
+- ❌ 不要用 ux-pro-max 的 indigo 主色（庆祝页用紫粉金：#a78bfa / #f472b6 / #fbbf24 / #67e8f9）
+- ❌ 不要分阶段切换/屏幕切换（用户偏好一切同时可见）——注意与「多阶段叙事入场」的区别：入场有节奏，但最终所有内容同屏可见
+- ❌ 不要只放文字没有交互；❌ 不要居中白色小卡片
+- ❌ 头像不要用真人照片直接放；SVG/PIL 滤镜都不能真正动漫化 → 必须用外部 AI 工具（即梦AI/可灵/妙鸭）生成二次元头像，第一次迭代用他给的图即可
+- ❌ 音乐用 Web Audio API 振荡器，不要引入 MP3/外部音频依赖
+- ✅ 每个元素要有交互反馈；名字逐字弹出（200ms/字）+ 祝福语打字机（500-800ms/行）是标准节奏
+
+### 完整可复制代码
+庆祝页全套交互代码（星空粒子场/名字逐字/彩花爆炸150粒子/轨道光环/礼物盒overlay/浮动气球/Web Audio旋律/五角星clip-path/SVG动漫化滤镜/性能指南）见 `references/interactive-effects.md`、`references/canvas-particle-starfield.md`、`references/birthday-celebration-patterns.md`。
+
 ## 动态数据桥接
 
 当项目需要展示每日更新的数据（量化推荐、日报、选品）时，用 `data.json` 桥接模式：Python同步脚本 → 输出data.json → HTML用fetch读取。

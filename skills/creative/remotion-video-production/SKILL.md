@@ -43,5 +43,42 @@ description: 用 Remotion（React 代码驱动）生成确定性视频——数�
 - A股配色铁律：红涨 `#ef4444` 绿跌 `#22c55e`（信号分歧度三色：绿=一致 / 黄=中性 / 红=分歧）
 - 竖屏 1080x1920 适配抖音/小红书；横屏 1920x1080 适配公众号/B站
 
+## 安装与项目结构（合并自 remotion-code-videos / remotion-data-video / remotion-data-videos）
+
+```bash
+mkdir -p ~/Desktop/hermes/remotion-lab && cd ~/Desktop/hermes/remotion-lab
+npm init -y
+npm install remotion @remotion/cli react react-dom   # 项目级；npm 全局装会 EACCES（共享主机权限）
+npx remotion browser ensure   # 下载 chrome-headless-shell ~92MB，放 node_modules/.remotion/
+```
+
+```
+remotion-lab/
+├── remotion.config.ts      # Config.setVideoImageFormat("jpeg"); setOverwriteOutput(true); setConcurrency(2)
+├── tsconfig.json           # 没有它 CLI 直接报 "Could not find a tsconfig.json file"
+├── src/
+│   ├── index.tsx           # registerRoot(RemotionRoot)
+│   ├── Root.tsx            # <Composition id durationInFrames fps width height component>
+│   └── DataShowcase.tsx    # 场景组件（粒子背景 + 玻璃卡片 + 动画）
+└── out/                    # 输出
+```
+
+tsconfig.json 最小可用：
+```json
+{ "compilerOptions": {
+    "target": "ES2022", "module": "ESNext", "moduleResolution": "Bundler",
+    "jsx": "react-jsx", "strict": true, "skipLibCheck": true,
+    "esModuleInterop": true, "allowSyntheticDefaultImports": true, "noEmit": true },
+  "include": ["src"] }
+```
+
+核心 API：`useCurrentFrame()` / `useVideoConfig()`；粒子用 SVG `<circle>` + `sin(frame/speed+phase)`（比 Canvas 稳，无头渲染同步执行）；数字滚动加 `fontVariantNumeric:"tabular-nums"` 否则宽度跳动；玻璃卡片 `rgba(255,255,255,.055)` + `backdropFilter blur(18px)` + 1px 半透明边框。
+
+- **真实数据接入**：量化每日信号在 `~/Desktop/hermes/quant-skill/logs/<日期>.json`（Top8 + total + disagreement），组件内嵌 STOCKS 数组 + DATE，改 JSON 即出新视频。**可 cron 每日自动渲染**：先跑 quant_ensemble → 生成 JSON → 更新组件 → render。
+- **脚注铁律**：数据视频底部加权重 + "信号仅供研究"声明。
+- 改 Root.tsx 里 Composition 的宽高/duration 后需重新 bundle 才生效。
+- **终端工具误判**：命令含 uvicorn/fastapi 关键词会被 terminal 误判为长驻进程 → 拆开装依赖命令。
+- 完整可复用组件实例见 `references/quant-top8-example.md`（粒子背景 + 逐行弹入 + 数字滚动 + 分歧度三色标签）。
+
 ## 模板
 - `templates/data-showcase.tsx`：通用数据榜单组件（粒子+玻璃卡片+逐行弹入+数字滚动），改 `STOCKS` 数组 + 标题即可换数据出片。量化每日榜单复用：直接读 `~/Desktop/hermes/quant-skill/logs/<date>.json` 的 top_k 填充。

@@ -17,7 +17,7 @@ metadata:
 用户给产品/主题/方向
        │
        ▼
-  ┌─ 是短剧/剧情类？ ──→ Aliang (aliang-shortvideo)
+  ┌─ 是短剧/剧情类？ ──→ short-drama-pipeline（含百炼出图+成片）
   │
   └─ 是带货/种草/测评？ ──→ LLM-video-maker (HyperFrames)
        │
@@ -61,7 +61,7 @@ vc --mode A --product "..." --category "..." --price 89
 
 ## 短剧走 Aliang
 
-当用户说「做个短剧」时，走 `aliang-shortvideo` skill：
+当用户说「做个短剧」时，走 `short-drama-pipeline` skill（调研→剧本→润色→分镜→百炼出图→成片）：
 
 1. 确认：灵感 + 题材 + 总时长 + 画风
 2. 生成剧情大纲 → 用户确认

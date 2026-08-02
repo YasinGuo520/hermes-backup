@@ -113,6 +113,14 @@ curl -s -o /path/to/output.png "<image_url>"
 5. **用 curl 调 API，不要用 python urllib**：本环境 urllib 会 `Connection reset by peer`（curl 稳定成功）。批量生成脚本要逐张 + 每张重试最多 4 次 + 失败 sleep 4s，一次性并发循环常失败
 6. **Qwen-Image 每次生成背景色值略有不同**：需要抠图时，必须逐图采样角落像素（四角均值）作背景色，不能写死一个色值
 
+## 存储约定与常用场景（合并自 cloud-image-gen）
+
+- 所有生成的图片保存到 `~/Desktop/hermes/images/`，文件名格式 `{用途}_{时间戳}.png`
+- **Yasin 常用场景**：商品主图/详情图、短视频封面、小红书配图/种草图、产品场景图（白底图、ins风、电商风）
+- **Fallback 顺序**：Qwen-Image → Z-Image → Kolors（某模型 overload 时直接换）
+- 不用问权不权限——key 已配置，直接调；但不要无脑批量刷（按张计费）
+- 更多场景提示词模板见 `references/prompt-examples.md`（各场景 prompt 模板库）
+
 ## 立绘用途决定背景色（重要）
 
 | 用途 | 背景要求 | 原因 |

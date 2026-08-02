@@ -6,6 +6,28 @@ category: devops
 
 # Hermes Agent 高级功能配置
 
+> **本技能覆盖 David Ondrej 7级路线图 Level 1-7**（合并自 hermes-config-evolution）——下面先给总览与审计，再给 Level 4-6 实操。
+
+## 7级路线图总览与审计（合并自 hermes-config-evolution）
+
+| Level | 名称 | 核心能力 | 成本 | 设置时间 |
+|-------|------|---------|------|---------|
+| 1 | VPS 部署 | 常驻服务器、隔离环境 | 仅VPS费用 | ~30min |
+| 2 | 消息接入 | Discord/飞书/Telegram 远程控制 | 免费 | ~15min |
+| 3 | Curator | 自动压缩技能省 token | 省钱 | ~5min |
+| 4 | GitHub 备份 | 每日 git push ~/.hermes/ | 免费 | ~10min |
+| 5 | Kanban 看板 | 多 Agent 可视化任务编排 | 每任务开销 | ~5min+dashboard |
+| 6 | Holographic 记忆 | 向量库长期召回 | 检索token | ~2min |
+| 7 | MCP Server | 把 Hermes 暴露给其他 AI 工具 | 看用量 | ~15min |
+
+**现状审计命令**：`hostname && hermes config show | grep terminal.backend`（L1）/ `hermes gateway status`（L2）/ `grep -A2 "curator:" ~/.hermes/config.yaml`（L3）/ `hermes cron list | grep -i backup`（L4）/ `ls -la ~/.hermes/kanban.db`（L5）/ `hermes memory status`（L6）/ `grep -i mcp ~/.hermes/config.yaml`（L7）。
+
+**决策规则**：L1-3 是标配先查；L4 是保险人人推荐；L5 给要「起码知道你在干嘛」的用户；L6 给多工作流（量化+SaaS+内容）需要跨会话召回的用户；L7 只给开发者（本地有 Claude Code/Codex/Cursor 才用，非技术用户跳过）。
+
+**完整映射表与来源**：`references/7-levels-framework.md`；**中国网络工作区**（GitHub SSH vs HTTPS、dashboard 隧道、provider 注意）：`references/china-network.md`。
+
+## 原则
+
 适用于配置 7级路线图 中的 Level 4 (GitHub备份)、Level 5 (Kanban看板)、Level 6 (Holographic记忆)。
 
 ## 原则

@@ -112,6 +112,35 @@ After building:
 3. `browser_console('JSON.stringify(gameState)')` → verify state transitions
 4. Check for console errors (undefined vars, missing event handlers)
 
+## Canvas 游戏架构细节（合并自 html-canvas-game）
+
+单文件 Canvas 点击冒险游戏（密室逃脱/纸嫁衣类）的核心骨架：
+
+```
+const G = { state:'title', scene:'hall', phase:0, inventory:[], flags:{}, mouseX:0, mouseY:0, hoverItem:null, clock:0 };
+const SCENES = { hall: { name:'祠堂正厅', bg:{r:20,g:12,b:8}, items:[{id:'candle',x:420,y:280,w:16,h:50,label:'烛台'}] } };
+const EXITS = { hall_to_shrine: {x:920,y:320,w:60,h:120, go:'shrine', label:'→ 偏殿'} };
+```
+
+- **每条谜题门都是一个 `flags[key]` 检查**：永远不要用 scene 计数/phase 数字编码进度，用命名 flag 便于调试
+- **谜题链模式**（密室逃脱标准循环）：`收集A → 门需要A → 收集B → A+B合成 → 新地点 → …`
+- **命中检测**：不要给 item 单独绑事件，用一个鼠标 handler 每帧 hit-test 所有 items/exits（简单、无内存泄漏）
+- **对话阻塞交互**：click handler 里 `if (textQueue.length > 0) return` 提前返回
+- **Canvas 固定尺寸**：1000×700，用 CSS 缩放，不要在游戏逻辑里做响应式
+- **背包上限**：push 前检查 `G.inventory.length < maxInv`
+- **氛围特效易得**：纸灰飘落（15-20粒子 sine 漂移）、烛光闪烁（CSS ::before keyframes）、雾（radial gradient 边缘暗化）、hover 发光（shadowBlur）
+- 完整可运行示例（3场景/12物品/谜题链/背包/对话/Canvas渲染）：`references/demo-complete-game.html`
+
+### 国内服务器环境 gotchas（无GUI、域名受限）
+| 问题 | 修复 |
+|------|------|
+| Google Fonts 被墙 | 系统中文黑体 `font-family:'SimSun','STSong','Songti SC',serif`，零外部 CSS import |
+| hf.co / github.com 不通 | `HF_ENDPOINT='https://hf-mirror.com'`；GitHub 用 gitclone.com |
+| 无显示器预览 | `curl -s http://localhost:PORT/ \| head -3` 验证；分享公网 IP 给用户 |
+| curl 显示旧内容 | 浏览器缓存：`Ctrl+F5` 或 URL 加 `?t=N` |
+| 远程浏览器卡顿 | 减粒子数；避免大量 box-shadow；优先 transform 而非 top/left |
+| 新进程绑不上端口 | `ss -tlnp \| grep <PORT>` 找到旧 PID kill 后再起 |
+
 ## Related skills
 - `creative/p5js` — generative art/sketches (canvas, shaders)
 - `creative/immersive-html-experiences` — celebration/full-screen pages

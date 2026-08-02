@@ -4,7 +4,21 @@ description: "Hermes 多实例部署与协作——分工、SOUL定制、网络�
 category: devops
 ---
 
-# Hermes 多实例协作
+# Hermes 多实例部署与协作
+
+> **本技能同时覆盖 hermes-multi-instance**（多台机器跑多个 Hermes 实例，每实例不同角色/SOUL.md/配置）——两者是同一类工作，多实例的「分工」部分见下文。
+
+## 多实例分工模式（合并自 hermes-multi-instance）
+
+多台机器/多个实例跑 Hermes 时，每个实例应有：
+- **不同角色**：一个做内容创作（抖音带货/短剧/绘本），一个做运维/数据（量化、监控），一个做客服
+- **不同 SOUL.md**：每实例一份独立 SOUL.md 定义人设/边界/输出风格
+- **不同配置**：不同平台接入（QQ/飞书/微信各一个实例）、不同 cron 任务、不同模型
+
+分工要点：
+- 每实例独立 `~/.hermes/` 目录 + 独立 profile，避免配置互踩
+- 定时任务按实例归属，避免两台机器重复执行同一 cron（cron 迁移见 server-migration skill）
+- 跨机协作靠网络桥接（Tailscale）与 SSH/文件通信，见下文
 
 当用户有**两台（或更多）** Hermes 实例时（服务器+Mac），需要明确的**分工+通信**方案。不要给每个实例相同的角色。
 

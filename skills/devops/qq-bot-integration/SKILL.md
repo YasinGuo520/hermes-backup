@@ -79,6 +79,21 @@ platforms:
 - **WebSocket 连不上** → 检查 IP 白名单（q.qq.com → 开发设置 → IP白名单）
 - **重启 gateway**：`hermes gateway restart`（不能从 gateway 进程内执行，需另开终端或用 `kill` + systemd 重启）
 
+### 机器人QQ号在哪找（合并自 qq-bot-setup）
+
+q.qq.com → 应用管理 → 点机器人 → **「开发设置」**，页面显示**机器人QQ号**。沙箱模式下机器人不可搜索，用二维码添加或发布上线后搜QQ号加好友最简单。
+
+### 常见问题补充
+
+| 问题 | 原因 | 解决 |
+|------|------|------|
+| "机器人去火星了" | 未配置AppID/Secret | 检查.env和config.yaml |
+| 找不到沙箱配置 | q.qq.com改版 | 应用管理→点机器人→找「使用范围与人员」 |
+| "open policy without allow-all opt-in" 错误 | dm_policy/group_policy设为open却没设ALLOW_ALL_USERS | 在.env加 `LIGHTCLAWBOT_ALLOW_ALL_USERS=true` 或 `QQ_ALLOW_ALL_USERS=true` |
+| 找不到二维码 | q.qq.com UI版本不同 | 直接发布上线，上线后搜QQ号加好友 |
+
+**验证方法**：配置完成后在 QQ 给机器人发消息，`tail -f ~/.hermes/logs/gateway.log | grep -i "qq\|lightclaw"` 出现 `inbound message: platform=qqbot` 或 `lightclaw.*inbound` 即成功。
+
 ---
 
 ## 路径 B：腾讯云 LightClawBot
