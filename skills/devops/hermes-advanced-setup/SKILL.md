@@ -24,7 +24,61 @@ category: devops
 
 **决策规则**：L1-3 是标配先查；L4 是保险人人推荐；L5 给要「起码知道你在干嘛」的用户；L6 给多工作流（量化+SaaS+内容）需要跨会话召回的用户；L7 只给开发者（本地有 Claude Code/Codex/Cursor 才用，非技术用户跳过）。
 
-**完整映射表与来源**：`references/7-levels-framework.md`；**中国网络工作区**（GitHub SSH vs HTTPS、dashboard 隧道、provider 注意）：`references/china-network.md`。
+**完整映射表与来源**：`references/7-levels-framework.md`；**中国网络工作区**（GitHub SSH vs HTTPS、dashboard 隧道、provider 注意）：`references/china-network.md`；**升级 Hermes 本体**（pip 已弃用、GitCode 镜像、本地补丁保留、网关重启陷阱）：`references/update-hermes.md`。
+
+## 升级 Hermes 本体（2026-08 起）
+
+- ⚠️ **pip 安装已非官方支持平台，不再更新**；PyPI 停在 0.19.0，新版本只在 GitHub main
+- 升级 = 源码树 `git fetch gitcode main` → `--ff-only` merge → 重应用本地补丁 → `pip install --user --break-system-packages -e .`
+- **必须先 stash 本地补丁**（feishu adapter 的 channel tag 注释，上游没修），merge 后 apply
+- **网关重启不能从网关进程内做**（SIGTERM 传播杀会话），用 crontab flag 技巧让 cron 在进程树外重启
+- 完整流程+坑：`references/update-hermes.md`
+
+## config.yaml 格式陷阱：gateway.platforms 必须 dict 不能 list（v0.20+）
+
+**症状：** 用户发消息没回应/反复问"你好了没"；网关日志出现：
+
+```
+ERROR gateway.run: Agent error in session agent:main:feishu:dm:...
+  File ".../gateway/run.py", line 4457, in _handle_message_with_agent
+    _plat_gw_cfg = _platforms_gw_cfg.get(platform_key) or {}
+AttributeError: 'list' object has no attribute 'get'
+```
+
+**根因：** v0.20 起 `gateway.platforms` 需要 dict 格式（按平台配 `skip_context_files`），如果被写成 list（`- feishu`）格式，网关每次处理该平台消息就崩，且是**进程内异常、不是整个网关退出**——所以用户看到的只是"没回应"，网关进程还活着。
+
+**检查：**
+```bash
+grep -A6 "^gateway:" ~/.hermes/config.yaml
+```
+❌ 坏（list）：
+```yaml
+gateway:
+  platforms:
+  - feishu
+  - qqbot
+```
+✅ 好（dict）：
+```yaml
+gateway:
+  platforms:
+    feishu:
+      skip_context_files: false
+    qqbot:
+      skip_context_files: false
+```
+
+**修复：** python yaml 改写（同 fallback 配置模式，先备份），改后**必须重启网关**才生效。
+
+**重启后健康检查（一套命令）：**
+```bash
+pgrep -af "hermes_cli.main gateway run"                # 确认新PID已起
+tail -50 ~/.hermes/logs/gateway.log | grep -cE "ERROR|AttributeError"   # 应为0
+ss -tlnp | grep 8897                                   # 端口在听
+systemctl --user status hermes-gateway | head -3       # Active: running
+```
+
+完整诊断记录：`references/gateway-message-crash.md`
 
 ## 原则
 
@@ -263,6 +317,48 @@ hermes memory status
 - 零费用
 - 与已有 built-in memory (MEMORY.md/USER.md) 互补，不冲突
 - 自动跨 session 存取事实，不需要手动维护
+
+## 模型 Fallback 配置（抗 Provider 过载）
+
+当用户看到 `⚠️ The model provider failed after retries` 报错：主模型 provider 高峰过载（典型：DeepSeek 官方 API 国内上午 10-11 点连续 503 "Service is too busy"），Hermes 重试 3 次全失败后显示该提示。不是 Hermes 挂了，解法是配 fallback 链，主模型失败自动切换。
+
+### 诊断（先确认根因再动手）
+```bash
+grep -E "API call failed after .* retries" ~/.hermes/logs/errors.log | tail
+```
+`HTTP 503: Service is too busy` = provider 官方过载。`hermes fallback list` 看当前是否已有 fallback 链（默认空）。
+
+### 配置（关键坑）
+- `hermes fallback add` 是**纯交互式 picker，无任何非交互参数**，脚本/自动化里不能用
+- ⚠️ **`hermes config set fallback_providers '[...]'` 会把数组存成字符串**（YAML 带引号），`fallback_config.py::_iter_fallback_entries` 只认 dict/list，字符串被静默忽略 → 配置看似成功实际无效
+- 正确做法：python yaml 直接写列表（先备份 config.yaml，与 Dashboard auth 同一模式）
+
+```python
+import yaml, shutil
+shutil.copy('/home/ubuntu/.hermes/config.yaml', '/home/ubuntu/.hermes/config.yaml.bak-fallback')
+cfg = yaml.safe_load(open('/home/ubuntu/.hermes/config.yaml'))
+cfg['fallback_providers'] = [{
+    'provider': 'custom',
+    'model': 'deepseek-ai/DeepSeek-V4-Flash',  # SiliconFlow 镜像 DeepSeek 官方同款
+    'base_url': 'https://api.siliconflow.cn/v1',
+    'key_env': 'SILICONFLOW_API_KEY'
+}]
+yaml.safe_dump(cfg, open('/home/ubuntu/.hermes/config.yaml','w'), allow_unicode=True, sort_keys=False, default_flow_style=False)
+```
+
+### 验证
+```bash
+hermes fallback list   # 应显示 Primary + Fallback chain (1 entry)
+# 实测备用通道（SiliconFlow 首次 curl 可能 20s 超时=网络抖动，用 60s 超时重试，不是通道挂了）
+curl -sS --max-time 60 https://api.siliconflow.cn/v1/chat/completions \
+  -H "Authorization: Bearer $SILICONFLOW_API_KEY" -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-ai/DeepSeek-V4-Flash","messages":[{"role":"user","content":"say OK"}],"max_tokens":10}'
+```
+
+### 中国网络注意
+- SiliconFlow（api.siliconflow.cn）国内可直连（~37ms），有 DeepSeek-V4-Flash/V4-Pro/V3.2/R1 全系镜像，是 DeepSeek 官方 API 的最佳 fallback 通道
+- fallback 用与主模型**同款模型**（deepseek-v4-flash ↔ deepseek-ai/DeepSeek-V4-Flash），切换用户无感
+- fallback 触发条件：rate-limit、5xx、连接错误（文档：hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers）
 
 ## 技术细节
 

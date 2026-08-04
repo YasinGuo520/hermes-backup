@@ -72,6 +72,13 @@ description: 海外账号/美区Apple ID/翻墙/礼品卡/AI付费全流程。�
 - 代充/拼车：便宜但封号风险，不碰
 - 面额策略：小火箭用$5卡（剩$2备用），ChatGPT订阅另买$25卡，不共用
 
+### Mac 上充值 ChatGPT Plus（无 iPhone 路径，2026实测）
+- Mac App Store 左下角头像 → 确认登录美区 ID（outlook 邮箱）→ 兑换充值卡或代码 → 输卡密
+- **必须装 App Store 版 ChatGPT**（搜 ChatGPT 认准 OpenAI 出品）：App Store 版订阅走苹果内购扣礼品卡余额；**官网下载的 dmg 版订阅走网页支付要绑信用卡，礼品卡用不上（最大坑）**
+- App 内 Apple 登录 → 左下角 Settings → Upgrade to Plus → 弹窗确认即扣 App Store 余额
+- 首次登录美区 ID 验证失败：开美国节点重试（平时 App Store 直连，登美区账号不稳就挂代理）
+- 余额每月扣 $19.99+税≈$21.4，买 $25 卡才够一次月费
+
 ## Step 6 ⚠️ App Store「检查」卡循环排查（实战高频坑）
 新注册美区ID在App Store登录/购买时反复跳回「检查」界面（登不上去/下载App时弹检查→返回），**按此顺序排查**：
 

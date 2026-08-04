@@ -50,8 +50,10 @@ security:
   redact_secrets: false
 gateway:
   platforms:
-  - feishu
-  - qqbot
+    feishu:
+      skip_context_files: false
+    qqbot:
+      skip_context_files: false
 onboarding:
   seen:
     busy_input_prompt: true
@@ -83,3 +85,8 @@ dashboard:
   basic_auth:
     username: admin
     password_hash: scrypt$16384$8$1$CrDOncKnZTLF/vYoDu7/+A==$q2RHI2eGO0OY7Tq4Ma0VT/F+26RsZ/llqBvI4GnsrA4=
+fallback_providers:
+- provider: custom
+  model: deepseek-ai/DeepSeek-V4-Flash
+  base_url: https://api.siliconflow.cn/v1
+  key_env: SILICONFLOW_API_KEY

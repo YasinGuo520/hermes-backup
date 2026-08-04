@@ -303,6 +303,30 @@ curl -s "https://push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20&po=1&np=1&f
 
 > 完整步骤和代码示例见 `references/quant-recommendation-verification.md`
 
+## 量化模型多日回测与因子诊断
+
+当用户反馈「量化模型不太行 / 推荐不准 / 要验证历史表现」时，不要只看单日成绩——跑**多日回测**并做**因子健康度诊断**：
+
+```bash
+python3 ~/.hermes/skills/finance/a-share-market-data/scripts/backtest_quant_logs.py [日志目录] [--top 8] [--window 5]
+```
+
+脚本自动：
+1. 读取量化日志 `~/Desktop/hermes/quant-skill/logs/*.json`（schema: `{date, weights, top_k:[{code, total, tech, kronos, flow, flow_amount, disagreement, ...}]}`）
+2. 新浪K线API拉每只推荐股历史行情，算推荐后 1/2/3 个交易日实际涨跌
+3. 输出命中率(>0%算赢) + 平均收益，并拉上证指数对比是否跑赢大盘
+4. 检查因子健康度：Kronos 取值分布、flow 是否全 0
+
+**因子失效红旗（一眼判断模型哪里坏了）：**
+
+| 现象 | 含义 | 修复方向 |
+|---|---|---|
+| Kronos 连续全 1.0 或全 0.0 | 信号饱和/预测失败，因子失去区分度，权重形同虚设（常见根因：strength 放大系数过大如 `×10` 导致全部同分） | 放大系数降到 2~3 |
+| flow 连续多天全 0 | 东财 `push2.eastmoney.com` ulist API 空响应（该接口在腾讯云等服务器不稳定），0.25 权重空转 | flow 全 0 时权重自动重分配 |
+| top_k 反复出现同一批代码 | 只剩 MA 等技术因子在排序，在推「均线多头的大盘蓝筹」，短线无弹性 | 修好 Kronos/flow 或换信号源 |
+
+**量化糅合系统 v2 现状**（Yasin 的本地系统）：`~/Desktop/hermes/quant-skill/quant_ensemble.py`，基础权重 tech=0.45 / kronos=0.30 / flow=0.25。**2026-08-04 已完成修复**：① Kronos `predict_kronos` 的 `strength = min(abs(pc/start_p-1)*10, 1.0)` 放大系数 10→2.5，并在 run() 里对 kronos_signal 做 z-score 归一化（`tanh(z*2)*0.5`），消除饱和；② 资金流覆盖率 <60% 时自动降权，空出权重按原比例分给 tech/kronos；③ 分歧度 >0.3 标「观望」、>0.5 直接排除，日志 top_k 增加 advice 字段。修复后五日回测：3日均值 +0.29%（旧 +0.10%）、3日命中 52%（旧 48%），提升有限——该模型本质是「均线多头蓝筹」选股器，50-60% 命中率是正常水平，跑一周真实数据再决定是否动权重。完整诊断+修复+回测方法见 `references/quant-ensemble-health-diagnostics.md`。
+
 ## 风险提示
 
 - Sina Finance 接口是非官方的，可能在不通知的情况下变更
@@ -317,7 +341,8 @@ curl -s "https://push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20&po=1&np=1&f
 finance/a-share-market-data/
 ├── SKILL.md                       # 本文件 — 综合使用指南
 ├── scripts/
-│   └── sina_ashare.py             # A股行情查询 + 板块排名脚本
+│   ├── sina_ashare.py             # A股行情查询 + 板块排名脚本
+│   └── backtest_quant_logs.py     # 量化推荐多日回测 + 因子健康度检查
 ├── references/
 ├── sina-finance-api.md        # 新浪财经API格式详细文档（含字段表）
 ├── eastmoney-sector-api.md    # 东方财富板块排名API文档（含curl示例）

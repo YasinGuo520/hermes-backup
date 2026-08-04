@@ -296,3 +296,39 @@ for s in <skill1> <skill2>...; do grep -m1 "^description" ~/.hermes/skills/$s/SK
 **品牌名清理：** 同步后用户会要求去掉 skill 里的品牌名（实测：海纳《直播话术》→ 直播话术体系）。patch 前先 `grep -rn "品牌名" ~/.hermes/skills/<skill>/` 找全所有出现位置——不只 description，正文引用行也要改。
 
 **同步后更新方法论工具箱：** 新 skill 加入 `~/Desktop/hermes/toolbox/build_toolbox.py` 的 SKILLS_DATA（按分类插行，name/desc/key/path）→ `python3 build_toolbox.py` → 8900 http.server 无需重启（见 html-project-hub skill）。验证线上：`curl -s http://127.0.0.1:8900/ | grep -o '<卡片名>'`。
+
+---
+
+## 10. 远程装 Hermes 到新电脑（Windows/任意电脑）
+
+**触发**：用户说「装 Hermes 到任意电脑 / 新电脑 / Windows 电脑」。⚠️ 先问清是哪台电脑、能否接入——**别默认是现有 Mac**（用户会纠正：'我是说任意电脑可能是 windows'）。装 Hermes ≠ 配 key：安装不碰任何 key，配 key 是 `hermes setup`/`.env` 单独一步，由用户决定何时配（只装不配 = 空壳，能跑 `hermes doctor` 但一问问题报「没配模型」）。
+
+### 第一步：远程接入（三选一）
+| 方式 | 适用 | 说明 |
+|---|---|---|
+| SSH | Windows 10+/Linux | 首选。Windows 需先开 OpenSSH Server（设置→系统→可选功能→添加），我 `ssh user@IP` 全命令行操作 |
+| 向日葵/ToDesk | 小白友好 | 装客户端给 ID+验证码，人肉远程看屏幕点鼠标——适合人看，不适合 AI 跑命令 |
+| RDP | 局域网 | Windows 自带 |
+
+**为什么优先 SSH**：AI 天生跑命令行，装 Hermes 就一条 `curl | bash` + 配置全命令行，不用「看屏幕找按钮」；向日葵每次要临时验证码、图形界面慢。
+
+### Windows SSH 无密码账户处理
+| 情况 | 解法 |
+|---|---|
+| 本地账户没密码 | 管理员 PowerShell `net user <用户名> <新密码>` 设临时密码（系统登录继续用 PIN，密码只给 SSH 用，不冲突） |
+| 微软账户登录 | 用微软账户邮箱密码登；忘了/开两步验证 → 走密钥 |
+| 不想设密码（推荐长期） | 密钥认证：服务器生成密钥对，公钥写 `C:\Users\<用户名>\.ssh\authorized_keys`，之后免密 |
+
+**本地账户 vs 微软账户判断**：设置→账户→你的信息——顶部显示邮箱地址=微软账户，显示用户名=本地账户。
+
+### 装 Hermes（Windows）
+```bash
+# 必须用 Git Bash（PowerShell 直接跑 curl 管道会出问题）
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+```
+
+### Windows 特有坑
+- **必须 Git Bash**，PowerShell 管道有问题
+- 报 `HTTP 400 No models provided` = config.yaml 被记事本存成 UTF-8 BOM，重存无 BOM 或 `hermes config edit` 修
+- 墙内拉安装脚本要开代理：SSH 会话 `export https_proxy=http://127.0.0.1:7890`（指向目标机本地代理端口）
+- 装完配置同步走服务器：DeepSeek key + config.yaml + tar over ssh 同步 `~/.hermes/skills` + 独立 SOUL.md（按角色定制，不复制服务器模板）

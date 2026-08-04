@@ -1,8 +1,8 @@
-沟通极简训斥狠厉，流量>产品先给流量方案+SOP。生存模式30天月入1万+0成本纯AI文字。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证才能推。产品方案2-3轮迭代，用户自拼方案再执行。不默认服小助示例；蓝海可能黑海先验需求，先调研不拍脑袋。
+流量>产品先给流量方案+SOP。生存模式30天月入1万+0成本纯AI文字。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证才能推。产品方案2-3轮迭代，用户自拼方案再执行。不默认服小助示例；蓝海可能黑海先验需求，先调研不拍脑袋。
 §
 项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。多项目对比用multi-project-compare模板。
 §
-量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(9维TA+资金流+Kronos本地缓存)。cron 8:45出Top8+板块，15:30收盘自进化。权重tech=0.45/kronos=0.30/flow=0.25。分歧度>0.5跳过>0.3观望。看板8:50同步。
+量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(9维TA+资金流+Kronos本地缓存)。cron 8:45出Top8+板块(ea324446676f)，15:30收盘自进化(4b176d3f9c5e)，看板8:50同步(084374e236cc)。基础权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖率<60%自动降权重分配。2026-08已修Kronos饱和(放大系数10→2.5+z-score)与分歧度>0.3观望/>0.5排除。模型本质是均线多头蓝筹选股器，命中率50-60%正常。诊断+修复+回测见a-share-market-data技能references/quant-ensemble-health-diagnostics.md。
 §
 蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比保留完整理论框架好。
 §
@@ -10,13 +10,13 @@
 §
 硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14。python直连会Connection reset必须用curl。
 §
-Delegation子Agent模板: red-blue-validator/six-persona-analyst/research-agent/executor-agent/qa-reviewer，引用~/Desktop/hermes/agent-templates/。
+Delegation子Agent模板: red-blue-validator/six-persona-analyst/research-agent/executor-agent/qa-reviewer，见~/Desktop/hermes/agent-templates/。
 §
 Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自动加载。
 §
 端口清单: 8000=AI爆款主图(Docker), 8001=中年人生, 8002=服小助客服, 8894=个人主页, 8895=Hub, 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d。
 §
-页面角色/贴纸直接用AI生成立绘(Qwen-Image→ffmpeg+numpy色键抠图→帧动画+3D视差)，不用CSS手绘。流程在visual-component-patterns技能。
+页面角色/贴纸用AI生成立绘(Qwen-Image→色键抠图→帧动画+3D视差)，不用CSS手绘。见visual-component-patterns技能。
 §
 红蓝分析法IP：蓝=提案/理性(#3b82f6)、红=攻击/质疑(#ef4444)，深黑蓝底+红蓝粒子。博主品牌页portfolio/index.html(8894,英文名Yasin)已定稿，Hero=巨型YASIN红蓝渐变+细字距「决策，不靠感觉」+大留白，按钮最简两字。完整指纹在ux-pro-max/references/yasin-personal-homepage.md。
 §
@@ -30,9 +30,9 @@ AI分析落地页(红蓝8920/六分身8921)：FastAPI单服务同端口=静态�
 §
 Mac Tailscale IP 100.80.117.5 (yasin, macOS)，SSH用户mac@。macOS TCC挡SSH读~/Desktop(Operation not permitted)，但~/.hermes/skills可读——跨机同步走skills目录。流程见hermes-multi-machine。
 §
-Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素画/展示类用manim-creative-scenes，数学解释用manim-video。像素画展厅(pixel-gallery)8915=Manim+3D沉浸环形画廊；动画类先给方向选项再全量干(要整体沉浸式不要平铺小动画)。
+Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素画/展示类用manim-creative-scenes，数学解释用manim-video。动画类先给方向选项再全量干(要整体沉浸式不要平铺小动画)。
 §
-图生3D(mecha3d 8931): 腾讯混元3D API唯一可用通道(Tripo/Meshy被墙)。密钥~/Desktop/hermes/mecha3d/.env。坑: sk-开头key无效须AKID签名；开通后手动领免费额度否则ResourceInsufficient；SDK ai3d.v20250513；pip用阿里云镜像。全流程见skill ai-3d-model-pipeline。
+图生3D(mecha3d 8931): 腾讯混元3D API唯一可用通道(Tripo/Meshy被墙)。密钥~/Desktop/hermes/mecha3d/.env。坑与全流程见skill ai-3d-model-pipeline。
 §
 服务保活: ~/Desktop/hermes/scripts/keepalive.sh + crontab每3分钟+@reboot。网关重启会杀光background http.server，批量恢复见html-project-hub常见坑6。8002=服小助独立venv；8897=Hermes网关必须nginx反代改写Host(否则Invalid Host header 400)。
 §
@@ -41,3 +41,9 @@ Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素�
 接码hero-sms.com/5sim(sms-activate已于2025-12关停)。
 §
 英语不好但正主动练听说：ChatGPT语音对话纠错+YouTube英文字幕(0.75倍速)，材料要电商/AI行业向。海外软件优先中文界面，英文界面用AI翻译/截图问AI。
+§
+远程装Hermes到新电脑：用户只要求安装、不配置DeepSeek key（安全顾虑，key只在自有环境配）。目标电脑可能为Windows（本地账户可能无密码，可设临时密码或密钥认证）；用户倾向向日葵远程操控，SSH连不上时用向日葵兜底。
+§
+DeepSeek官方API高峰期(国内上午10-11点)会503过载，已配fallback_providers→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。注意hermes config set存数组会变成字符串无效，必须python yaml直接写列表格式。
+§
+Hermes v0.20 config.yaml 坑：gateway.platforms 必须是 dict 格式（feishu: {skip_context_files: false}），如果是 list（- feishu）会导致网关处理消息时崩溃 AttributeError: 'list' object has no attribute 'get'（gateway/run.py:4457）。修复于2026-08-04 23:06，备份 config.yaml.bak-20260804230607。

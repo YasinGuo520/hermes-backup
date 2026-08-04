@@ -175,6 +175,7 @@ result.slice(0,15).join('\\n');
 6. **浏览器 console JS 提取链接是关键词：** 在 36氪搜索结果页无法直接获取文章 URL 时，使用 `browser_console` 执行 `document.querySelectorAll('a[href*="/p/"]')` 可以提取所有文章链接。
 7. **误判过滤结果**：中国搜索引擎对敏感内容（PUA/情感陪聊灰色地带）有过滤，搜索结果可能不完整。
 8. **国际站点超时**：从中国服务器访问 Google/Wikipedia 经常会超时，不要依赖。
+9. **推荐/测评类搜索混大量 SEO 软文**：搜「免费APP哪个好」「工具测评」类问题，结果前几条常是垃圾站（tgpbr.com / pgzsq.com / pkfjl.com 等域名）捧闻所未闻的野鸡APP（实例：「咕噜口语SpeakGuru」「励说口语」，标榜⭐5.0满分、"85%测试者提升"、编造"火山创想旗下"）。**完全不可信，必须交叉验证**：App Store/Play 商店真实评论、知乎真实讨论、独立媒体。软文特征：无真实用户 ID、所有维度全满分、出现"宝藏APP"+引流链接、域名是 SEO 站群。用 AnySearch batch 多查询后，对每个候选单独核实，别被第一篇"实测Top1"带节奏。
 
 ## Codex 视频生态 Skills 对标
 
