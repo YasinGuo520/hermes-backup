@@ -570,7 +570,31 @@ crontab:
 - 启动用 `nohup ... &`（crontab 环境没有 hermes background 管理）
 - 日志 `/var/log/keepalive.log`（`sudo touch && chmod 666`）
 
-**新服务上线必须同步加进 keepalive.sh**（否则下轮网关重启又挂）。
+**新服务上线必须同步加进 keepalive.sh 的 两处**（否则下轮网关重启又挂）：
+1. 对应类型数组（STATIC/FASTAPI/PYTHON_SERVICES）— 启动逻辑
+2. `check_all()` 的端口列表 — 否则状态表永远不显示它，挂了也看不出 ❌（8896 踩过：dashboard 挂了 nginx 8897 变 502，但 keepalive 状态表全 ✅，因为列表里没 8896）
+
+### ⚠️ cron 环境 PATH 陷阱：脚本内命令必须用绝对路径
+
+cron 环境的 PATH 只有 `/usr/bin:/bin`，**不含 `~/.local/bin`、venv/bin 等用户路径**。keepalive.sh 里 `hermes dashboard` 直接写 `hermes` → cron 下 `command not found`，nohup 静默失败（日志只记 FAIL 不记原因），服务永远拉不起来。
+
+**铁律：cron/keepalive 脚本里所有非系统命令一律写绝对路径**（`/home/ubuntu/.local/bin/hermes`、`/project/venv/bin/python` 等）。
+
+**复现/验证 cron 环境的技巧**（手动跑脚本时用纯净环境，能真实暴露 PATH 问题）：
+```bash
+env -i HOME=/home/ubuntu PATH=/usr/bin:/bin /home/ubuntu/Desktop/hermes/scripts/keepalive.sh start
+```
+
+### ⚠️ crontab 重定向到 /var/log/xxx.log 会静默失败
+
+非 root 用户在 **/var/log 目录下没有创建新文件的权限**。crontab 写 `>> /var/log/linkcheck.log` 时，文件不存在→重定向失败→**整个命令不执行**，日志永远不生成，任务等于没跑（linkcheck 8月1日配置后从没执行过，因为日志文件从没被创建）。
+
+**排查信号：** crontab 里有任务但对应日志文件不存在 → 先查重定向路径有没有写权限。
+**修复：** 日志重定向到用户可写目录，如 `~/.hermes/logs/<name>.log`。keepalive.log 例外是因为它被 `sudo touch && chmod 666` 预先创建过，之后普通用户能 append——新脚本别依赖这个技巧。
+
+### 排查链：nginx 反代返回 502
+
+502 = nginx 活着但 **后端没起**（不是 nginx 配置问题）。`curl http://127.0.0.1:PORT/` 直接测后端端口：000/拒绝连接 → 后端挂，去查保活日志；200 → nginx 配置或 Host 头问题。检查链：`ss -tlnp | grep 反代端口` → `cat /etc/nginx/sites-enabled/<conf>` 看 proxy_pass 指向 → 直测后端端口。
 
 ## HTTPS 页面调 HTTP API 被 mixed content 拦截（Failed to fetch）
 

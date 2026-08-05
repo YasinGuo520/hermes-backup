@@ -2,11 +2,11 @@
 §
 项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。多项目对比用multi-project-compare模板。
 §
-量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(9维TA+资金流+Kronos本地缓存)。cron 8:45出Top8+板块(ea324446676f)，15:30收盘自进化(4b176d3f9c5e)，看板8:50同步(084374e236cc)。基础权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖率<60%自动降权重分配。2026-08已修Kronos饱和(放大系数10→2.5+z-score)与分歧度>0.3观望/>0.5排除。模型本质是均线多头蓝筹选股器，命中率50-60%正常。诊断+修复+回测见a-share-market-data技能references/quant-ensemble-health-diagnostics.md。
+量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py(9维TA+资金流+Kronos本地缓存)。cron 8:45出Top8+板块(ea324446676f)，15:30收盘自进化(4b176d3f9c5e)，看板8:50同步(084374e236cc)。基础权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖率<60%自动降权重。模型本质是均线多头蓝筹选股器，命中率50-60%正常。诊断+修复见a-share-market-data技能references/quant-ensemble-health-diagnostics.md。
 §
 蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比保留完整理论框架好。
 §
-设计系统：深色科技风(极光粒子+玻璃卡片+渐变紫)>后台；不同项目不同风格(杂志/赛博/暗金/玄学/CRT/矩阵/卡通)；背景网格≥0.08opacity粒子≥1.5px；模板优先html5up.net(curl ZIP)部署8890-8899预览；Hub深紫渐变+科技网格+紫色节点Canvas。前端迭代：先出基础版等提意见再加/改，不做第三轮新构图。创意页先调研全球优秀设计，多阶段叙事+交互元素(气球/礼物盒/confetti/音乐)，全屏沉浸深色系。
+设计系统：深色科技风(极光粒子+玻璃卡片+渐变紫)>后台；不同项目不同风格(杂志/赛博/暗金/玄学/CRT/矩阵/卡通)；背景网格≥0.08opacity粒子≥1.5px；模板优先html5up.net(curl ZIP)部署8890-8899预览；Hub深紫渐变+科技网格+紫色节点Canvas。前端迭代：先出基础版等提意见再加/改，不做第三轮新构图。创意页先调研全球优秀案例，全屏沉浸深色系+交互元素。
 §
 硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14。python直连会Connection reset必须用curl。
 §
@@ -18,7 +18,7 @@ Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自�
 §
 页面角色/贴纸用AI生成立绘(Qwen-Image→色键抠图→帧动画+3D视差)，不用CSS手绘。见visual-component-patterns技能。
 §
-红蓝分析法IP：蓝=提案/理性(#3b82f6)、红=攻击/质疑(#ef4444)，深黑蓝底+红蓝粒子。博主品牌页portfolio/index.html(8894,英文名Yasin)已定稿，Hero=巨型YASIN红蓝渐变+细字距「决策，不靠感觉」+大留白，按钮最简两字。完整指纹在ux-pro-max/references/yasin-personal-homepage.md。
+红蓝分析法IP：蓝=提案/理性(#3b82f6)、红=攻击/质疑(#ef4444)，深黑蓝底+红蓝粒子。博主品牌页portfolio/index.html(8894)已定稿。完整指纹见ux-pro-max/references/yasin-personal-homepage.md。
 §
 火山方舟(ARK): key在/backend/.env的ARK_API_KEY(ark-开头)，base https://ark.cn-beijing.volces.com/api/v3。视频POST /contents/generations/tasks(注意generations非generators)，模型doubao-seedance-1-0-pro-fast-251015(720p≈0.4元/5秒)/1-5-pro-251215/2-0-260128，图片doubao-seedream-5-0-260128。
 §
@@ -42,8 +42,8 @@ Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素�
 §
 英语不好但正主动练听说：ChatGPT语音对话纠错+YouTube英文字幕(0.75倍速)，材料要电商/AI行业向。海外软件优先中文界面，英文界面用AI翻译/截图问AI。
 §
-远程装Hermes到新电脑：用户只要求安装、不配置DeepSeek key（安全顾虑，key只在自有环境配）。目标电脑可能为Windows（本地账户可能无密码，可设临时密码或密钥认证）；用户倾向向日葵远程操控，SSH连不上时用向日葵兜底。
+远程装Hermes：不配DeepSeek key（安全顾虑，key只在自有环境配）；目标Windows机SSH连不上时用向日葵兜底。
 §
 DeepSeek官方API高峰期(国内上午10-11点)会503过载，已配fallback_providers→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。注意hermes config set存数组会变成字符串无效，必须python yaml直接写列表格式。
 §
-Hermes v0.20 config.yaml 坑：gateway.platforms 必须是 dict 格式（feishu: {skip_context_files: false}），如果是 list（- feishu）会导致网关处理消息时崩溃 AttributeError: 'list' object has no attribute 'get'（gateway/run.py:4457）。修复于2026-08-04 23:06，备份 config.yaml.bak-20260804230607。
+Hermes v0.20 config.yaml 坑：gateway.platforms 必须是 dict 格式（feishu: {skip_context_files: false}），如果是 list（- feishu）会导致网关处理消息时崩溃 AttributeError: 'list' object has no attribute 'get'（gateway/run.py:4457）。
