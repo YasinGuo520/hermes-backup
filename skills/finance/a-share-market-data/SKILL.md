@@ -303,6 +303,28 @@ curl -s "https://push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20&po=1&np=1&f
 
 > 完整步骤和代码示例见 `references/quant-recommendation-verification.md`
 
+## 每日收盘 cron（15:30自进化 + v2当日验证）— 两套独立系统
+
+每日收盘 cron 分两步，注意这是**两套不同的系统，日志和权重互不相通**：
+
+| 系统 | 脚本路径 | 日志 | 权重 |
+|---|---|---|---|
+| 旧因子权重系统（自进化） | `~/projects/quant_self_evolve.py` | `~/projects/quant_recommend_log.json` | 20+因子权重（rsi/macd/ma 等，`~/projects/quant_weights.json`） |
+| v2糅合系统 | `~/Desktop/hermes/quant-skill/quant_ensemble.py` | `~/Desktop/hermes/quant-skill/logs/YYYY-MM-DD.json` | tech/kronos/flow (0.45/0.30/0.25) |
+
+**第一步**：`python3 ~/projects/quant_self_evolve.py` = 完整复盘+调权；`--report-only` = 只看报告不调权。
+⚠️ **该脚本不处理 `--help`**：传 `--help`（或任何未知参数）会直接跑完整流程并把 `quant_weights.json` 改写调权。想只看报告必须显式传 `--report-only`。
+
+**第二步**：v2 当日验证。读 `logs/` 当日 JSON 的 `top_k`（8只），新浪 API 查收盘价，涨幅 = (当前价-昨收)/昨收。
+
+**累计准确率口径（重要）**：cron 任务里的「累计N天准确率」是**推荐当日**口径 —— 推荐日收盘 vs 前一交易日收盘，不是 T+1。`backtest_quant_logs.py` 输出的是 1日后/2日后/3日后（T+1 口径），数值与当日口径不同（实测 8-06：当日 56.9% vs T+1 47%）。当日口径直接用脚本：
+
+```bash
+python3 ~/.hermes/skills/finance/a-share-market-data/scripts/verify_v2_daily.py [日志目录] [--top 8]
+```
+
+脚本用新浪 K线 API（`CN_MarketData.getKLineData`）按推荐日期匹配当日收盘，输出每日命中数/平均涨幅 + 累计准确率。
+
 ## 量化模型多日回测与因子诊断
 
 当用户反馈「量化模型不太行 / 推荐不准 / 要验证历史表现」时，不要只看单日成绩——跑**多日回测**并做**因子健康度诊断**：
