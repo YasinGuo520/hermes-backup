@@ -485,13 +485,13 @@
     "created_at": "2026-07-13T08:16:50.847437+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-08-04T02:52:15.563346+00:00",
-    "last_used_at": "2026-08-04T02:52:12.321579+00:00",
-    "last_viewed_at": "2026-08-04T02:52:12.313850+00:00",
+    "last_used_at": "2026-08-07T00:26:34.007266+00:00",
+    "last_viewed_at": "2026-08-07T00:26:33.999532+00:00",
     "patch_count": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 28,
-    "view_count": 28
+    "use_count": 29,
+    "view_count": 29
   },
   "claude-code": {
     "archived_at": null,
@@ -1590,12 +1590,12 @@
     "created_at": "2026-07-19T02:02:21.475103+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-07-19T04:40:17.481755+00:00",
-    "last_used_at": "2026-08-06T00:30:44.945073+00:00",
+    "last_used_at": "2026-08-07T00:30:07.309613+00:00",
     "last_viewed_at": "2026-07-27T02:41:02.951438+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 21,
+    "use_count": 22,
     "view_count": 4
   },
   "nano-pdf": {
@@ -1719,14 +1719,14 @@
     "archived_at": null,
     "created_at": "2026-08-01T16:23:31.085524+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-04T02:42:46.882327+00:00",
-    "last_used_at": "2026-08-04T03:13:56.855328+00:00",
-    "last_viewed_at": "2026-08-04T03:13:56.848891+00:00",
-    "patch_count": 7,
+    "last_patched_at": "2026-08-07T00:27:03.066144+00:00",
+    "last_used_at": "2026-08-07T00:26:39.613790+00:00",
+    "last_viewed_at": "2026-08-07T00:26:39.607526+00:00",
+    "patch_count": 10,
     "pinned": false,
     "state": "active",
-    "use_count": 9,
-    "view_count": 9
+    "use_count": 12,
+    "view_count": 12
   },
   "overseas-service-access": {
     "archived_at": "2026-08-02T15:47:07.956955+00:00",

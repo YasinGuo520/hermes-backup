@@ -1,12 +1,12 @@
-流量>产品先给流量方案+SOP。生存模式30天月入1万+0成本纯AI文字。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证才能推。产品方案2-3轮迭代，用户自拼方案再执行。不默认服小助示例；蓝海可能黑海先验需求，先调研不拍脑袋。
+流量>产品，先给流量方案+SOP。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证才能推。产品方案2-3轮迭代，用户自拼方案再执行。生存模式目标30天月入1万+0成本纯AI文字。
 §
 项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。多项目对比用multi-project-compare模板。
 §
-量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，日志logs/*.json，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖率<60%自动降权。本质均线多头蓝筹选股器，命中率50-60%正常。注意：15:30"自进化"是另一套旧系统~/projects/quant_self_evolve.py（因子权重版，日志quant_recommend_log.json，两套日志权重互不相通；--help会误触发调权，看报告必须--report-only）。v2累计准确率按推荐当日口径（verify_v2_daily.py），backtest_quant_logs.py是T+1口径。诊断见a-share-market-data技能references/quant-ensemble-health-diagnostics.md。
+量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，日志logs/*.json，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖<60%自动降权，本质均线多头蓝筹选股器命中率50-60%正常。15:30"自进化"是旧系统~/projects/quant_self_evolve.py(因子权重版，日志quant_recommend_log.json)，两套日志权重互不相通；--help误触发调权，看报告必须--report-only。v2准确率按推荐当日口径(verify_v2_daily.py)，backtest_quant_logs.py是T+1口径。诊断见a-share-market-data技能references/quant-ensemble-health-diagnostics.md。
 §
 蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比保留完整理论框架好。
 §
-设计系统：深色科技风(极光粒子+玻璃卡片+渐变紫)优先，不同项目不同风格(杂志/赛博/暗金/玄学/CRT/矩阵/卡通)。背景网格≥0.08opacity粒子≥1.5px。模板优先html5up.net(curl ZIP)部署8890-8899预览。前端迭代先出基础版等意见，不做第三轮新构图。创意页先调研全球优秀案例，全屏沉浸深色系+交互元素。
+设计系统：背景网格≥0.08opacity粒子≥1.5px。模板优先html5up.net(curl ZIP)部署8890-8899预览。前端迭代先出基础版等意见，不做第三轮新构图。创意页先调研全球优秀案例，全屏沉浸深色系+交互元素。
 §
 硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14。python直连会Connection reset必须用curl。
 §
@@ -20,19 +20,19 @@ Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自�
 §
 红蓝分析法IP：蓝=提案/理性(#3b82f6)、红=攻击/质疑(#ef4444)，深黑蓝底+红蓝粒子。品牌页指纹见ux-pro-max/references/yasin-personal-homepage.md。
 §
-火山方舟(ARK): key在/backend/.env的ARK_API_KEY(ark-开头)，base https://ark.cn-beijing.volces.com/api/v3。视频POST /contents/generations/tasks(注意generations非generators)，模型doubao-seedance-1-0-pro-fast-251015(720p≈0.4元/5秒)/1-5-pro-251215/2-0-260128，图片doubao-seedream-5-0-260128。
+火山方舟(ARK): key在/backend/.env的ARK_API_KEY，base https://ark.cn-beijing.volces.com/api/v3。视频POST /contents/generations/tasks(注意generations非generators)，模型doubao-seedance-1-0-pro-fast-251015(720p≈0.4元/5秒)/1-5-pro-251215/2-0-260128，图片doubao-seedream-5-0-260128。
 §
-Remotion: ~/Desktop/hermes/remotion-lab，代码驱动确定性视频(数据/文字/图表100%精确)，适合量化榜单/数据复盘量产。全流程见skill remotion-video-production。
+Remotion: ~/Desktop/hermes/remotion-lab，代码驱动确定性视频，适合量化榜单/数据复盘量产。全流程见skill remotion-video-production。
 §
 DeepSeek真实API key在Hermes配置.env里；config.yaml里sk-gaw开头key是SiliconFlow不是DeepSeek。红蓝分析法server.py会自己读.env。
 §
-AI分析落地页(红蓝8920/六分身8921)：FastAPI单服务同端口=静态页+POST /api/analyze→DeepSeek。提示词内置Yasin铁律(收入打折/区分数据与推断/黑海风险/最小行动单元)。工具箱(8900)card-link。
+AI分析落地页(红蓝8920/六分身8921)：FastAPI单服务同端口=静态页+POST /api/analyze→DeepSeek。提示词内置Yasin铁律(收入打折/区分推断/黑海/最小行动单元)。工具箱(8900)card-link。
 §
 Mac Tailscale IP 100.80.117.5 (yasin, macOS)，SSH用户mac@。macOS TCC挡SSH读~/Desktop，但~/.hermes/skills可读——跨机同步走skills目录。见hermes-multi-machine。
 §
 Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素画/展示类用manim-creative-scenes，数学解释用manim-video。动画类先给方向选项再全量干(要整体沉浸式不要平铺小动画)。
 §
-图生3D(mecha3d 8931): 腾讯混元3D API唯一可用通道(Tripo/Meshy被墙)。密钥~/Desktop/hermes/mecha3d/.env。坑与全流程见skill ai-3d-model-pipeline。
+图生3D(mecha3d 8931): 腾讯混元3D API唯一可用通道(Tripo/Meshy被墙)。密钥~/Desktop/hermes/mecha3d/.env。坑与全流程见skill ai-image-to-3d。
 §
 服务保活: ~/Desktop/hermes/scripts/keepalive.sh + crontab每3分钟+@reboot。网关重启会杀光background http.server，批量恢复见html-project-hub常见坑6。8002=服小助独立venv；8897=Hermes网关必须nginx反代改写Host(否则Invalid Host header 400)。
 §
@@ -42,8 +42,8 @@ Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素�
 §
 英语不好但正主动练听说：ChatGPT语音对话纠错+YouTube英文字幕(0.75倍速)，材料要电商/AI行业向。海外软件优先中文界面，英文界面用AI翻译/截图问AI。
 §
-远程装Hermes：不配DeepSeek key（安全顾虑，key只在自有环境配）；目标Windows机SSH连不上时用向日葵兜底。
+远程装Hermes：不配DeepSeek key（安全顾虑，key只在自有环境配）；Windows机SSH连不上用向日葵兜底。
 §
-DeepSeek官方API高峰(国内上午10-11点)会503过载，已配fallback→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。注意hermes config set存数组会变字符串无效，必须python yaml写列表。
+DeepSeek官方API高峰(国内上午10-11点)503过载，已配fallback→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。hermes config set存数组变字符串无效，必须python yaml写列表。
 §
-Hermes v0.20 config.yaml坑：gateway.platforms必须是dict(feishu: {skip_context_files: false})，list格式会让网关崩溃AttributeError(list has no attribute get, gateway/run.py:4457)。
+Hermes v0.20 config.yaml坑：gateway.platforms必须是dict(feishu:{skip_context_files:false})，list格式会让网关崩溃AttributeError(list has no attribute get, gateway/run.py:4457)。
