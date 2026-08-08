@@ -1590,12 +1590,12 @@
     "created_at": "2026-07-19T02:02:21.475103+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-07-19T04:40:17.481755+00:00",
-    "last_used_at": "2026-08-07T00:30:07.309613+00:00",
+    "last_used_at": "2026-08-08T00:30:18.453665+00:00",
     "last_viewed_at": "2026-07-27T02:41:02.951438+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 22,
+    "use_count": 23,
     "view_count": 4
   },
   "nano-pdf": {
@@ -2474,13 +2474,13 @@
     "created_at": "2026-07-31T08:30:01.801072+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-07-31T08:30:12.479312+00:00",
-    "last_used_at": null,
-    "last_viewed_at": null,
+    "last_used_at": "2026-08-07T20:03:18.148953+00:00",
+    "last_viewed_at": "2026-08-07T20:03:18.142532+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 0,
-    "view_count": 0
+    "use_count": 1,
+    "view_count": 1
   },
   "web-scraping": {
     "archived_at": null,
