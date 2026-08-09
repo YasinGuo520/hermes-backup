@@ -2,7 +2,7 @@
 name: agent-performance
 description: "Agent性能诊断与维护——当Agent变傻/变慢时的系统化检查清单。覆盖context压缩、记忆瘦身、搜索工具健康检查、配置优化。"
 tags: [hermes, maintenance, troubleshooting, diagnostics, performance]
-related_skills: [claude-mem, install-github-hermes-tools, server-service-deployment]
+related_skills: [claude-mem, find-skills, server-service-deployment]
 ---
 
 # Agent Performance Diagnostics（Agent"变傻"诊断）

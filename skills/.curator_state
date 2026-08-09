@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260802-153732",
-  "last_run_at": "2026-08-02T15:37:32.999992+00:00",
-  "last_run_duration_seconds": 734.440633,
-  "last_run_summary": "auto: 25 marked stale; llm: The pass is complete. Here's the full report.\n\n## Curator consolidation pass — summary\n\n**Scope:** 144 curator-managed skills scanned; 16 prefix clusters processed. **53 skills moved to `.archive/`** (30 consolidations + 23 stale-builtin pr…\narchived 53 skill(s):\n  • ai-3d-model-pipeline → ai-image-to-3d\n  • ai-3d-web-showcase → ai-image-to-3d\n  • ai-analyzer-landing-page → ai-analysis-landing-pages\n  • ai-video-full-pipeline → ai-video-production\n  • aliang-shortvideo → short-drama-pipeline\n  • celebration-page-design → immersive-html-experiences\n  • celebration-web-pages → immersive-html-experiences\n  • chaoke-i2v-product-video → ai-video-production\n  • china-industry-research → china-market-research\n  • cloud-image-gen → siliconflow-image-gen\n  … and 43 more\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin ai-analysis-landing-pages",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260809-154112",
+  "last_run_at": "2026-08-09T15:41:12.818635+00:00",
+  "last_run_duration_seconds": 592.255413,
+  "last_run_summary": "auto: 10 marked stale; llm: All consolidation work is complete and verified. Here is the pass summary.\n\n## Curator pass summary — umbrella consolidation\n\n**Scope:** 93 curator-managed skills scanned; 7 clusters processed; **15 skills archived** (12 consolidations into…\narchived 15 skill(s):\n  • ai-video-content-creation → ai-video-production\n  • aliang-bailian-voice-clone → aliang-bailian\n  • aliang-kids-story-maker → aliang-bailian\n  • aliang-picturebook-audiobook → aliang-bailian\n  • aliang-podcast-maker → aliang-bailian\n  • aliang-product-detail-photos → aliang-bailian\n  • frontend-design → ux-pro-max\n  • hermes-agent-skill-authoring → skill-creator\n  • install-github-hermes-tools → find-skills\n  • ocr-and-documents → markitdown\n  … and 5 more\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin ai-video-production",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 7
+  "run_count": 8
 }

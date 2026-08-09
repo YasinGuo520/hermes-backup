@@ -1,6 +1,6 @@
 ---
 name: ai-video-production
-description: 全自动AI视频生产流水线——使用本地Python工具（moviepy + edge-tts + ffmpeg）从文案到成品MP4的端到端自动化。无需GPU，无需云API。适用于抖音带货素材、知识科普、工具测评等竖屏短视频。
+description: AI视频生产全流程：本地流水线（moviepy+ffmpeg）与云端平台（小云雀/即梦/可灵），含工作流选型。
 triggers:
   - AI视频生成
   - 自动视频
@@ -13,7 +13,8 @@ triggers:
   - 文字转视频
   - 带货视频
 related:
-  - ai-video-content-creation  # 互补技能：云端AI视频平台生成
+  - llm-video-maker  # 互补：HyperFrames 确定性动画出片
+  - short-drama-pipeline  # 短剧管线
 platforms: [macos, linux]
 ---
 
@@ -23,7 +24,7 @@ platforms: [macos, linux]
 
 **适用范围：** 抖音带货视频、AI工具测评、知识科普、产品介绍等竖屏短视频。
 
-**与 `ai-video-content-creation` 的关系：** 互补。该技能走云端AI平台（小云雀/即梦），本技能走本地Python全自动。前者适合高质量视觉素材，后者适合快速、低成本、可批量生产的内容。
+**双模式：** 本技能同时覆盖本地 Python 流水线（moviepy+edge-tts+ffmpeg：快速、低成本、可批量生产）与云端平台工作流（小云雀/即梦/可灵：高质量视觉素材）——见下文「云端视频平台工作流」章节。
 
 ---
 
@@ -744,3 +745,36 @@ proj.save()  # 打开剪映即可看到草稿
 2. 修改 `TTS_TEXT`（配音文案）
 3. 修改 `SCENES`（分镜配置）
 4. 运行 `python3 build_video.py`
+
+---
+
+## 云端视频平台工作流（合并自 ai-video-content-creation）
+
+当走**云端 AI 视频平台**（小云雀/即梦AI/可灵AI）生成短视频素材时，完整流程（分镜规划 → 提示词编写 → 分段生成 → 合成配乐 → 与 Hermes 配合的 3 种模式）见 `references/cloud-platform-workflow.md`。
+
+- **平台速查**：小云雀（xyq.jianying.com，注册1200积分+每天120）一句话出片零门槛；即梦AI（jimeng.jianying.com，Seedance）质量顶级、科幻场景最佳；可灵AI（klingai.com）物理理解强、广告级质量。无 GPU 环境全走云端。
+- **核心原则**：一个镜头只放一个视觉元素+一个运动；15秒视频拆 5 个 3 秒片段；提示词指定运动方向（"从左向右飞入"）+ 氛围词（电影级布光/暖橙蓝对比）。
+- **合成**：ffmpeg concat `-c copy` 合并 + BGM 淡入淡出。
+- **火山方舟/Seedance API 程序化调用**（Key 类型是最大坑、计费表、验证命令）：`references/volcengine-ark-api.md`；独立知识库另见 `volcengine-ark-api` skill。
+- 平台对比与提示词模板库：`references/platform-comparison.md` / `references/video-platform-comparison.md` / `references/mars-base-prompts.md` / `references/siliconflow-video-api.md` / `references/text-to-video-pipeline.md`。
+
+## 工作流编排与选型（合并自 video-production-workflow）
+
+用户说「做个视频 / 出个片 / 做个带货视频」时按此决策：
+
+```
+用户给产品/主题/方向
+  ├─ 短剧/剧情类 → short-drama-pipeline（含百炼出图+成片）
+  ├─ 带货/种草/测评 → LLM-video-maker (HyperFrames)
+  └─ 应急/兜底 → 本 skill 旧管线 (Wan2.2+moviepy)
+```
+
+**带货短视频标准流程：**
+1. **VC 出文案**（不要手工写，VC 有爆款拆解能力）：`python3 ~/Desktop/hermes/viral_copywriter.py --mode A --product "<产品名>" --category "<品类>" --target "<目标人群>" --price <价格> --platform douyin`（或 alias `vc`）。
+2. **转 LLM-video-maker 出片**：VC 文案整理成 `brief.json` → `npx hyperframes init projects/<id>` → 写 HTML/GSAP 构图（文案分段/动画/转场）→ `npx hyperframes render` → edge-tts 配音（+15%）→ ffmpeg 音画合成。详见 `llm-video-maker` skill。
+3. **交付**：成片存 `~/Desktop/hermes/video-maker/projects/<id>/renders/`；改文案重跑 VC，改画面调 HTML/GSAP 重渲染。
+
+**要点：**
+- 12 款视频工具按场景/平台/成本选型速查：`references/video-tools-catalog.md`。
+- Manim 程序化动画（像素画/几何/数学确定性动画）：见 `manim-creative-scenes` skill（环境 `~/Desktop/hermes/manim-venv`，v0.20.1）。
+- 带货视频字幕放**底部**（H-180）；转场必须**淡入淡出**不要硬切。

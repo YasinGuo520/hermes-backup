@@ -1,6 +1,6 @@
 ---
 name: find-skills
-description: 自动搜索并安装社区最佳Skill，连接Skill.sh和Agent Skills生态，通过自然语言描述需求找到最匹配的Skill。
+description: 搜索/安装社区 Skill 与 GitHub 工具（克隆/venv/软链/插件/MCP），含中国网络降级方案。
 ---
 
 # FindSkills（Skill搜索引擎）
@@ -44,7 +44,7 @@ description: 自动搜索并安装社区最佳Skill，连接Skill.sh和Agent Ski
 | 类型 | 特征 | 处理方式 |
 |------|------|----------|
 | **单Skill** | 可单独安装的 Skill 包 | 用 `hermes skills install` 或本skill推荐 |
-| **GitHub项目工具** | 仓库含 `skills/` + `plugins/` 目录 | ⭐ 用 `install-github-hermes-tools` skill处理：克隆→venv→软链技能/插件→验证 |
+| **GitHub项目工具** | 仓库含 `skills/` + `plugins/` 目录 | ⭐ 见下文「GitHub 项目工具安装」：克隆→venv→软链技能/插件→验证 |
 
 例如 `quant-trade` 有14个skill + 1个plugin，需要软链而不是 `hermes skills install` 安装。
 
@@ -161,3 +161,78 @@ hermes skills tap list                   # 列出已添加的 tap
 - https://github.com/topics/agent-skills - GitHub话题
 - https://github.com/ZeroPointRepo/awesome-hermes-skills - 精选社区Skill目录（258个）
 - 各Agent官方插件市场
+
+---
+
+## GitHub 项目工具安装（合并自 install-github-hermes-tools）
+
+当用户找到的 GitHub 项目自带 `skills/` 和/或 `plugins/` 目录（如 quant-trade、社区项目）时，走完整安装流程：
+
+### 1. 克隆仓库（含中国镜像降级）
+
+```bash
+cd ~/Desktop
+git clone https://github.com/<user>/<repo>.git
+# 直连超时依次试：gitclone.com/github.com/<user>/<repo>.git → ghproxy.net/https://github.com/<user>/<repo>.git
+# 镜像都不行 → jsDelivr CDN 逐个拉文件（见上文中国网络方案）
+```
+
+### 2. venv + 依赖
+
+```bash
+cd ~/Desktop/<repo>
+which python3.13  # 优先用户 Python 3.13
+python3.13 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt   # 国内给足超时（300s）
+```
+
+⚠️ PEP 668：系统 Python（brew）禁止 venv 外 pip install，必须用 venv。版本以 `pyproject.toml` / `requirements.txt` 的 `python_requires` 为准。
+
+### 3. 软链 skills/ 和 plugins/ 到 Hermes
+
+```bash
+# skills：每个子目录软链到 ~/.hermes/skills/，加唯一前缀避免撞名（如 quant-）
+for skill in skills/*/; do
+    name=$(basename "$skill")
+    ln -sfn "$(pwd)/skills/$name" ~/.hermes/skills/<prefix>-$name
+done
+# plugins
+ln -sfn "$(pwd)/plugins/<plugin_name>" ~/.hermes/plugins/<plugin_name>
+```
+
+用 `ln -sfn`（软链）而非复制——git 更新自动生效。
+
+### 4. 验证 + 环境变量
+
+```bash
+source venv/bin/activate
+python -c "import sys; sys.path.insert(0, '.'); from plugins.<plugin_name> import *; print('✅ Import OK')"
+hermes skills list | grep <skill-name>   # 确认 enabled
+```
+
+- 项目需要 `.env` / API key 时尽量继承 Hermes 已有配置（如 OPENAI_API_KEY）；可选功能 key 记为可配置。
+- 免费数据源（AKShare/yfinance 等）API 会漂移：先测基础功能（stock_quote）再看高级功能。
+
+### 5. MCP Server 安装（工具是 MCP 服务器而非 skill/plugin 时）
+
+**Streamable HTTP MCP（推荐，MCP spec 2025-03-26+）：**
+```bash
+pip install --upgrade mcp   # ⚠️ 升级可能把 starlette 顶到不兼容版本，报 fastapi 错就 pin："starlette>=0.40.0,<0.42.0"
+hermes mcp add <name> --url <mcp_endpoint_url>
+# 自动化场景非交互式（依次答：需要认证? n / API key 空 / 启用全部工具 Y）：
+echo -e "n\n\nY" | hermes mcp add <name> --url <mcp_endpoint_url>
+hermes mcp list    # 确认 ✓ enabled
+```
+stdio 类型用 `hermes mcp add --command`；官方目录 `hermes mcp catalog` / `hermes mcp install <name>` 一键装。
+装完 `/reset` 或新会话才能看到 MCP 工具（会话启动时加载）。
+
+**装完搜索类 MCP 必做**：写入 memory 声明搜索优先级（如「先走 AnySearch（MCP 4工具），无结果再回 web_search」），否则 Agent 会在两条搜索路径间反复纠结/走错。同时检查 `~/.hermes/.env` 里 EXA/TAVILY/BRAVE key 是否缺失（缺失 = web_search 静默失败）。
+
+**MCP 坑：**
+- `mcp.client.streamable_http is not available` → `pip install --upgrade mcp`
+- `hermes mcp add` 挂起 → 交互式命令，自动化用 `echo -e "n\n\nY" |` 管道
+- 工具不出现 → 会话启动时加载，`/reset` 或新会话
+
+### 6. 记忆
+
+给 memory 加一条紧凑安装记录：项目路径、venv 路径、启用的关键功能。

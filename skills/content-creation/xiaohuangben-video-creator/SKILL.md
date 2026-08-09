@@ -381,7 +381,7 @@ S4: 事件的批判/回怼/感悟/呼吁
 ① 检测水印
    → vision_analyze 识别全图：58pic / tao.hoos / 视觉中国 / 随机字符串水印
    → 有则先PS去水印，别直接上传百炼（I2V会保留水印文字）
-   → 去水印方法见 chaoke-i2v-product-video 的 references/watermark-handling.md
+   → 去水印方法见 ai-video-production skill（原 chaoke-i2v-product-video 已并入；归档副本 ~/.hermes/skills/.archive/chaoke-i2v-product-video/references/watermark-handling.md）
 
 ② 检查图片格式
    → file <path> 检查真实格式。HEIF/HEIC图片（.jpg实际是HEVC格式）不能被PIL/Python直接读取
@@ -462,4 +462,4 @@ S4: 事件的批判/回怼/感悟/呼吁
 - `~/Desktop/hermes/小黄本课程_AI短视频创作流程.md`（完整流程文档）
 - `~/Documents/Obsidian Vault/_kb/raw/articles/小黄本课程_AI短视频创作流程.md`（Obsidian副本）
 - 关联Skill：product-video-director（Seedance逐镜生成+拼接执行器）/ ai-video-production / llm-video-maker / domestic-video-distribution / jianying-editor
-- `chaoke-i2v-product-video references/xiaohuangben-content-framework.md` — 小黄本4脚本类型框架（本引擎的模板来源）
+- 小黄本4脚本类型框架（本引擎模板来源）：原 chaoke-i2v-product-video 已并入 ai-video-production，归档副本见 ~/.hermes/skills/.archive/chaoke-i2v-product-video/references/xiaohuangben-content-framework.md

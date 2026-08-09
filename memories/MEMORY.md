@@ -2,13 +2,13 @@
 §
 项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。
 §
-量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，日志logs/*.json，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖<60%自动降权，均线多头蓝筹命中率50-60%正常。旧系统~/projects/quant_self_evolve.py(因子权重版)两套互不相通；--help误触发调权须--report-only。v2按推荐当日口径(verify_v2_daily.py)，backtest_quant_logs.py是T+1口径。诊断见a-share-market-data技能。
+量化糅合系统v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，日志logs/*.json，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖<60%自动降权，均线多头蓝筹命中率50-60%正常。旧系统~/projects/quant_self_evolve.py(因子权重版)互不相通；--help误触发调权须--report-only。v2按推荐当日口径(verify_v2_daily.py)，backtest_quant_logs.py是T+1口径。诊断见a-share-market-data技能。
 §
 蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比保留完整理论框架好。
 §
-设计系统：背景网格≥0.08opacity粒子≥1.5px。模板优先html5up.net(curl ZIP)部署8890-8899预览。前端迭代先出基础版等意见，不做第三轮新构图。创意页先调研全球优秀案例，全屏沉浸深色+交互元素。
+设计系统：背景网格≥0.08opacity粒子≥1.5px。模板优先html5up.net(curl ZIP)部署8890-8899预览。前端迭代先出基础版等意见，不做第三轮新构图。全屏沉浸深色+交互元素。
 §
-硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14。python直连会Connection reset必须用curl。
+硅基流动API: Qwen-Image/Kolors/通义万相，key在.env，出图~/Desktop/hermes/images/。Qwen-Image $0.02/张≈¥0.14。python直连Connection reset必须用curl。
 §
 Delegation子Agent模板: red-blue-validator/six-persona-analyst/research-agent/executor-agent/qa-reviewer，见~/Desktop/hermes/agent-templates/。
 §
@@ -24,17 +24,17 @@ Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自�
 §
 Remotion: ~/Desktop/hermes/remotion-lab，代码驱动确定性视频。见skill remotion-video-production。
 §
-DeepSeek真实API key在Hermes配置.env；config.yaml里sk-gaw开头key是SiliconFlow不是DeepSeek。红蓝分析法server.py会自己读.env。
+DeepSeek真实key在Hermes配置.env；config.yaml里sk-gaw开头key是SiliconFlow非DeepSeek。官方API高峰(10-11点)503过载，fallback→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。hermes config set存数组变字符串无效，必须python yaml写列表。红蓝分析法server.py自己读.env。
 §
 AI分析落地页(红蓝8920/六分身8921)：FastAPI单服务同端口=静态页+POST /api/analyze→DeepSeek。提示词内置Yasin铁律(收入打折/区分推断/黑海/最小行动单元)。
 §
 Mac Tailscale IP 100.80.117.5 (yasin)，SSH用户mac@。macOS TCC挡SSH读~/Desktop但~/.hermes/skills可读——跨机同步走skills目录。见hermes-multi-machine。
 §
-Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素画/展示类用manim-creative-scenes，数学解释用manim-video。动画类先给方向再全量干(要沉浸式不要平铺小动画)。
+Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素画/展示类用manim-creative-scenes，数学解释用manim-video。
 §
 图生3D(mecha3d 8931): 腾讯混元3D API唯一可用通道(Tripo/Meshy被墙)，密钥~/Desktop/hermes/mecha3d/.env。见skill ai-image-to-3d。
 §
-服务保活: ~/Desktop/hermes/scripts/keepalive.sh + crontab每3分钟+@reboot。网关重启会杀光background http.server，恢复见html-project-hub常见坑6。8002=服小助独立venv；8897=Hermes网关须nginx反代改写Host(否则400)。
+服务保活: ~/Desktop/hermes/scripts/keepalive.sh + crontab每3分钟+@reboot。网关重启杀光background http.server，恢复见html-project-hub坑6。8002=服小助独立venv；8897=Hermes网关须nginx反代改写Host(否则400)。
 §
 改导航页(Hub 8895)铁律：①先备份build_hub.py+index.html ②只动导航页严禁影响其他端口(曾搞挂10+服务) ③挂了keepalive.sh恢复 ④工具箱(8900)card-link禁止丢失，改完跑linkcheck.sh。
 §
@@ -44,6 +44,6 @@ Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素�
 §
 远程装Hermes：不配DeepSeek key(安全顾虑，key只在自有环境配)；Windows机SSH连不上用向日葵兜底。
 §
-DeepSeek官方API高峰(上午10-11点)503过载，fallback→SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=https://api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)。hermes config set存数组变字符串无效，必须python yaml写列表。
-§
 Hermes v0.20 config.yaml坑：gateway.platforms必须是dict(feishu:{skip_context_files:false})，list格式网关崩溃(AttributeError, gateway/run.py:4457)。
+§
+网络环境：联通宽带。两台iPhone共用美区Apple ID(guoyuexing1@outlook.com)下Shadowrocket，iPhone 11留在iOS 15.7当翻墙专用机（只切App Store不切iCloud）。FB想调成美国英文内容（电商市场研究用），推荐走美国节点+语言English(US)。机场需求：GPT+视频，预算敏感，月付不年付。

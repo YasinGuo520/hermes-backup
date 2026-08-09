@@ -356,11 +356,11 @@ DeepSeek V4-Flash 定价（2026年7月）：输入（命中）¥0.02/百万token
 
 ## AI视频内容创作（与抖音带货结合）
 
-集成 `ai-video-content-creation` skill 的工作流。用于生成带货素材/创意短片/产品展示。
+集成 `ai-video-production` skill 的云端平台工作流（合并自 ai-video-content-creation）。用于生成带货素材/创意短片/产品展示。
 
 **推荐路径**：小云雀网页版（xyq.jianying.com）→ 一句话出片 → 下载素材 → 剪映/ffmpeg合成
 
-详见 `ai-video-content-creation` skill 和 `references/` 目录的提示词库。
+详见 `ai-video-production` skill 的「云端视频平台工作流」章节（含平台对比/分镜/提示词，references 见其 `references/cloud-platform-workflow.md` 与提示词库）。
 
 ---
 

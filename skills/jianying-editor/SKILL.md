@@ -238,7 +238,7 @@ python3 ~/Desktop/hermes/jianying_batch.py config.json
 当剪映草稿方案不奏效时（格式不兼容、权限问题、路径错误），直接切换到 ffmpeg 管线：
 - 使用 `xfade=transition=fade:duration=0.5:offset=X` 实现交叉淡化
 - 多段拼接需要精确计算 offset = 前一段起点 + 前一段完整时长 - 重叠时长
-- 参考 [references/ffmpeg-concat-workflow.md](../../content-creation/video-production-workflow/references/ffmpeg-concat-workflow.md)
+- 参考 `ai-video-production` skill（本地视频合成主家）的「ffmpeg xfade 交叉淡化」章节与 `references/build-script-template.md`
 
 **判断标准**：如果 JyProject 初始化成功、save() 成功，但剪映打开草稿报错（任何错误），直接切 ffmpeg 方案，不要反复调试 JyWrapper。
 
