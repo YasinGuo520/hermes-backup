@@ -1,7 +1,12 @@
 model:
-  base_url: https://api.deepseek.com/v1
-  default: deepseek-v4-flash
-  provider: deepseek
+  base_url: ''
+  default: gpt-5.5
+  provider: openai-api
+fallback_providers:
+  - provider: custom
+    model: deepseek-ai/DeepSeek-V4-Flash
+    base_url: https://api.siliconflow.cn/v1
+    key_env: SILICONFLOW_API_KEY
 agent:
   max_turns: 90
   context_length: 32000
@@ -32,6 +37,10 @@ display:
   platforms:
     lightclawbot:
       streaming: true
+dashboard:
+  basic_auth:
+    username: admin
+    password_hash: scrypt$16384$8$1$CrDOncKnZTLF/vYoDu7/+A==$q2RHI2eGO0OY7Tq4Ma0VT/F+26RsZ/llqBvI4GnsrA4=
 memory:
   memory_char_limit: 5000
   user_char_limit: 3000
@@ -40,7 +49,7 @@ delegation:
   max_iterations: 50
 skills:
   external_dirs:
-  - ~/.agents/skills
+    - ~/.agents/skills
 curator:
   consolidate: true
 approvals:
@@ -78,15 +87,28 @@ platforms:
 plugins:
   disabled: []
   enabled:
-  - agency-agents-router
-  - web/ddgs
-  - lightclawbot
-dashboard:
-  basic_auth:
-    username: admin
-    password_hash: scrypt$16384$8$1$CrDOncKnZTLF/vYoDu7/+A==$q2RHI2eGO0OY7Tq4Ma0VT/F+26RsZ/llqBvI4GnsrA4=
-fallback_providers:
-- provider: custom
-  model: deepseek-ai/DeepSeek-V4-Flash
-  base_url: https://api.siliconflow.cn/v1
-  key_env: SILICONFLOW_API_KEY
+    - agency-agents-router
+    - web/ddgs
+    - lightclawbot
+
+# ── Fallback Model ────────────────────────────────────────────────────
+# Automatic provider failover when primary is unavailable.
+# Uncomment and configure to enable. Triggers on rate limits (429),
+# overload (529), service errors (503), or connection failures.
+#
+# Supported providers:
+#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
+#   openai-codex (OAuth — hermes auth) — OpenAI Codex
+#   nous         (OAuth — hermes auth) — Nous Portal
+#   zai          (ZAI_API_KEY)         — Z.AI / GLM
+#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
+#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
+#   minimax      (MINIMAX_API_KEY)     — MiniMax
+#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
+#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
+#
+# For custom OpenAI-compatible endpoints, add base_url and key_env.
+#
+# fallback_model:
+#   provider: openrouter
+#   model: anthropic/claude-sonnet-4

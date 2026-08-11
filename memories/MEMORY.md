@@ -41,3 +41,7 @@ Manim: ~/Desktop/hermes/manim-venv(CE v0.20.1,中文WenQuanYi Zen Hei)。像素�
 Hermes v0.20 config.yaml坑：gateway.platforms必须是dict(feishu:{skip_context_files:false})，list格式会导致网关崩溃。
 §
 翻墙网络：两台iPhone共用美区Apple ID(guoyuexing1@outlook.com)下Shadowrocket，iPhone 11留iOS 15.7当翻墙专用机（只切App Store不切iCloud）；FB调美国英文内容(电商研究)须美国节点+English(US)。宽带/机场偏好见user profile。
+§
+网络：联通宽带，翻墙主用途=GPT+视频；有两台iPhone 11，其中一台iOS 15.7留作翻墙专用机（拔SIM卡+美区ID装小火箭，TikTok用拔卡或网页版方案）。对出海有好奇心但未启动（问过LINE/WhatsApp/FB Ads Manager/Product Hunt）。自省：用户承认自己"分析多执行少"，认可"公开承诺+固定发布节奏"是解药——推动他时可用此杠杆（如公开日更、对读者承诺）。
+§
+机场/NPN翻墙选型：搜索软文站不可信，51fan.pro是相对有用的导航站（有老牌/稳定分类+标注跑路机场）。用户联通宽带去GPT+视频，预算敏感，倾向月付+先试用。最终选飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付实测。华为CloudFetch/WgetCloud偏贵(¥75起)，Nexitally奶昔(2017最老牌)/AmyTelecom/MESL/TAG品牌交叉验证通过但需用户上官同确认价格。
