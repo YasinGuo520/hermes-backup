@@ -3,14 +3,14 @@
     "archived_at": null,
     "created_at": "2026-07-07T07:21:59.043983+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-06T07:40:36.587988+00:00",
-    "last_used_at": "2026-08-11T07:30:42.398536+00:00",
-    "last_viewed_at": "2026-08-11T07:30:42.387954+00:00",
-    "patch_count": 29,
+    "last_patched_at": "2026-08-12T07:51:13.523397+00:00",
+    "last_used_at": "2026-08-12T07:50:27.849940+00:00",
+    "last_viewed_at": "2026-08-12T07:50:27.841548+00:00",
+    "patch_count": 32,
     "pinned": false,
     "state": "active",
-    "use_count": 44,
-    "view_count": 44
+    "use_count": 47,
+    "view_count": 47
   },
   "a-share-stock-selection-methodology": {
     "archived_at": null,
@@ -29,14 +29,14 @@
     "archived_at": null,
     "created_at": "2026-07-15T01:50:19.667371+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-09T15:50:08.398494+00:00",
-    "last_used_at": "2026-08-09T15:50:04.198357+00:00",
-    "last_viewed_at": "2026-08-09T15:50:04.189430+00:00",
-    "patch_count": 46,
+    "last_patched_at": "2026-08-12T02:34:31.760795+00:00",
+    "last_used_at": "2026-08-12T04:21:31.652832+00:00",
+    "last_viewed_at": "2026-08-12T04:21:31.646034+00:00",
+    "patch_count": 49,
     "pinned": false,
     "state": "active",
-    "use_count": 36,
-    "view_count": 36
+    "use_count": 41,
+    "view_count": 41
   },
   "agent-reach": {
     "archived_at": null,
@@ -498,13 +498,13 @@
     "created_at": "2026-07-13T08:16:50.847437+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-08-04T02:52:15.563346+00:00",
-    "last_used_at": "2026-08-07T00:26:34.007266+00:00",
-    "last_viewed_at": "2026-08-07T00:26:33.999532+00:00",
+    "last_used_at": "2026-08-12T02:15:08.224252+00:00",
+    "last_viewed_at": "2026-08-12T02:15:08.212529+00:00",
     "patch_count": 26,
     "pinned": false,
     "state": "active",
-    "use_count": 29,
-    "view_count": 29
+    "use_count": 30,
+    "view_count": 30
   },
   "claude-code": {
     "archived_at": null,
@@ -966,13 +966,13 @@
     "created_at": "2026-07-06T06:04:55.323996+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-08-09T15:48:45.193133+00:00",
-    "last_used_at": "2026-08-09T15:48:29.286732+00:00",
-    "last_viewed_at": "2026-08-09T15:48:29.280230+00:00",
+    "last_used_at": "2026-08-12T04:21:06.055504+00:00",
+    "last_viewed_at": "2026-08-12T04:21:06.046790+00:00",
     "patch_count": 11,
     "pinned": false,
     "state": "active",
-    "use_count": 14,
-    "view_count": 14
+    "use_count": 15,
+    "view_count": 15
   },
   "findmy": {
     "archived_at": null,
@@ -1148,13 +1148,13 @@
     "created_at": "2026-07-01T00:53:18.587263+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-08-04T14:07:37.377577+00:00",
-    "last_viewed_at": "2026-08-04T14:07:37.371177+00:00",
+    "last_used_at": "2026-08-12T02:33:16.039480+00:00",
+    "last_viewed_at": "2026-08-12T02:33:16.030458+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 39,
-    "view_count": 39
+    "use_count": 40,
+    "view_count": 40
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -1629,12 +1629,12 @@
     "created_at": "2026-07-19T02:02:21.475103+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-07-19T04:40:17.481755+00:00",
-    "last_used_at": "2026-08-11T00:30:39.342515+00:00",
+    "last_used_at": "2026-08-12T00:30:03.660158+00:00",
     "last_viewed_at": "2026-07-27T02:41:02.951438+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 26,
+    "use_count": 27,
     "view_count": 4
   },
   "nano-pdf": {
@@ -1758,14 +1758,14 @@
     "archived_at": null,
     "created_at": "2026-08-01T16:23:31.085524+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-11T08:01:17.091552+00:00",
-    "last_used_at": "2026-08-11T08:00:23.625002+00:00",
-    "last_viewed_at": "2026-08-11T08:00:23.618283+00:00",
-    "patch_count": 12,
+    "last_patched_at": "2026-08-12T04:51:56.134269+00:00",
+    "last_used_at": "2026-08-12T04:51:45.397805+00:00",
+    "last_viewed_at": "2026-08-12T04:51:45.388088+00:00",
+    "patch_count": 18,
     "pinned": false,
     "state": "active",
-    "use_count": 14,
-    "view_count": 14
+    "use_count": 21,
+    "view_count": 21
   },
   "overseas-service-access": {
     "archived_at": "2026-08-02T15:47:07.956955+00:00",

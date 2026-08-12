@@ -317,6 +317,14 @@ curl -s "https://push2.eastmoney.com/api/qt/clist/get?cb=&pn=1&pz=20&po=1&np=1&f
 
 **第二步**：v2 当日验证。读 `logs/` 当日 JSON 的 `top_k`（8只），新浪 API 查收盘价，涨幅 = (当前价-昨收)/昨收。
 
+⚠️ **今日无 v2 日志 ≠ 一定是非交易日**：先排查早盘 cron（`ea324446676f`）是否失败，再决定跳过。常见根因 = **全局模型配置漂移**触发 cron 安全守卫拦截（2026-08-12 实测）。快速诊断：
+1. `ls -la ~/.hermes/cron/output/ea324446676f/` —— 当天输出文件异常小（正常 4-10KB，失败仅 ~1.7KB）
+2. 读当天输出 md，若含 `RuntimeError: Skipped to prevent unintended spend: global inference config drifted (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5')` → 确认是配置漂移拦截，**不是非交易日**
+3. 修复状态核对：`stat -c '%y' ~/.hermes/config.yaml`（应已改回 deepseek/deepseek-v4-flash）+ `~/.hermes/cron/jobs.json` 四字段（provider/model/provider_snapshot/model_snapshot 均为 deepseek）
+4. 报告时明确写「cron 失败原因」而非「非交易日跳过」，并提示量化看板 08:50 同步同天缺数据会自动补齐
+
+> 完整诊断+修复细节见 `references/quant-cron-drift-diagnosis.md`
+
 **累计准确率口径（重要）**：cron 任务里的「累计N天准确率」是**推荐当日**口径 —— 推荐日收盘 vs 前一交易日收盘，不是 T+1。`backtest_quant_logs.py` 输出的是 1日后/2日后/3日后（T+1 口径），数值与当日口径不同（实测 8-06：当日 56.9% vs T+1 47%）。当日口径直接用脚本：
 
 ```bash
@@ -366,7 +374,9 @@ finance/a-share-market-data/
 │   ├── sina_ashare.py             # A股行情查询 + 板块排名脚本
 │   └── backtest_quant_logs.py     # 量化推荐多日回测 + 因子健康度检查
 ├── references/
-├── sina-finance-api.md        # 新浪财经API格式详细文档（含字段表）
+│   ├── sina-finance-api.md        # 新浪财经API格式详细文档（含字段表）
+│   ├── quant-cron-drift-diagnosis.md  # v2日志缺失=配置漂移cron失败 诊断流程（2026-08-12）
+│   └── ...
 ├── eastmoney-sector-api.md    # 东方财富板块排名API文档（含curl示例）
 ├── eastmoney-kline-api.md     # 东方财富历史K线API文档（含参数表、Python示例）
 └── baostock-data-guide.md     # Baostock数据源指南（HTTP API被屏蔽时的备选）

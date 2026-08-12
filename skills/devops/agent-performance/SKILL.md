@@ -17,6 +17,18 @@ related_skills: [claude-mem, find-skills, server-service-deployment]
 - "你好像失忆了"
 - "怎么搜不到东西"
 
+### 铁律：没有调查就没有发言权（用户核心要求）
+
+用户明确要求：**任何结论必须先调查清楚再回复**——查日志、看数据、翻配置备份、验证事实，证据齐了再答。不凭印象、不猜测、不编造。
+
+诊断时的证据链优先级（本次会话模型漂移排查验证过的顺序）：
+1. `config.yaml` 备份文件（`.bak*`）→ 确认配置变更的时间窗
+2. `~/.hermes/logs/errors.log` + `agent.log` → 首次报错时间戳
+3. **实际调用日志计数**（`grep -oE "model=deepseek|model=gpt" agent.log | sort | uniq -c`）→ 区分"名义配置"与"实际通道"
+4. `session_search` → 找是否有明确执行过变更的会话记录
+
+**典型错误**（用户明确批评过）：用户问"模型为什么变了"时，含糊回答"可能是更新改的"——正确做法是先翻备份+日志给出证据链（如：8/4备份还是deepseek → 8/12首次报错已是gpt-5.5 → 但3500+实际调用都是deepseek，说明gpt-5.5只是名义配置、一直在fallback）。回答格式：**先给调查结果，再给结论**；不确定就明说"这是推断"并附证据。
+
 ### Step -1：先确认哪个Hermes（关键！多实例用户）
 
 用户可能有多个Hermes实例（服务器 + Mac本地 + 另一台PC）。**不要默认诊断自己。**
@@ -390,9 +402,78 @@ cronjob(
 )
 ```
 
-### 快捷指令
+#### 第拾步：检查Cron任务健康（provider drift）
 
-用户喊 **「醒脑」** → 立即执行一次：磁盘清理脚本 + 记忆瘦身 + curator技能检查 + 重建技能档案库(`build-skill-manifest.py` → `kb_summary.py`) + 检查磁盘/内存/记忆状态。
+当用户反馈「定时任务没收到内容」时，检查cron任务状态：
+
+```bash
+hermes cron list | grep -E 'error|Skipped'
+```
+
+**Cron Provider Drift** — 当全局模型配置变化（如 `deepseek` → `openai-api`），旧的cron任务创建时的 `provider_snapshot`/`model_snapshot` 与当前全局配置不匹配，scheduler 会跳过执行防止意外扣费。日志特征：
+
+```
+WARNING cron.scheduler: Job 'XXX': SKIPPED — global inference config drifted
+since creation (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash'
+-> 'gpt-5.5') and this job is unpinned.
+```
+
+**修复方法（先尝试 cronjob update，如无效则直接编辑 jobs.json）：**
+
+```bash
+# 方法A：update cronjob（只重置创建时间戳，不一定总能修复drift检测）
+hermes cron action=update job_id=<id> name="<原name>" schedule="<原schedule>"
+
+# ⚠️ cronjob update 工具没有 provider/model 参数，所以 drift 检测可能依然存在
+# 如果 update 后仍然 drift，使用方法B
+
+# 方法B（可靠）：直接编辑 jobs.json 中的 provider_snapshot/model_snapshot
+python3 << 'PYEOF'
+import json
+
+with open('/home/ubuntu/.hermes/cron/jobs.json', 'r') as f:
+    data = json.load(f)
+
+error_ids = ["<job_id1>", "<job_id2>", ...]  # 有drift错误的job IDs
+
+for job in data['jobs']:
+    if job['id'] in error_ids:
+        job['provider'] = "<current_provider>"  # e.g. "openai-api"
+        job['model'] = "<current_model>"        # e.g. "gpt-5.5"
+        job['provider_snapshot'] = "<current_provider>"
+        job['model_snapshot'] = "<current_model>"
+
+with open('/home/ubuntu/.hermes/cron/jobs.json', 'w') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+PYEOF
+```
+
+**验证修复：** `hermes cron action=run job_id=<id>` — 返回 `execution_success: true` 即修复成功。
+
+**陷阱：**
+- 直接编辑 jobs.json 需在 scheduler 空闲时进行（无 .tick.lock 竞争）
+- 修改后 scheduler 会在下一 tick 自动加载新配置，无需重启
+
+**⚠️ 重要：区分「名义配置」与「实际通道」**
+
+用户可能观察到「扣费都走 deepseek」——这是判断真实情况的黄金线索。config.yaml 显示 gpt-5.5 不代表实际在用 gpt-5.5：当主 provider 调用失败时，fallback_providers（如 SiliconFlow 的 deepseek）会自动接管。验证方法：
+
+```bash
+grep -oE "model=deepseek|model=gpt" ~/.hermes/logs/agent.log | sort | uniq -c
+```
+
+如果 deepseek 计数远大于 gpt（如 3500 vs 57），说明 gpt-5.5 只是名义配置，实际一直在 fallback 到 deepseek。此时用户感觉「一切正常」是真实的——真正干活的是 deepseek。修复时把全局配置 + jobs.json 统一回实际通道（deepseek），并 pin cron 任务防止再漂移。
+
+**「怎么这么多天都能用？不是要充钱吗」类问题的解释：** Hermes 调用 API 走的是开发者 key（按 token 计费），不是 ChatGPT 个人会员（$20/月）。.env 里有 OPENAI_API_KEY 就能调 gpt-5.5，扣的是 API 额度不是用户口袋。
+
+**模型变更需用户确认再动**：全局模型配置（model.default/provider）改动前必须问用户，不能自行切换（用户明确要求）。
+
+### 额外：cron no_agent 任务不受 drift 影响
+script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影响。
+
+## 快捷指令
+
+用户喊 **「醒脑」** → 立即执行一次：磁盘清理脚本 + 记忆瘦身 + curator技能检查 + 重建技能档案库(`build-skill-manifest.py` → `kb_summary.py`) + cron drift检查 + 检查磁盘/内存/记忆状态。
 
 ## 警告
 
