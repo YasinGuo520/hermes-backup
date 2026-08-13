@@ -22,17 +22,17 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-08-13T08:00:00+08:00",
-      "last_run_at": "2026-08-12T08:00:04.043637+08:00",
+      "next_run_at": "2026-08-14T08:00:00+08:00",
+      "last_run_at": "2026-08-13T08:10:11.192282+08:00",
       "last_status": "error",
-      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=73d214f48a6b provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
+      "last_error": "TimeoutError: Cron job 'AI\u82f1\u8bed\u6bcf\u65e5\u4e00\u7ec3' idle for 600s (limit 600s) \u2014 last activity: waiting for non-streaming API response",
       "last_delivery_error": null,
       "deliver": "feishu:oc_61850e610adf5771e7ba779c955a061e",
       "origin": {
@@ -68,17 +68,17 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:53.800270+08:00",
-      "next_run_at": "2026-08-13T08:30:00+08:00",
-      "last_run_at": "2026-08-12T08:30:04.263716+08:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=99bf3a31759a provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
+      "next_run_at": "2026-08-14T08:30:00+08:00",
+      "last_run_at": "2026-08-13T09:28:39.416598+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -118,17 +118,17 @@
       "schedule_display": "45 8 * * 1-5",
       "repeat": {
         "times": 30,
-        "completed": 23
+        "completed": 24
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:34:24.510884+08:00",
-      "next_run_at": "2026-08-13T08:45:00+08:00",
-      "last_run_at": "2026-08-12T08:45:04.608368+08:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=ea324446676f provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
+      "next_run_at": "2026-08-14T08:45:00+08:00",
+      "last_run_at": "2026-08-13T08:55:45.245858+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -166,15 +166,15 @@
       "schedule_display": "30 15 * * 1-5",
       "repeat": {
         "times": 600,
-        "completed": 23
+        "completed": 24
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:34:25.533452+08:00",
-      "next_run_at": "2026-08-13T15:30:00+08:00",
-      "last_run_at": "2026-08-12T15:49:26.001732+08:00",
+      "next_run_at": "2026-08-14T15:30:00+08:00",
+      "last_run_at": "2026-08-13T15:40:12.570284+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -258,15 +258,15 @@
       "schedule_display": "every 25m",
       "repeat": {
         "times": null,
-        "completed": 1539
+        "completed": 1596
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-17T09:08:27.467715+08:00",
-      "next_run_at": "2026-08-13T03:17:03.637057+08:00",
-      "last_run_at": "2026-08-13T02:52:03.637057+08:00",
+      "next_run_at": "2026-08-14T03:03:21.281366+08:00",
+      "last_run_at": "2026-08-14T02:38:21.281366+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -306,17 +306,17 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 25
+        "completed": 26
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-19T09:58:43.113407+08:00",
-      "next_run_at": "2026-08-13T08:30:00+08:00",
-      "last_run_at": "2026-08-12T08:30:04.330575+08:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=cbab278bb15f provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
+      "next_run_at": "2026-08-14T08:30:00+08:00",
+      "last_run_at": "2026-08-13T09:33:47.822307+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -356,17 +356,17 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 22
+        "completed": 23
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-08-13T04:00:00+08:00",
-      "last_run_at": "2026-08-12T04:00:04.564710+08:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash' -> 'gpt-5.5'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=791dff1e6cc4 provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
+      "next_run_at": "2026-08-14T04:00:00+08:00",
+      "last_run_at": "2026-08-13T04:04:30.226878+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "local",
       "origin": {
@@ -402,15 +402,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 24
+        "completed": 25
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T16:19:33.986204+08:00",
-      "next_run_at": "2026-08-13T09:00:00+08:00",
-      "last_run_at": "2026-08-12T10:14:16.070152+08:00",
+      "next_run_at": "2026-08-14T09:00:00+08:00",
+      "last_run_at": "2026-08-13T09:36:46.531088+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -451,15 +451,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 103
+        "completed": 109
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-08-13T04:00:00+08:00",
-      "last_run_at": "2026-08-13T00:00:44.681313+08:00",
+      "next_run_at": "2026-08-14T04:00:00+08:00",
+      "last_run_at": "2026-08-14T00:00:18.731315+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -497,15 +497,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 17
+        "completed": 18
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-08-14T03:00:00+08:00",
-      "last_run_at": "2026-08-12T03:01:12.279380+08:00",
+      "next_run_at": "2026-08-15T03:00:00+08:00",
+      "last_run_at": "2026-08-13T03:00:27.933070+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -537,15 +537,15 @@
       "schedule_display": "50 8 * * 1-5",
       "repeat": {
         "times": null,
-        "completed": 9
+        "completed": 10
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T00:36:20.608043+08:00",
-      "next_run_at": "2026-08-13T08:50:00+08:00",
-      "last_run_at": "2026-08-12T08:50:04.026948+08:00",
+      "next_run_at": "2026-08-14T08:50:00+08:00",
+      "last_run_at": "2026-08-13T08:50:11.703657+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -583,15 +583,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 3767
+        "completed": 4055
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-08-13T03:05:00+08:00",
-      "last_run_at": "2026-08-13T03:00:04.003772+08:00",
+      "next_run_at": "2026-08-14T03:05:00+08:00",
+      "last_run_at": "2026-08-14T03:00:22.205755+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -608,5 +608,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-08-13T03:00:04.004365+08:00"
+  "updated_at": "2026-08-14T03:00:22.206290+08:00"
 }
