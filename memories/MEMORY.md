@@ -1,8 +1,6 @@
-流量>产品，先给流量方案+SOP。三层决策(红蓝→六分身→IPO)，先红蓝+数据验证。产品方案2-3轮迭代，用户自拼方案再执行。
+流量>产品先给方案+SOP。三层决策(红蓝→六分身→IPO)先红蓝+数据验证。项目立项调project-four-persona-analysis技能，存~/Desktop/hermes/[项目名]/。
 §
-项目立项：调用project-four-persona-analysis技能，文件存~/Desktop/hermes/[项目名]/。
-§
-量化糅合v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖<60%降权，命中率50-60%正常；旧系统~/projects/quant_self_evolve.py不相通；--help误触发调权须--report-only；v2按当日口径(verify_v2_daily.py)，backtest是T+1；诊断见a-share-market-data技能。
+量化糅合v2: ~/Desktop/hermes/quant-skill/quant_ensemble.py，权重tech=0.45/kronos=0.30/flow=0.25，flow覆盖<60%降权，命中率50-60%正常；旧~projects/quant_self_evolve.py不相通；--help误触发调权须--report-only；当日口径(verify_v2_daily.py)，backtest是T+1。
 §
 蒸馏偏好：主动蒸馏大skill成紧凑版，不加载160条规则。精炼cookbook比完整理论框架好。
 §
@@ -18,20 +16,22 @@ Obsidian vault ~/obsidian-vault/，每4h蒸馏到kb_context.md，新session自�
 §
 媒体工具：Remotion ~/Desktop/hermes/remotion-lab；Manim ~/Desktop/hermes/manim-venv(CE v0.20.1,中文字体，像素/展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)腾讯混元3D唯一可用通道(Tripo/Meshy被墙)，密钥~/Desktop/hermes/mecha3d/.env。
 §
-API：①DeepSeek真key在Hermes配置.env，config.yaml的sk-gaw是SiliconFlow非DeepSeek；官方高峰10-11点503→fallback SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)；hermes config set存数组变字符串无效须python yaml写列表。②硅基流动key在.env，Qwen-Image $0.02/张≈¥0.14，出图~/Desktop/hermes/images/，python直连Connection reset须curl。③火山方舟key在~/backend/.env ARK_API_KEY，base ark.cn-beijing.volces.com/api/v3，视频/图片接口见volcengine-ark-api技能。
+API：①DeepSeek真key在Hermes配置.env，config.yaml的sk-gaw是SiliconFlow非DeepSeek；官方高峰10-11点503→fallback SiliconFlow(deepseek-ai/DeepSeek-V4-Flash, base_url=api.siliconflow.cn/v1, key_env=SILICONFLOW_API_KEY)；config set存数组变字符串无效须python yaml写列表。②硅基流动key在.env，Qwen-Image $0.02/张≈¥0.14，出图~/Desktop/hermes/images/，python直连Connection reset须curl。③火山方舟key在~/backend/.env ARK_API_KEY，base ark.cn-beijing.volces.com/api/v3，接口见volcengine-ark-api技能。
 §
-Mac Tailscale IP 100.80.117.5 (yasin)，SSH用户mac@。macOS TCC挡SSH读~/Desktop但~/.hermes/skills可读——跨机同步走skills目录。见hermes-multi-machine。
+Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡SSH读~/Desktop但~/.hermes/skills可读，跨机同步走skills目录。见hermes-multi-machine。
 §
 接码用hero-sms.com/5sim（sms-activate已停）。
 §
-英语学习：ChatGPT语音纠错+YouTube英文字幕0.75倍速(电商/AI材料)；海外软件优先中文界面，英文界面AI翻译/截图问AI。2026-08定目标考雅思7分（咨询过计划：12个月每天2h，词汇3000-4000起点，听读冲7.5写作口语6-6.5组合）。
+英语学习：ChatGPT语音纠错+YouTube英文字幕0.75倍速(电商/AI材料)；海外软件优先中文界面。目标雅思7分：12个月每天2h，词汇3000-4000起点，听读7.5写作口语6-6.5。
 §
 远程装Hermes：不配DeepSeek key(安全顾虑)；Windows机SSH连不上用向日葵兜底。
 §
 Hermes v0.20坑：config.yaml gateway.platforms必须是dict(feishu:{skip_context_files:false})，list格式导致网关崩溃。
 §
-Cron provider drift：模型配置变更后旧cron被跳过，编辑~/.hermes/cron/jobs.json改provider/model/provider_snapshot/model_snapshot四字段（cronjob update不支持；config.yaml须hermes config set，patch被拒）。根因=v0.20升级冲掉模型配置，OPENAI_API_KEY失败大量fallback走deepseek扣费。默认deepseek/deepseek-v4-flash，模型变更须用户确认。web_search(DDG)从中国服务器持续超时，用curl浏览器UA直抓+AnySearch MCP替代。
+Cron drift：模型变更后旧cron被跳过，编辑~/.hermes/cron/jobs.json改provider/model/provider_snapshot/model_snapshot四字段（cronjob update不支持；config.yaml须hermes config set）。默认deepseek/deepseek-v4-flash，模型变更须用户确认。web_search(DDG)中国服务器持续超时，用curl浏览器UA直抓+AnySearch MCP替代。
 §
-服务运维：保活~/Desktop/hermes/scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(恢复见html-project-hub坑6)；8002=服小助独立venv；8897=Hermes网关须nginx反代改写Host。改Hub(8895)铁律：先备份build_hub.py+index.html，只动导航页，挂了keepalive.sh恢复，工具箱(8900)card-link禁丢，改完跑linkcheck.sh。
+服务运维：保活~/Desktop/hermes/scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(见html-project-hub坑6)；8002=服小助独立venv；8897=网关须nginx反代改写Host。改Hub(8895)铁律：先备份build_hub.py+index.html，只动导航页，挂了keepalive.sh恢复，工具箱(8900)card-link禁丢，改完跑linkcheck.sh。
 §
-翻墙/机场：联通宽带，主用途GPT+视频；两台iPhone 11共用美区Apple ID(guoyuexing1@outlook.com)下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；FB/TikTok须美国节点+English(US)，TikTok拔SIM卡+时区美国或网页版。机场选型看51fan.pro老牌/稳定分类(软文不可信)；已选飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付实测，Nexitally/AmyTelecom/MESL/TAG交叉验证过，价格上官网确认。
+翻墙/机场：联通宽带，主用GPT+视频；两台iPhone 11共用美区Apple ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版。机场看51fan.pro老牌/稳定(软文不可信)；已选飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付实测，价格上官网确认。
+§
+小红书2026红线（做变现建议必带）：个人店禁教育类目(2026.4起)，卖课须个体户/企业店+定向邀约+ICP证，主流玩法=小红书引流+第三方平台(千聊/小鹅通/知识星球)交付；AI批量虚构种草=封号+法律风险(杭州首例判不正当竞争)，AI辅助须勾选标识，纯AI量产笔记限流；卖课话术禁收益承诺/虚假人设/私域导流。用户期望：平台操作类变现建议必须先查平台规则再给结论，别先给操作后补风险（他抓过我前后矛盾：先答案例5可快速复制、后查政策说高危）。
