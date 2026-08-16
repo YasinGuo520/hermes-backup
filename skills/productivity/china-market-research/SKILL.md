@@ -1,11 +1,11 @@
 ---
 name: china-market-research
-description: 中国市场调研——搜索中文互联网获取商业情报、产品案例、市场规模数据。覆盖百度/搜狗/360 反爬绕过、中文信息源、Python 提取技术、产品发现方法论。
+description: 中国市场调研——搜索中文互联网获取商业情报、产品案例、市场规模数据 + 细分赛道机会评估。覆盖百度/搜狗/360 反爬绕过、中文信息源、Python 提取技术、产品发现方法论。
 ---
 
 # 中国市场调研 Skill
 
-> **网页版已上线**：http://43.138.221.174:8922/（输入方向 → DeepSeek 按本方法论出结构化报告，含数据诚实标注：所有数字标【训练知识】/【估算】/【需验证】，页面顶部 disclaimer 声明非实时爬取）。工具箱 8900 有入口。搭建模式见 `ai-analysis-landing-pages` skill。
+> **网页版已上线**：http://43.138.221.174:8922/（输入方向 → DeepSeek 按本方法论出结构化报告，含数据诚实标注：所有数字标【训练知识】/【估算】/【需验证】，页面顶部 disclaimer 声明非实时爬取）。工具箱 8900 有入口。搭建模式见 `server-service-deployment` skill 的 `references/ai-analysis-landing-pages.md`。
 
 当用户要求调研**中国市场**的某一商业方向（SaaS/APP/小程序/创业机会/市场规模/竞品），且需要从中文互联网获取信息时，使用本 Skill。
 
@@ -233,6 +233,32 @@ result.slice(0,15).join('\\n');
 - **弱点识别是最重要输出**：价格贵？功能复杂？客户太大？渠道依赖单一？（渠道壁垒比技术壁垒更难破）
 - **陷阱**：客户量注水（区分触达 vs 付费）、案例数据选优、技术夸大（用七问矩阵拆穿）
 - 完整维度表/输出规范/Checklist见 `references/ecommerce-cs-competitors.md`（电商AI客服赛道竞品矩阵）+ `references/fukeai-deep-dive.md`（福客AI深度扒皮案例）+ 行业调研报告 `references/2024-2025_china_saas_startup_opportunities.md` / `references/2024-2025_silver_economy_elderly_care_report.md` / `references/2025_china_niche_market_billion_revenue_report.md`
+
+## 细分赛道机会评估（合并自 niche-market-research）
+
+用户问「还有什么赛道机会」「年入千万的赛道」「挖掘XX方向」时，用细分赛道方法论评估，完整框架见 `references/niche-market-research.md`：
+
+### 调研矩阵分解
+- **人口属性维度**：男性（赚钱/好色/游戏/成长）、女性（爱美/育儿/情感/社交）、老年人（养生/陪伴/子女）、Z世代（副业/精神消费）、宠物主、小B商家
+- **赛道形态维度**：SaaS / 小程序 / APP / 社群知识付费 / 工具+交易平台
+- 用 `delegate_task` 并行调研（每方向一个子Agent，Prompt 模板见参考文件）
+
+### 统一评估框架（7维度打分 ⭐1-4）
+市场规模 / 竞争程度 / AI契合度 / 冷启动难度 / 毛利率 / 合规风险 / **与创始人能力匹配度**
+
+### ⚠️ 生存模式（用户急需现金流时，跳过完整分析先过5条硬过滤）
+识别信号：「先稳住生活」「一个月内盈利1万」「先赚到钱再说」。
+**先调研后建议铁律**：所有平台建议先搜 `平台名 + 项目名 + 真实收入` 验证实际状态再给结论（多次犯过：咸鱼文书代写没销量、猪八戒单是刷的、AI商品图平台在限制）。5条硬过滤：今天能准备 / 7天能收钱 / 0资金投入 / 单人交付 / 有现成资源。变现排序：卖服务 > 卖现成产品 > 按单接活 > 代理分销 > ❌做新SaaS。约束清单见 `references/niche-survival-mode-user-constraints.md`。
+
+### 游戏赛道专项
+- 术语坑：流水≠利润（买量吃60-80%）；畅销榜=IAP收入、人气榜=IAA广告；eCPM是核心指标
+- 利润真相：`净利润 ≈ 流水 × (20%-买量占比) - 研发`；零买量30-50%净利率但规模有限
+- 一人可行：休闲消除/解压 1-3周 ✅；塔防 ⚠️ 需买量；RPG/SLG ❌。数据源：GameLook/引力引擎/DataEye/微信官方榜单，参考 `references/niche-2026-wechat-minigame-market-brief.md`
+
+### 产品设计迭代（用户说「深入拆这个」时）
+- 第一版永远是错的（1-3轮否定正常）；「不够」= 重构核心机制不是微调细节
+- 迭代三轮法：V1换底层玩法 → V2加维度 → V3用户合成「A框架+B内容+C操作」→ 按配方执行停止迭代
+- 评估矩阵：可玩性/深度/自然学习/合成度/一人可行性，案例见 `references/niche-ai-agent-popularization-game-design.md`
 
 ## 输出格式
 

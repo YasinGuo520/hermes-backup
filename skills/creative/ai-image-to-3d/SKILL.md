@@ -10,7 +10,7 @@ description: 2D立绘转GLB真3D模型（腾讯混元3D API）→ Three.js 3D展
 
 ## 何时使用
 - 用户要求「把XX做成3D立体的」「3D展示页」「转3D模型」
-- ⚠️ 动手前先问清楚：**真3D**（可旋转看背面，本技能）还是**伪3D**（CSS视差倾斜，见 visual-component-patterns「AI立绘动态升级」）。用户说「真3D的才行」就是本技能。
+- ⚠️ 动手前先问清楚：**真3D**（可旋转看背面，本技能）还是**伪3D**（CSS视差倾斜，见 `ux-pro-max` 技能 references/visual-component-patterns.md「AI立绘动态升级」）。用户说「真3D的才行」就是本技能。
 
 ## 通道选择（腾讯云服务器实测）
 | 通道 | 状态 | 说明 |
@@ -37,7 +37,7 @@ description: 2D立绘转GLB真3D模型（腾讯混元3D API）→ Three.js 3D展
 - 讨论阶段给方案对比表（真3D vs 伪3D、成本、工具、版权风险），等用户明确选型后再开工
 - 用户说「能搞就行」= 确认技术方向，但仍要等他说「搞」才执行
 
-## 立绘准备（Qwen-Image 生成，见 siliconflow-image-gen）
+## 立绘准备（Qwen-Image 生成，见 china-ai-platforms 的 references/siliconflow-image.md）
 图生3D输入图必须：
 - **纯黑色背景**（建模友好，不要花背景）
 - 全身完整、正面站姿、无遮挡
@@ -79,8 +79,8 @@ curl -s -o /dev/null -w "%{http_code}" http://43.138.221.174:8915/mecha_front.pn
 ## Three.js 展示页（拿到 GLB 后）
 - Three.js CDN + GLTFLoader 加载 `.glb`
 - 太空/深空风：星空粒子背景 + 模型自动慢转 + 鼠标拖拽旋转 + 环境光/方向光/点光三灯
-- 风格基调参考 visual-component-patterns（深色科技风），页面独立端口 + http.server 部署
-- 部署参考 immersive-html-experiences
+- 风格基调参考 `ux-pro-max`（深色科技风，组件库见其 references/visual-component-patterns.md），页面独立端口 + http.server 部署
+- 部署参考 `ux-pro-max` 的 references/immersive-html-experiences.md
 
 ### ⚠️ r160 起是 ES module，importmap 必须精确到文件（实测踩坑，白屏排查 30 分钟）
 墙内不能用 Google CDN，three.js 用 jsdelivr 下载到本地 `js/` 目录：
@@ -110,7 +110,7 @@ js/
 
 ## 流程总结
 1. 确认要真3D（问：360°旋转还是视觉炫就行）
-2. 生成/准备纯黑背景立绘（siliconflow-image-gen，¥0.14/张）
+2. 生成/准备纯黑背景立绘（china-ai-platforms 硅基流动生图，¥0.14/张）
 3. 让用户提供腾讯云 SecretId/SecretKey
 4. 立绘放已开放公网端口（curl 验证）
 5. `hunyuan3d.py` 提交+轮询+下载 OBJ zip
@@ -136,7 +136,7 @@ js/
 - 模型加载后 Box3 算包围盒 → scale 适配 → 平移居中；ACESFilmic tone mapping。
 - 背景粒子用户偏好「明显不能太淡」：70粒子、alpha 0.15-0.35、连线距离140px。
 - 交付前验证：`browser_navigate` + `browser_console` 查 canvas 存在、loader 隐藏、model.glb 资源被请求；`browser_vision` 确认模型完整无破面；公网 curl 200 才算上线。
-- 成品页挂导航 Hub（8895）/ 工具箱（8900）入口，见 html-project-hub skill。
+- 成品页挂导航 Hub（8895）/ 工具箱（8900）入口，见 `server-service-deployment` 的 references/html-project-hub.md。
 
 ### 现成模板（可直接改）
 - `templates/space-showcase.html` — 深空星空粒子+星云背景+机甲悬浮+拖拽旋转+滚轮缩放+触屏（完整可改模板）

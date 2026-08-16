@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260809-154112",
-  "last_run_at": "2026-08-09T15:41:12.818635+00:00",
-  "last_run_duration_seconds": 592.255413,
-  "last_run_summary": "auto: 10 marked stale; llm: All consolidation work is complete and verified. Here is the pass summary.\n\n## Curator pass summary — umbrella consolidation\n\n**Scope:** 93 curator-managed skills scanned; 7 clusters processed; **15 skills archived** (12 consolidations into…\narchived 15 skill(s):\n  • ai-video-content-creation → ai-video-production\n  • aliang-bailian-voice-clone → aliang-bailian\n  • aliang-kids-story-maker → aliang-bailian\n  • aliang-picturebook-audiobook → aliang-bailian\n  • aliang-podcast-maker → aliang-bailian\n  • aliang-product-detail-photos → aliang-bailian\n  • frontend-design → ux-pro-max\n  • hermes-agent-skill-authoring → skill-creator\n  • install-github-hermes-tools → find-skills\n  • ocr-and-documents → markitdown\n  … and 5 more\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin ai-video-production",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260816-162923",
+  "last_run_at": "2026-08-16T16:29:23.182941+00:00",
+  "last_run_duration_seconds": 1207.956167,
+  "last_run_summary": "auto: 5 marked stale, 1 reactivated; llm: All verifications pass — every re-homed file resolves, cross-references point to the correct umbrellas, and the library is clean. The consolidation pass is complete.\n\n## Human-readable summary\n\n**Clusters processed (19 skills consolidated i…\narchived 20 skill(s):\n  • ai-analysis-landing-pages → server-service-deployment\n  • aliang-bailian → china-ai-platforms\n  • claude-mem → agent-performance\n  • content-risk-detector → douyin-livestream-ecommerce\n  • data-dashboard → ux-pro-max\n  • decision-co-pilot → project-recommendation-workflow\n  • design-inspiration → ux-pro-max\n  • feishu-lark → china-im-channels\n  • html-project-hub → server-service-deployment\n  • immersive-html-experiences → ux-pro-max\n  … and 10 more\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 8
+  "run_count": 9
 }

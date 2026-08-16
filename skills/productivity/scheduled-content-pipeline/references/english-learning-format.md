@@ -1,121 +1,99 @@
-# AI 英语每日一练 — 输出格式模板
+# AI 英语每日一练 — 输出格式模板（2026-08 现行版）
 
-This is the output template for the daily 8:00 AM English learning cron job. Produces a structured English snippet from trending AI content.
+Output template for the daily English learning cron job. The cron prompt requires: ① web_search today's trending AI tool/project/news (English query), ② 3-5 English sentences with source link, ③ 2-3 sentence Chinese summary, ④ 2-3 fill-in-the-blank sentences for listening/grammar practice.
 
-## Output Format (exact structure)
+## Output Format (exact structure — cron prompt enforces this)
 
 ```
-📖 【今日AI英语片段】
-───────────────
-🔤 原文
-[2-3句英文原文，标明出处]
-───────────────
-🀄 中文翻译
-[整段自然翻译，不机器味]
-───────────────
-📝 核心词汇
+---
+# AI英语每日一练
+**Topic**: <English topic name>
+**Date**: YYYY-MM-DD
 
-| 单词 | 词性 | 释义 | 例句 |
-|------|------|------|------|
-| word1 | n/v/adj | 中文释义 | 原文中用到的例子 |
-| word2 | ... | ... | ... |
-（列出3-5个词）
-───────────────
-💡 一句话用法提示
-[教一个实用的造句模式，比如"你今天可以用xx句型来写Prompt"]
+---
+
+## 📰 English Intro (3-5 sentences)
+<3-5 grammatically correct, medium-difficulty English sentences>
+
+**Source**: [<Outlet> — <Headline>](<URL>) (<date>, by <author>)
+
+## 🇨🇳 中文总结
+<2-3 clear conversational sentences>
+**生词**：word 释义 | word 释义 ...
+
+## ✍️ 填空练习 (Fill in the blanks)
+1. <sentence with ____ blank — target keyword or preposition/collocation>
+2. ...
+3. ...
+
+<details>
+<summary>答案</summary>
+
+1. **answer**（释义）— 简短说明（介词搭配/词形等易错点）
+2. ...
+3. ...
+
+</details>
+
+**今天能记住的一个搭配**：<one high-value collocation with example, e.g. work on — I'm working on a new project.>
 ```
 
 ## Formatting Rules
 
-- **原文来源**：必须是今日热门/真实内容，不编造
-- **词性标记**：准确标注 n/v/adj/adv 等
-- **中文翻译**：自然口语化，不要机器翻译腔
-- **单词优先级**：技术术语 > 高频动词 > 其他词汇
-- **词汇数量**：3-5个词，宁缺毋滥
-- **用法提示**：给出一个可立即套用的句型，结合AI/编程场景
-- **总长度**：控制在500字以内
-- **分隔线**：用 `───────────────` 共15个全角横线
+- **Topic 必须新鲜**：today/yesterday 的真实新闻，经权威媒体验证，绝不写旧闻或编造
+- **英文**：语法正确、难度适中（雅思 6-7 水平），3-5 句
+- **中文总结**：清晰口语化 2-3 句 + 生词表（带中文释义）
+- **填空练习**：2-3 句，每句挖 1-2 个空，优先挖关键词（acquisition）或介词搭配（work __ → on）；答案放 `<details>` 里并给一句易错点说明
+- **搭配提示**：给一个用户当天能直接套用的短语，不要方法论
+- **词汇优先级**：技术术语 > 高频动词 > 其他
 
-## Content Sourcing
+## Content Sourcing — 新鲜度验证流程（CRITICAL，2026-08 实战总结）
 
-Source content from **trending English-language AI content** published today:
-- Trending GitHub repositories (README descriptions)
-- AI papers (abstracts from arxiv)
-- Tech blogs / announcements (OpenAI, Anthropic, Google, Meta)
-- AI tool launch posts (Product Hunt, Hacker News)
-- Technical documentation excerpts
+### 问题：web_search 搜 "today" 返回旧闻/垃圾
+Query 如 "trending AI tool today" / "OpenAI today" 会混入大量过时文章（GPT-4 Turbo 时代、o3-mini 发布）和不可验证的 AI 生成 clickbait（典型：LinkedIn pulse 上编造的 "GPT-5.4" 类文章）。**绝不轻信单条搜索结果，写之前必须验证。**
 
-### Recommended Sourcing Flow
-
-**Step 1: Find trending content via HN Firebase API (most reliable)**
-
-Use terminal + curl to fetch HN top stories — avoid browser tools (CDP timeout in cron):
+### 已验证可行路径：curl The Verge AI feed
+openai.com/news 对 curl 和 browser_navigate 都被 Cloudflare 拦截（curl 返回 cf_chl JS challenge，浏览器显示 "Just a moment..."）——**别在它身上浪费时间**。
 
 ```bash
-# Get top story IDs
-IDS=$(curl -s --max-time 8 "https://hacker-news.firebaseio.com/v0/topstories.json" | python3 -c "import json,sys; print(' '.join(str(i) for i in json.load(sys.stdin)[:10]))")
-
-# Fetch details for each
-for id in $IDS; do
-  curl -s --max-time 5 "https://hacker-news.firebaseio.com/v0/item/$id.json" | \
-    python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"[{d.get('score',0)}pts] {d.get('title','')}\")"
-done
-```
-
-**Known issue**: Python `urllib.request` is significantly slower than `curl` piped into `python3 -c` in this environment. Always use curl for the HTTP fetch.
-
-**Step 2: Filter for AI/tech content with >200 points**
-
-Look for: AI papers, new APIs, open-source tools, model releases, benchmarks. Skip general news, opinion pieces, non-tech articles.
-
-**Step 3: Extract article body**
-
-For HTML articles, strip tags with regex and filter for meaningful lines:
-
-```bash
-curl -s --max-time 15 "<URL>" | python3 -c "
-import sys,re
-html=sys.stdin.read()
-# Remove script/style blocks first
-html=re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL)
-html=re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.DOTALL)
-text=re.sub(r'<[^>]+>', '\\n', html)
-# Deduplicate and filter short lines
-seen=set()
-for l in text.split('\n'):
-    l=l.strip()
-    if len(l)>30 and l not in seen:
-        seen.add(l); print(l)
+# 1) 抓 AI feed，带浏览器 UA
+curl -sL --max-time 25 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36" \
+  "https://www.theverge.com/ai-artificial-intelligence" -o /tmp/verge_ai.html
+# 2) 解析 h2 标题：每行自带 作者+日期+标题（如 "Emma Roth Aug 14 Cursor is officially part of SpaceX"）
+grep -oE '<h2[^>]*>.*?</h2>' /tmp/verge_ai.html | sed -E 's/<[^>]+>//g' | head -20
+# 3) 拿文章 URL
+grep -oE 'href="[^"]*<keyword>[^"]*"' /tmp/verge_ai.html | sort -u
+# 4) 抓文章并验证日期+摘要
+curl -sL --max-time 25 -A "<browser UA>" "<article URL>" | python3 -c "
+import re, html, sys
+raw = sys.stdin.read()
+m = re.search(r'\"datePublished\":\"([^\"]+)\"', raw)
+if m: print('DATE:', m.group(1))
+m = re.search(r'<meta name=\"description\" content=\"([^\"]+)\"', raw)
+if m: print('META:', html.unescape(m.group(1)))
 "
 ```
 
-For GitHub READMEs, use the GitHub API (base64 decode) instead of `raw.githubusercontent.com` (known blank-response issue):
+`datePublished` 确认新鲜度（当天/昨天），meta description 即官方摘要，可直接作为英文介绍的事实基础。重磅消息（如 "$60B 收购"）必须等权威媒体确认后再写。
 
-```bash
-curl -s "https://api.github.com/repos/{owner}/{repo}/readme" | \
-  python3 -c "import json,sys,base64; d=json.load(sys.stdin); print(base64.b64decode(d['content']).decode())"
-```
+### 反 clickbait 规则
+LinkedIn/pulse 和大量 Medium 的 "新版 GPT" 文章常是 AI 生成或纯编造。在真实媒体（The Verge / TechCrunch / Ars Technica）上查不到 datePublished 验证的，一律丢弃。
 
-**Step 4: Pick 2-3 paragraphs** containing concrete technical claims (benchmark numbers, speed comparisons, accuracy metrics) — these produce the best vocabulary targets.
-
-For each session:
-1. Search for a trending AI tool/project/news (HN Firebase API)
-2. Find an English article/README/blog from the results
-3. Extract 2-3 sentences with substantive technical vocabulary (3-5 words worth learning)
-4. Produce the structured output above
+### 备用源（旧方法仍有效）
+- HN Firebase API（topstories.json）→ 过滤 >200 pts 的 AI/技术内容（curl 优先，urllib 慢）
+- GitHub README：用 API base64 解码，不用 raw.githubusercontent.com（已知 blank 问题）
+- 文章正文提取：先删 script/style 块再剥标签，过滤 >30 字符行
 
 ## Cron Job Command
 
 ```bash
 cronjob action='create' \
   name="AI英语每日一练" \
-  schedule="0 8 * * *" \   # 8:00 AM Beijing daily
+  schedule="0 8 * * *" \
   deliver="origin"
 ```
 
 ## Adapting
 
-For other language-learning pipelines:
-- Adjust the header emoji (📖 → 📰 for news, 🎧 for listening, etc.)
-- Keep the 4-section structure (原文→翻译→词汇→用法提示)
-- The core vocabulary table format is highly effective — maintain it
+- 其他语言学习管道：改头部 emoji 即可（📰 新闻 / 🎧 听力）
+- 填空练习结构对听力训练同样适用（挖空 → 播音频 → 填词）

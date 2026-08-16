@@ -1,6 +1,6 @@
 ---
 name: agent-performance
-description: "Agent性能诊断与维护——当Agent变傻/变慢时的系统化检查清单。覆盖context压缩、记忆瘦身、搜索工具健康检查、配置优化。"
+description: "Agent性能诊断与维护——当Agent变傻/变慢时的系统化检查清单。覆盖context压缩、记忆瘦身（含claude-mem跨会话记忆）、搜索工具健康检查、配置优化。"
 tags: [hermes, maintenance, troubleshooting, diagnostics, performance]
 related_skills: [claude-mem, find-skills, server-service-deployment]
 ---
@@ -474,6 +474,14 @@ script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影�
 ## 快捷指令
 
 用户喊 **「醒脑」** → 立即执行一次：磁盘清理脚本 + 记忆瘦身 + curator技能检查 + 重建技能档案库(`build-skill-manifest.py` → `kb_summary.py`) + cron drift检查 + 检查磁盘/内存/记忆状态。
+
+## 跨会话长期记忆（claude-mem，合并自 claude-mem skill）
+
+会话记忆自动捕获/摘要/注入的机制与记忆瘦身方法见 `references/claude-mem.md` 与 `references/memory-consolidation.md`，要点：
+- 自动捕获会话中的工具使用/关键决策/代码变更 → 语义摘要 → 下次会话自动注入，避免重复犯错
+- 记忆存 `~/.hermes/memories/`，敏感信息不记录，定期清理过期记忆
+- 记忆瘦身/去重/合并的具体操作方法见 `references/memory-consolidation.md`（Agent 感觉"变傻"时与本技能第七步配合使用）
+- 与 Hermes 内置 Holographic 记忆（`hermes memory setup holographic`，见 hermes-advanced-setup）互补：claude-mem 管会话摘要注入，Holographic 管向量召回
 
 ## 警告
 

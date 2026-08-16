@@ -1,6 +1,6 @@
 ---
 name: douyin-livestream-ecommerce
-description: 抖音桌播/挂播带货全套方法论 —— 选品、货盘组合、短视频钩子、直播间节奏、收益测算。专注不出镜桌播形式，覆盖日用品/玩具/男装/新奇好物四大类目。
+description: 抖音桌播/挂播带货全套方法论 —— 选品、货盘组合、短视频钩子、直播间节奏、收益测算、内容合规审查。专注不出镜桌播形式，覆盖日用品/玩具/男装/新奇好物四大类目。
 category: creative
 triggers:
   - 抖音带货选品
@@ -433,12 +433,32 @@ osascript -e 'tell application "Calendar" to tell calendar "个人" to \
 - 写完事件后告知用户**关闭Mac端通知** + **打开iPhone端通知**（各人操作）
 - 飞书日历需开发者后台开通 `calendar:calendar` 权限并重新发布应用
 
+## 内容合规审查（合并自 content-risk-detector）
+
+发布任何文案/脚本/话术前，先做内容安全扫描防限流/封号。完整检测维度见 `references/content-risk-detector.md`，要点：
+
+**检测维度（8项）：**
+| 维度 | 检查内容 | 严重程度 |
+|------|---------|:-------:|
+| 违禁词 | 政治敏感、色情擦边、赌博相关 | 🔴 高 |
+| 夸大宣传 | "最好""第一""全网最低""包治"等绝对化用语 | 🟡 中 |
+| 功效宣称 | 食品说疗效、日用品说医疗效果 | 🔴 高 |
+| 价格违规 | 虚构原价、虚假折扣 | 🟡 中 |
+| 引流违规 | 诱导关注/分享/外链引流 | 🟡 中 |
+| 版权风险 | 未授权音乐/图片/品牌logo | 🟡 中 |
+| 未成年保护 | 涉及未成年人不当内容 | 🔴 高 |
+| 虚假人设 | 冒充专家/医生/教授身份 | 🔴 高 |
+
+**抖音特别敏感词：** 绝对化用语（最好、第一、NO.1、极致、唯一、独创）、虚假宣传（包治、根治、安全无毒、不复发）、诱导（点击这里、加我微信、私聊我）、价格（原价XX现价XX需有真实交易记录）。
+
+**处理流程：** 扫描风险词 → 标记风险等级（🔴/🟡/🟢）→ 给替换建议 → 输出安全版文案。
+
 ## 参考文件
 
 - `references/2026-07-product-selection-data.md` — 本会话产出的完整选品数据（7款日用品的佣金/退货/对标达人数据）
 - `references/toy-volume-benchmarks-2026.md` — 抖音玩具类目已验证销量基准（头部通货月销10万+、稳定爆款月销3-5万）
 - `references/prompt-templates.md` — 完整Prompt模板库（带货/短视频/自媒体/通用四大类，含万能公式和精选Prompt）
-- `references/ai-learning-path-content.md` — AI系统学习路径完整内容（8大分支，含模型分类/资源渠道/避坑指南）
+- AI系统学习路径完整内容（8大分支，含模型分类/资源渠道/避坑指南）见本SKILL.md「AI系统学习路径」章节（原文案在归档副本 .archive/douyin-livestream-ecommerce 历史版本）
 - `references/okr-timeline-planning.md` — OKR + 30天5阶段进度规划法，含财务倒推公式、货盘配比、每日Checklist模板、飞书Bitable结构
 - `references/bailian-i2v-product-video.md` — 百炼图生视频(I2V)带货素材生产管线：完整命令、提示词模板、成本速查，2026-07-11实测验证
 - `references/ecommerce-ai-saas-product-planning.md` — 电商AI客服SaaS产品规划：定位/竞品/定价/成本/护城河，2026-07-11新建

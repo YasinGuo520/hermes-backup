@@ -17,7 +17,7 @@ category: devops
 
 分工要点：
 - 每实例独立 `~/.hermes/` 目录 + 独立 profile，避免配置互踩
-- 定时任务按实例归属，避免两台机器重复执行同一 cron（cron 迁移见 server-migration skill）
+- 定时任务按实例归属，避免两台机器重复执行同一 cron（cron 迁移见 `server-service-deployment` skill 的 `references/server-migration.md`）
 - 跨机协作靠网络桥接（Tailscale）与 SSH/文件通信，见下文
 
 当用户有**两台（或更多）** Hermes 实例时（服务器+Mac），需要明确的**分工+通信**方案。不要给每个实例相同的角色。
@@ -295,7 +295,7 @@ for s in <skill1> <skill2>...; do grep -m1 "^description" ~/.hermes/skills/$s/SK
 
 **品牌名清理：** 同步后用户会要求去掉 skill 里的品牌名（实测：海纳《直播话术》→ 直播话术体系）。patch 前先 `grep -rn "品牌名" ~/.hermes/skills/<skill>/` 找全所有出现位置——不只 description，正文引用行也要改。
 
-**同步后更新方法论工具箱：** 新 skill 加入 `~/Desktop/hermes/toolbox/build_toolbox.py` 的 SKILLS_DATA（按分类插行，name/desc/key/path）→ `python3 build_toolbox.py` → 8900 http.server 无需重启（见 html-project-hub skill）。验证线上：`curl -s http://127.0.0.1:8900/ | grep -o '<卡片名>'`。
+**同步后更新方法论工具箱：** 新 skill 加入 `~/Desktop/hermes/toolbox/build_toolbox.py` 的 SKILLS_DATA（按分类插行，name/desc/key/path）→ `python3 build_toolbox.py` → 8900 http.server 无需重启（见 `server-service-deployment` 的 references/html-project-hub.md）。验证线上：`curl -s http://127.0.0.1:8900/ | grep -o '<卡片名>'`。
 
 ---
 

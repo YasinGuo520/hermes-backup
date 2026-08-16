@@ -210,6 +210,7 @@ When both web tools and browser fail:
 7. **raw.githubusercontent.com returns blank.** This CDN endpoint often returns empty responses from headless servers. Always have the GitHub API + base64 workaround ready as a fallback.
 8. **browser tools timeout in cron.** Browser tools (browser_navigate, etc.) are unreliable in cron/background sessions that lack a real display server. Design content pipelines to work with terminal + curl as the primary path, not the browser.
 9. **Chinese-only search causes repetition.** Without海外 sources, the agent rehashes the same ~3 domestic stories every day. Always structure search into海外 + 国内 + domain-specific tiers (see Layer 2).
+10. **"Today" searches return stale/clickbait results.** web_search with "today"/"new AI" queries surfaces old articles (GPT-4 Turbo-era, o3-mini launch) plus unverifiable AI-generated clickbait (LinkedIn pulse "GPT-5.4" style). Never trust a single hit — verify freshness on a real outlet before writing. Reliable path: `curl` The Verge AI feed (https://www.theverge.com/ai-artificial-intelligence) with a browser UA, parse `<h2>` headlines (each carries author+date), pick the freshest item, then extract the article and confirm the `"datePublished"` meta. openai.com/news is Cloudflare-blocked for both curl and browser_navigate — skip it. Full recipe in `references/english-learning-format.md`.
 
 ## Verification Checklist
 

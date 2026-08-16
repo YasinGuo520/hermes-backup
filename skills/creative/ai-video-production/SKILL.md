@@ -1,6 +1,6 @@
 ---
 name: ai-video-production
-description: AI视频生产全流程：本地流水线（moviepy+ffmpeg）与云端平台（小云雀/即梦/可灵），含工作流选型。
+description: AI视频生产全流程：本地流水线（moviepy+ffmpeg）与云端平台（小云雀/即梦/可灵），含工作流选型与短视频内容方案模板。
 triggers:
   - AI视频生成
   - 自动视频
@@ -755,7 +755,7 @@ proj.save()  # 打开剪映即可看到草稿
 - **平台速查**：小云雀（xyq.jianying.com，注册1200积分+每天120）一句话出片零门槛；即梦AI（jimeng.jianying.com，Seedance）质量顶级、科幻场景最佳；可灵AI（klingai.com）物理理解强、广告级质量。无 GPU 环境全走云端。
 - **核心原则**：一个镜头只放一个视觉元素+一个运动；15秒视频拆 5 个 3 秒片段；提示词指定运动方向（"从左向右飞入"）+ 氛围词（电影级布光/暖橙蓝对比）。
 - **合成**：ffmpeg concat `-c copy` 合并 + BGM 淡入淡出。
-- **火山方舟/Seedance API 程序化调用**（Key 类型是最大坑、计费表、验证命令）：`references/volcengine-ark-api.md`；独立知识库另见 `volcengine-ark-api` skill。
+- **火山方舟/Seedance API 程序化调用**（Key 类型是最大坑、计费表、验证命令）：`references/volcengine-ark-api.md`；独立知识库另见 `china-ai-platforms` skill（火山/硅基/百炼三平台选型总纲）。
 - 平台对比与提示词模板库：`references/platform-comparison.md` / `references/video-platform-comparison.md` / `references/mars-base-prompts.md` / `references/siliconflow-video-api.md` / `references/text-to-video-pipeline.md`。
 
 ## 工作流编排与选型（合并自 video-production-workflow）
@@ -778,3 +778,14 @@ proj.save()  # 打开剪映即可看到草稿
 - 12 款视频工具按场景/平台/成本选型速查：`references/video-tools-catalog.md`。
 - Manim 程序化动画（像素画/几何/数学确定性动画）：见 `manim-creative-scenes` skill（环境 `~/Desktop/hermes/manim-venv`，v0.20.1）。
 - 带货视频字幕放**底部**（H-180）；转场必须**淡入淡出**不要硬切。
+
+## 短视频内容方案模板库（合并自 xiaohuangben-video-creator）
+
+输入「产品/行业 + 内容类型 + 子类型」→ 自动出完整视频方案（选题+脚本+分镜+AI管线+成本）的**内容策划引擎**，完整 12 模板见 `references/xiaohuangben-video-templates.md`。要点：
+
+- **解析规则**：`[行业/产品] + [内容类型: 晒过程/教知识/聊观点/讲故事] + [子类型]`，内容类型缺省=晒过程（带货最常用）
+- **8大爆款元素**（成本的/人群的/奇葩的/最差的/反差的/怀旧的/荷尔蒙的/头牌的）× **6个钩子技巧**（[金钱][验证/揭秘][盲盒][对抗][送温暖][荷尔蒙]）
+- **输出7区块**：选题定位/脚本文案/分镜脚本/AI管线选择/风险预警/下一步行动/扩展选题灵感
+- **管线映射**：晒过程→Seedance(火山方舟) 首选、Ken Burns 降级、百炼 I2V 兜底；教知识/聊观点→本 skill 文字视频；讲故事→llm-video-maker
+- **文案字数**：10s≈40字 / 12s≈50字 / 15s≈60字 / 20s≈85字（260字/分钟）
+- **执行铁律**：用户给图先做3件事（查水印/查HEIF格式/判断模特实拍）；先出配音再算视频长度；产品A/B对应关系必须用 vision_analyze 确认

@@ -143,5 +143,5 @@ const EXITS = { hall_to_shrine: {x:920,y:320,w:60,h:120, go:'shrine', label:'→
 
 ## Related skills
 - `creative/p5js` — generative art/sketches (canvas, shaders)
-- `creative/immersive-html-experiences` — celebration/full-screen pages
+- `ux-pro-max` 的 references/immersive-html-experiences.md — celebration/full-screen pages（已并入 ux-pro-max）
 - `creative/sketch` — quick HTML mockups (2-3 variants)

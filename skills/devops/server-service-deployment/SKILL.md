@@ -1,6 +1,6 @@
 ---
 name: server-service-deployment
-description: "在云服务器上部署和运维Python Web服务。涵盖环境变量管理、端口与防火墙、Hermes网关配置、TCP保活、后台进程控制。"
+description: "在云服务器上部署和运维Python Web服务。涵盖环境变量管理、端口与防火墙、Hermes网关配置、TCP保活、后台进程控制、环境迁移、静态项目托管、AI落地页。"
 version: 2.0
 author: Yasin + Agent
 created_by: agent
@@ -855,3 +855,33 @@ for p in open('/dev/stdin').read().strip().split():
 ## 国内模板站可达性
 
 见 `references/china-template-sites-accessibility.md`
+
+## Hermes 环境迁移（合并自 server-migration）
+
+当用户要求「搬服务器 / 迁移到云端 / move everything to the server」时，完整迁移工作流见 `references/server-migration.md`，要点：
+
+- **七阶段标准流程**：审计目标服务器 → 获取源机数据 → 迁移文件（macOS 路径 `~/Desktop/hermes/` → `~/projects/`）→ 重建 cron（三种 job 类型：prompt-only / script-runner / no-agent）→ Obsidian vault 符号链接 → 最终验证 → **技能裁剪（必做）**
+- **cron 迁移专节**：`cat ~/.hermes/cron/jobs.json` 提取 id/name/prompt/schedule/deliver/origin/model_snapshot/repeat/script/no_agent/enabled_toolsets；备份/本地专属脚本跳过；`~` 在双引号内不展开用全路径
+- **铁律**：迁移后 139+ 技能全加载会让服务器变慢（用户必抱怨）→ Phase 7 把未用技能移到 `~/skills_disabled/`，会话 `/reset` 生效
+- **坑**：`.env` 受保护不能直接改（用 symlink）；`rm -rf` 被安全拦截（留 `__MACOSX` 无害）；GitHub 下载被墙用 gh-proxy.com 镜像；computer-use 不能远程控制 Mac（无显示服务器）
+
+## 静态 HTML 项目托管与导航中心（合并自 html-project-hub）
+
+服务器上多个静态 HTML 项目（每项目独立端口 + 中央导航页）的管理见 `references/html-project-hub.md`，要点：
+
+- **架构**：`~/Desktop/hermes/hermes-hub/`（build_hub.py 数据列表 → 渲染 → index.html）+ 每项目独立 `python3 -m http.server <端口> --bind 0.0.0.0`
+- **端口分配**：8890-8899 HTML 项目、8900 工具箱、8920-8923 AI 落地页、9000+ 其他；选口先 `lsof -ti:<端口>` 查占用
+- **⚠️ 用户铁律**：改导航页前先备份（`cp build_hub.py build_hub.py.bak`）；只动导航页严禁连带重启其他服务；服务挂了用 `keepalive.sh`（见本 skill 全站服务保活节）不要手动逐个起
+- **工具箱外链**：`build_toolbox.py` 的 SKILLS_DATA 条目支持 `"url": "http://IP:PORT/"` 字段 → 卡片自动渲染「打开页面 →」；重跑后无需重启 8900（静态实时读取）
+- **坑**：网关重启会杀光所有 background http.server（实测 15 端口挂 11 个）→ 靠 crontab `*/3 * * * *` + `@reboot` 保活；卡片链接手写死的话改数据源不生效
+- 模板：`references/build_hub_template.py`（深紫科技风模板，生产版已是分类网格版）、`scripts/keepalive.sh`（生产保活脚本）
+
+## AI 方法论落地页（合并自 ai-analysis-landing-pages）
+
+把分析框架/方法论做成「输入想法→AI出结论」的网页（红蓝/六分身/市场调研/行业调研 8920-8923）见 `references/ai-analysis-landing-pages.md`，要点：
+
+- **核心模式**：FastAPI 单服务同端口 = 静态页 + `POST /api/analyze` → DeepSeek JSON mode → 前端渲染；同端口无 CORS
+- **候选页面筛选**：纯推理可完成 + 输入简单 + 输出结构化 + 高频刚需（依赖工具链/实时数据的做不了）——13 个候选池见 `references/candidate-pages-backlog.md`
+- **提示词设计**：内置方法论框架 + 用户铁律（收入打折/区分推断/黑海诚实/最小行动单元/直接语气）+ 数据诚实机制（【训练知识】/【估算】/【需验证】标注）
+- **部署**：`templates/server.py`（标准脚手架）+ `templates/systemd.service`（Environment=PORT=892X）→ systemd enable --now → `curl http://127.0.0.1:892X/health`；公网用 Nginx 子路径反代（`proxy_pass http://127.0.0.1:892X/`）
+- **坑**：DeepSeek key 在 `~/.hermes/.env`（config.yaml 的 sk-gaw 是 SiliconFlow 的）；`response_format json_object` 提示词必须含"JSON"字样；改版前先查端口是静态还是 API 服务（`ss -tlnp` + `readlink /proc/PID/cwd`）；uvicorn 命令被终端工具误判长驻进程要拆开跑

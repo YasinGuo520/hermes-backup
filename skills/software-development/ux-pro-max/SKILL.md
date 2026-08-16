@@ -1,6 +1,6 @@
 ---
 name: ux-pro-max
-description: 前端视觉设计蒸馏规则集 — 配色/间距/阴影/质感/动效/设计流程。
+description: 前端视觉设计蒸馏规则集 — 配色/间距/阴影/质感/动效/设计流程 + 组件模式库/沉浸式页面/数据看板/灵感参考。
 ---
 
 # UX Pro Max — 视觉设计速查
@@ -418,7 +418,7 @@ write_file → browser_navigate(file://或本地端口) → browser_vision(自�
 
 ## 风格指纹沉淀（v2 新增）
 
-每个成功定稿的页面，把设计系统蒸馏成「风格指纹」追加到 visual-component-patterns：
+每个成功定稿的页面，把设计系统蒸馏成「风格指纹」追加到本技能的组件模式库（`references/visual-component-patterns.md`）：
 - 色值（背景/主色/强调/文字）
 - 字体栈
 - 关键间距/圆角值
@@ -426,6 +426,42 @@ write_file → browser_navigate(file://或本地端口) → browser_vision(自�
 - 一句话风格描述 + 适用场景
 
 下次做同风格页面直接引用指纹，不重新发明。
+
+## 组件模式库（合并自 visual-component-patterns）
+
+可复用视觉组件（流动星光/徽章光环/玻璃卡片/彩花粒子/打字机/CRT复古/玄学古风/电路板/3D环形展厅/AI立绘贴纸等），完整组件清单与实现要点见 `references/visual-component-patterns.md`：
+- 组件索引表 + 适用场景：见该文件头部「组件清单」
+- 玄学/古风四件套（烟雾粒子+卷轴卡片+印章按钮+烛光火焰）：`references/mystical-components.md`
+- 3D环形展厅（perspective + preserve-3d + 拖拽旋转）：`references/3d-ring-gallery.md`
+- 电路板背景动画（Canvas PCB走线+脉冲节点）：`references/circuit-board-canvas.md`
+
+## 沉浸式HTML页面模式（合并自 immersive-html-experiences）
+
+庆典/全屏/沉浸式页面（生日页、庆祝页、作品展厅）的完整设计模式见 `references/immersive-html-experiences.md`，要点：
+- 触发：炫酷页面/全屏展示/沉浸效果/科幻/赛博朋克/复古像素/占卜玄学/极简名片
+- 深色庆典配色（紫粉金 #a78bfa/#f472b6/#fbbf24）、星空粒子、吧唧系统、彩花物理引擎、头像动漫化、打字机效果
+- 庆祝页禁忌：不要用本技能 indigo 主色（庆祝页用紫粉金）、不要分阶段屏幕切换、音乐用 Web Audio 振荡器不引 MP3
+- 用户迭代四轮节奏（平淡→加交互→改全屏→退回布局）与「先调研再动手」硬规则
+- 子文件：`references/immersive-style-matrix.md`（风格矩阵选型）、`references/immersive-starfield-canvas.md`（星空粒子）、`references/immersive-interactive-effects.md`（交互代码全集）、`references/immersive-canvas-particle-starfield.md`、`references/immersive-birthday-celebration-patterns.md`、`references/immersive-anime-avatar-pipeline.md`（头像动漫化两段式）、`references/immersive-data-bridge-pattern.md`（data.json 动态数据桥接）、`references/immersive-manim-video-integration.md`（Manim 视频嵌入）、`references/immersive-preview-workflow.md`（预览工作流）、`references/immersive-3d-ring-gallery.md`（3D 环形画廊实现）
+- 批量部署多个 HTML 项目用 delegate_task 并行（最多3个一批，端口规划见 `references/immersive-preview-workflow.md`）
+
+## 数据看板模式（合并自 data-dashboard）
+
+单文件 HTML 数据看板（大屏/监控/分析页）见 `references/data-dashboard.md`，要点：
+- Monitor 表面布局：顶部统计行 + 数据表 + 图表列 + 热力图，无 hero、无功能卡网格
+- 科幻深色主题 token（bg #0a0e1a / 主色 #00d4ff / 金字 #ffd700）
+- Canvas 环形图、CSS 条形/柱状图、热力图、动画计数器、可排序表格
+- 数据同步模式：cron 采集脚本 → data.json → fetch 渲染（`references/douyin-worked-example.md` 完整案例）
+- A股看板铁律：红涨 #ef4444 / 绿跌 #22c55e（中国标准，与西方相反）
+- 坑：Canvas DPR 缩放、零值条 min-height:4px、表格溢出滚动、确定性 mock 数据
+
+## 灵感参考流程（合并自 design-inspiration）
+
+用户说「想做个炫酷网站/落地页」但没定风格时，**先展示参考再动手**：
+1. 确认商业目的还是纯玩
+2. 从 `references/stunning-landing-pages.md` 加载案例库，推荐 3-5 个（含精华/技术栈/Demo 链接）
+3. 用户选定后转交执行（单页→sketch/claude-design；3D叙事→Three.js+GSAP；AI产品风格→Brainwave 源码）
+4. 陷阱：别在灵感阶段推技术方案；「炫酷」不一定是 3D；别把纯玩往商业变现扯
 
 ### 红蓝品牌双色（Yasin个人主页 / 红蓝分析法IP 专用）
 
