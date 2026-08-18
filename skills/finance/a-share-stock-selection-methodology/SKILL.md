@@ -203,7 +203,7 @@ Referer头必须用 `https://quote.eastmoney.com/`, 重试2次, 失败降级运�
 | 任务 | 时间 | 命令 | Cronjob ID |
 |:----|:---:|:-----|:----------|
 | 早盘Top-8 | 工作日8:45 | `quant_ensemble.py --top 8` | ea324446676f |
-| 收盘自进化 | 工作日15:30 | `quant_ensemble.py --evolve --days 5` | 4b176d3f9c5e |
+| 收盘自进化 | 工作日15:30 | **实际运行 `~/projects/quant_self_evolve.py --report-only`**（旧自进化脚本，只出报告不调权，**与v2日志不相通**，其累计准确率是旧口径）；v2验证由cron agent手动查Sina完成（见"每日自进化cron验证流程"） | 4b176d3f9c5e |
 
 ### 自进化机制
 
@@ -229,6 +229,7 @@ Softmax风格更新: 表现好的信号源加权重, 差的减权重.
 | **东方财富资金流API持续数天不可用** | **flow_score=0.0持续4+天，0.25权重完全浪费** | **加入自动检测：flow API连续N次失败则将其权重重新分配给tech/kronos，等API恢复再调回** |
 | 技术分集中 | [-0.1,+0.1]无区分度 | z-score归一化+tanh放大 |
 | **自进化验证门槛过高** | **`>=5`行行情记录的硬要求，新系统运行不足5天时永远无法触发调权** | **初始期（<10个交易日）把阈值降到`>=2`，积累足够数据后再升回`>=5`** |
+| **早报cron超时无日志** | **8:45早报cron（ea324446676f）`TimeoutError: idle for 601s (limit 600s) — waiting for non-streaming API response`，当日 `logs/` 无JSON生成** | **DeepSeek早高峰API慢导致LLM cron超时。诊断：查 jobs.json 的 last_status/last_error 区分休市vs故障。修复：改 no_agent+script 直跑 `quant_ensemble.py --top 8`，绕过LLM API等待（0 token）** |
 
 ## 风险提示模板（每次必须带）
 
@@ -292,6 +293,18 @@ Softmax风格更新: 表现好的信号源加权重, 差的减权重.
    | 股票 | 推荐价 | 现价 | 今日涨跌 | 状态 |
    ```
 5. **总结统计**：上涨/下跌/涨停各多少只，平均涨幅，命中率
+
+### 每日自进化cron验证流程（4b176d3f9c5e，工作日15:30）
+
+收盘后验证当日早报推荐的固定流程（cron prompt已固化）：
+
+1. **跑自进化报告**：`cd ~/projects && python3 quant_self_evolve.py --report-only`（⚠️ 这是**旧脚本**，其累计准确率口径与v2 logs**不相通**，只能看趋势不能当v2准确率）
+2. **读当日v2日志**：`~/Desktop/hermes/quant-skill/logs/YYYY-MM-DD.json` → `top_k[]` 每项 `code`+`total`（总分0~1区间，直接填表格总分列）
+3. **批量查行情**：新浪API（sh/sz前缀 + Referer头 + GBK），涨幅=(现价-昨收)/昨收×100
+4. **输出表格**：代码|名称|昨收|收盘|涨幅|总分|结果(✅/❌)，最后合计涨跌只数、准确率、平均涨幅
+5. **今日无日志处理**：先查 `~/.hermes/cron/jobs.json` 中 ea324446676f 的 `last_status`/`last_error` 区分原因——
+   - 非交易日（周末/节假日）→ 跳过第二步，只输出自进化报告
+   - cron故障（如TimeoutError）→ 如实报告故障原因 + 用**昨日推荐在今日收盘**的表现做替代验证（表格标注"替代验证"），并给出修复建议（把早报cron改 no_agent+script 直跑脚本绕过LLM API等待，0 token不依赖DeepSeek响应）
 
 ## 个股深度分析流程（用户问"XX接下来走势"时使用）
 
