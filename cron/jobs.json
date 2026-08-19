@@ -22,15 +22,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 37
+        "completed": 38
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-08-19T08:00:00+08:00",
-      "last_run_at": "2026-08-18T08:12:59.229390+08:00",
+      "next_run_at": "2026-08-20T08:00:00+08:00",
+      "last_run_at": "2026-08-19T08:12:14.614512+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -68,17 +68,17 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 37
+        "completed": 38
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:53.800270+08:00",
-      "next_run_at": "2026-08-19T08:30:00+08:00",
-      "last_run_at": "2026-08-18T08:46:08.806192+08:00",
-      "last_status": "error",
-      "last_error": "TimeoutError: Cron job '\u4eca\u65e5AI\u8d44\u8baf\u542bAgent\u53d8\u73b0\u5b9e\u6218' idle for 600s (limit 600s) \u2014 last activity: waiting for non-streaming API response",
+      "next_run_at": "2026-08-20T08:30:00+08:00",
+      "last_run_at": "2026-08-19T08:48:38.527747+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -118,17 +118,17 @@
       "schedule_display": "45 8 * * 1-5",
       "repeat": {
         "times": 30,
-        "completed": 27
+        "completed": 28
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:34:24.510884+08:00",
-      "next_run_at": "2026-08-19T08:45:00+08:00",
-      "last_run_at": "2026-08-18T08:55:10.152913+08:00",
-      "last_status": "error",
-      "last_error": "TimeoutError: Cron job '\u7cc5\u5408\u91cf\u5316\u9009\u80a1\u65e9\u62a5v2' idle for 601s (limit 600s) \u2014 last activity: waiting for non-streaming API response",
+      "next_run_at": "2026-08-20T08:45:00+08:00",
+      "last_run_at": "2026-08-19T08:55:10.943167+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -166,15 +166,15 @@
       "schedule_display": "30 15 * * 1-5",
       "repeat": {
         "times": 600,
-        "completed": 27
+        "completed": 28
       },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
+      "enabled": false,
+      "state": "paused",
+      "paused_at": "2026-08-19T15:58:18.423793+08:00",
       "paused_reason": null,
       "created_at": "2026-07-12T14:34:25.533452+08:00",
-      "next_run_at": "2026-08-19T15:30:00+08:00",
-      "last_run_at": "2026-08-18T15:37:39.954762+08:00",
+      "next_run_at": "2026-08-20T15:30:00+08:00",
+      "last_run_at": "2026-08-19T15:35:18.269922+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -258,15 +258,15 @@
       "schedule_display": "every 25m",
       "repeat": {
         "times": null,
-        "completed": 1884
+        "completed": 1928
       },
-      "enabled": true,
-      "state": "scheduled",
-      "paused_at": null,
+      "enabled": false,
+      "state": "paused",
+      "paused_at": "2026-08-19T21:30:05.473677+08:00",
       "paused_reason": null,
       "created_at": "2026-07-17T09:08:27.467715+08:00",
-      "next_run_at": "2026-08-19T03:15:06.273052+08:00",
-      "last_run_at": "2026-08-19T02:50:06.273052+08:00",
+      "next_run_at": "2026-08-19T21:36:49.600462+08:00",
+      "last_run_at": "2026-08-19T21:11:49.600462+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -306,15 +306,15 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-19T09:58:43.113407+08:00",
-      "next_run_at": "2026-08-19T08:30:00+08:00",
-      "last_run_at": "2026-08-18T09:25:42.391151+08:00",
+      "next_run_at": "2026-08-20T08:30:00+08:00",
+      "last_run_at": "2026-08-19T08:49:29.418081+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -356,15 +356,15 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 28
+        "completed": 29
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-08-19T04:00:00+08:00",
-      "last_run_at": "2026-08-18T04:02:15.171114+08:00",
+      "next_run_at": "2026-08-20T04:00:00+08:00",
+      "last_run_at": "2026-08-19T04:02:53.845226+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -402,15 +402,15 @@
       "schedule_display": "0 9 * * *",
       "repeat": {
         "times": null,
-        "completed": 30
+        "completed": 31
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T16:19:33.986204+08:00",
-      "next_run_at": "2026-08-19T09:00:00+08:00",
-      "last_run_at": "2026-08-18T09:22:50.355991+08:00",
+      "next_run_at": "2026-08-20T09:00:00+08:00",
+      "last_run_at": "2026-08-19T09:24:43.182958+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -451,15 +451,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 139
+        "completed": 145
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-08-19T04:00:00+08:00",
-      "last_run_at": "2026-08-19T00:00:03.114274+08:00",
+      "next_run_at": "2026-08-20T04:00:00+08:00",
+      "last_run_at": "2026-08-20T00:00:53.408294+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -497,15 +497,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 23
+        "completed": 24
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-08-20T03:00:00+08:00",
-      "last_run_at": "2026-08-18T03:02:26.137738+08:00",
+      "next_run_at": "2026-08-21T03:00:00+08:00",
+      "last_run_at": "2026-08-19T03:01:49.978644+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -537,15 +537,15 @@
       "schedule_display": "50 8 * * 1-5",
       "repeat": {
         "times": null,
-        "completed": 13
+        "completed": 14
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T00:36:20.608043+08:00",
-      "next_run_at": "2026-08-19T08:50:00+08:00",
-      "last_run_at": "2026-08-18T08:50:08.081411+08:00",
+      "next_run_at": "2026-08-20T08:50:00+08:00",
+      "last_run_at": "2026-08-19T08:50:12.989058+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -583,15 +583,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 5495
+        "completed": 5783
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-08-19T03:05:00+08:00",
-      "last_run_at": "2026-08-19T03:00:06.640247+08:00",
+      "next_run_at": "2026-08-20T03:05:00+08:00",
+      "last_run_at": "2026-08-20T03:00:57.560330+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -608,5 +608,5 @@
       "fire_claim": null
     }
   ],
-  "updated_at": "2026-08-19T03:00:06.640756+08:00"
+  "updated_at": "2026-08-20T03:00:57.560899+08:00"
 }

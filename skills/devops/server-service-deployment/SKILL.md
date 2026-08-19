@@ -574,6 +574,14 @@ crontab:
 1. 对应类型数组（STATIC/FASTAPI/PYTHON_SERVICES）— 启动逻辑
 2. `check_all()` 的端口列表 — 否则状态表永远不显示它，挂了也看不出 ❌（8896 踩过：dashboard 挂了 nginx 8897 变 502，但 keepalive 状态表全 ✅，因为列表里没 8896）
 
+### ⚠️ 服务改由 nginx 托管后，必须从 keepalive.sh 移除该端口（否则回滚顶掉 nginx）
+
+**案例（2026-08-19 简历↔中年人生互换）：** portfolio 原本 `python3 -m http.server 8894` 托管，互换后 8894 改由 nginx 反代中年人生（8001）。**没同步删掉 `STATIC_PROJECTS` 里的 `portfolio|8894`**，keepalive 每3分钟发现 8894 "没起 http.server" 就把它重新拉起来，跟 nginx 抢端口——nginx reload 静默失败，新配置不生效。
+
+**铁律：任何端口从 http.server/socat 换成 nginx 反代后，立刻从 keepalive.sh 对应数组删除该条目**（保留也行但必须注释掉），否则保活脚本是 nginx 配置的隐形敌人。
+
+完整实操（nginx reload 静默失败排查、www-data 权限 500、sites-enabled .bak 冲突、Hub 链接同步）见 `references/nginx-service-swap.md`。
+
 ### ⚠️ cron 环境 PATH 陷阱：脚本内命令必须用绝对路径
 
 cron 环境的 PATH 只有 `/usr/bin:/bin`，**不含 `~/.local/bin`、venv/bin 等用户路径**。keepalive.sh 里 `hermes dashboard` 直接写 `hermes` → cron 下 `command not found`，nohup 静默失败（日志只记 FAIL 不记原因），服务永远拉不起来。

@@ -30,12 +30,14 @@ related:
 | **飞书** | 主力工作台（高稳定） | open.feishu.cn 建应用 + WebSocket 长连接 | 权限申请→重发布应用→重启网关；Bitable 写表 |
 | **QQ** | 24h 值守、机器人客服 | 官方 QQ Bot API（q.qq.com）或腾讯云 LightClawBot | 沙箱→审核→上线；intents；IP 白名单 |
 | **微信** | 个人微信桥接（日常聊天） | iLink（ilinkai.weixin.qq.com）第三方桥接 | 4-5h token 过期/2h 空闲断连；扫码重登；保活脚本 |
+| **Telegram** | 海外渠道、私密传输（仅解决传输层） | `hermes setup` 选 Telegram / BotFather token | **国内服务器连不上 api.telegram.org**，须先解决代理（见 references/telegram.md） |
 
 ## 渠道文档
 
 - `references/qq-bot.md` — QQ 官方 API + LightClawBot 双路径：注册、沙箱 vs 生产、intents、发布上线、常见坑
 - `references/weixin-ilink.md` — 微信 iLink：断连日志诊断、TCP 保活、watchdog、-2/-14 错误、凭证轮换、彻底清除
 - `references/feishu-lark.md` — 飞书：权限矩阵、工具集、错误码速查、Bitable API 工作流
+- `references/telegram.md` — TG：Hermes 原生支持、国内服务器被墙实测、代理/双实例/放弃三方案、隐私分层、VPN 节点敏感度
 
 ## 通用运维（所有渠道）
 

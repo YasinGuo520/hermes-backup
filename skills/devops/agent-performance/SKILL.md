@@ -471,6 +471,24 @@ grep -oE "model=deepseek|model=gpt" ~/.hermes/logs/agent.log | sort | uniq -c
 ### 额外：cron no_agent 任务不受 drift 影响
 script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影响。
 
+### 费用/扣费排查（用户问「怎么扣了这么多钱」）
+
+触发词：「扣了XX块」「token很厉害」「余额怎么没了」。**先查证再解释**——用户常把「累计多天消耗」或「别的平台扣费」误当成「刚才聊几句烧的」。实测案例：用户怀疑下午量化任务扣了10块，实际该任务单次仅 ¥0.04-0.7；「聊几句扣10块」实为 6-7 天累计 + 长会话。
+
+排查流程（命令与脚本详见 `references/cost-billing-audit.md`）：
+1. **查余额**：DeepSeek `GET https://api.deepseek.com/user/balance`（.env 的 DEEPSEEK_API_KEY）；SiliconFlow `GET https://api.siliconflow.cn/v1/user/info`——两个都查，fallback 通道可能也在烧
+2. **统计日志**：正则解析 agent.log 的 `API call #N: ... in=X out=Y cache=Z/N`，按 session/cron 聚合
+3. **按官方价格估算**——deepseek-v4-flash 官方价（2026-08-19 直抓 api-docs.deepseek.com）：缓存命中 ¥0.05/M（高峰0.10）、未命中 ¥1.5/M（高峰3.0）、输出 ¥4.5/M（高峰9.0）。**别用早期估算价（0.02/1/2）或 V3 旧价（0.5/2/8）**，会把账单低估/高估 50 倍。价格可能变动，对账前先抓官方页；完整价格表+抓取命令见 `references/cost-billing-audit.md`
+4. **对账结论模板**：单次 cron ¥0.03-0.2、日常对话 ¥0.2-1、一天全自动跑（5-6 个 cron + 聊天）¥2-10。「10块」通常是多天累计或别处扣费（GPT 订阅/机场/苹果内购/其他服务）
+
+关键洞察：
+- Hermes 每次 API 调用带整个上下文，**固定行李 5-6万 tokens/次**（system prompt + 工具 + 技能列表 + 记忆）——用户「感觉没聊多少」但每次调用都在付这 5-6 万输入，这是「扣费严重但好像没用多少token」的核心解释
+- 会话内缓存命中率通常 90-100%（命中 ¥0.05/M 极便宜）；**但 cron 任务首次调用缓存命中率只有 19-26%**（新会话前缀不同→缓存失效→按未命中 ¥1.5-3/M 全价收），cron 多 = 未命中量大头
+- **⚠️ 多服务共享同一个 DeepSeek key**：Hermes + 服小助(ai_cs_package/.env) + 红蓝/六分身落地页(server.py 硬编码) 全用 sk-ce1a8ba...。控制台总量 >> agent.log 统计时，差额来自其他服务或**用户 Mac 上的另一个 Hermes 实例**（多实例用户，先问 Mac 端是否也跑 cron）
+- **费用大头铁律：先看「输入·未命中缓存」**（价差30倍）。别信「thinking占大头」的结论——用控制台输出token总量证伪（当日输出0.26M撑不起87%）
+- **会话经济学：老会话=缓存钱包，别删、别频繁 /new**（新会话=未命中全价）；只有快触发压缩（threshold 0.5）才开新会话。详见 `references/cost-billing-audit.md` §4.5-4.6
+- 余额只剩几毛时给用户省钱建议：钉同一会话少 /new；cron 挪到空闲时段（价格减半）；Mac 与服务器 cron 去重
+
 ## 快捷指令
 
 用户喊 **「醒脑」** → 立即执行一次：磁盘清理脚本 + 记忆瘦身 + curator技能检查 + 重建技能档案库(`build-skill-manifest.py` → `kb_summary.py`) + cron drift检查 + 检查磁盘/内存/记忆状态。
