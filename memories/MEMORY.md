@@ -22,8 +22,6 @@ Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡SSH读~/Desktop但~
 §
 接码用hero-sms.com/5sim（sms-activate已停）。
 §
-英语学习：ChatGPT语音纠错+YouTube英文字幕0.75倍速；海外软件优先中文界面；目标雅思7分(12个月每天2h，词汇3000-4000起点，听读7.5口语6-6.5)。
-§
 远程装Hermes：Mac实例实际配了DeepSeek key且是主要烧费端(¥12-27/天 vs 服务器¥2-3)，查扣费差额先怀疑Mac端cron/新会话；Windows机SSH连不上用向日葵兜底。
 §
 Hermes v0.20坑：config.yaml gateway.platforms必须是dict(feishu:{skip_context_files:false})，list格式导致网关崩溃。
@@ -32,14 +30,12 @@ Cron drift：模型变更后旧cron被跳过，编辑~/.hermes/cron/jobs.json改
 §
 服务运维：保活~/Desktop/hermes/scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(html-project-hub坑6)；8002=服小助独立venv；8897=网关须nginx反代改写Host；改Hub(8895)先备份build_hub.py+index.html只动导航页，工具箱(8900)card-link禁丢，改完跑linkcheck.sh。
 §
-翻墙/机场：联通宽带主用GPT+视频；两台iPhone 11共用美区Apple ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版；平台IP敏感度：TikTok唯一高度敏感(切节点=换区+风控)，X/FB/IG/TG/WhatsApp/YouTube/Discord切英国等节点无影响(FB偶弹验证、FB广告账户校验IP)；频繁多国横跳才触发账号风控；机场看51fan.pro(软文不可信)，已选飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付实测，价格上官网确认。TG接入Hermes：国内腾讯云连不上api.telegram.org(curl 000)，须先代理或Mac跑，见china-im-channels技能references/telegram.md。
+翻墙/机场：联通主用GPT+视频；两台iPhone 11共用美区Apple ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版；TikTok唯一高度敏感(切节点=换区+风控)，X/FB/IG/TG/WhatsApp/YouTube/Discord切英国等节点无影响(FB偶弹验证)，频繁横跳才触发风控。已选飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付，价格上官网确认。TG接入Hermes：国内腾讯云连不上api.telegram.org，须代理或Mac跑，见china-im-channels技能references/telegram.md。
 §
-小红书2026红线：个人店禁教育类目(2026.4起)，卖课须个体户/企业店+定向邀约+ICP或走第三方(千聊/小鹅通/知识星球)交付；AI虚假种草=封号+法律风险(杭州首例判不正当竞争)，AI托管账号封号13万+，纯AI量产限流，须勾选AI辅助+真人化改写；话术禁收益承诺/虚假人设/私域导流。平台操作类变现建议必须先查规则再给结论。GPT充值GamsGo拼车不可靠(共享号互看/独享号不在手/土区风控)，用Pockyt礼品卡最稳。
+小红书2026红线：个人店禁教育类目(2026.4起)，卖课须个体户/企业店+定向邀约+ICP或走第三方(千聊/小鹅通/知识星球)；AI虚假种草=封号+法律风险，AI托管封号13万+，纯AI量产限流，须勾选AI辅助+真人化改写；话术禁收益承诺/虚假人设/私域导流。平台操作类变现必须先查规则再给结论。GPT充值用Pockyt礼品卡最稳(GamsGo拼车不可靠)。
 §
-拼多多2026运营：赛马制核心(低价爆款+高转化)，流量四来源(搜索/场景/活动/付费)，售后是最大亏点。APP首页布局：顶部频道栏(2026.8新增'最快明天达')、百亿补贴C位、多多买菜+限时秒杀并列、9块9特卖折叠'其他'。雨刮器(标品)适合百亿补贴/秒杀，服装(非标)适合9块9+场景推荐。
+拼多多2026运营：赛马制核心(低价爆款+高转化)，流量四来源(搜索/场景/活动/付费)，售后是最大亏点，APP百亿补贴C位。雨刮器(标品)适合百亿补贴/秒杀，服装(非标)适合9块9+场景推荐。
 §
-视频剪辑接单渠道：U客直谈(无抽佣直连甲方)、牛片网(企业片需作品集)、圆领(标准化轻服务)、淘宝代剪店铺(批量300-800/条)；避开一品威客会员费(4.8万起坑)和'免费教学+日350'招聘(割韭菜)。Yasin有AI视频技能(product-video-director/remotion/jianying-editor)可差异化定价300-500/条。
+Yasin财务紧急(2026-08)：月支1万撑不过1个月，救急赚钱优先，先推执行不谈长期计划。已验证：U客直谈真实(免费版接剪辑单，勿买98联系卡/198会员)、快马日结真实(蓝领150-300/天需出门)、微赚=骗局、短剧出海'一次性费用'=割韭菜、游戏搬砖时薪7-15元不适合；避开一品威客会员费(4.8万)和'免费教学+日350'招聘。剪辑接单渠道：U客直谈/牛片网(需作品集)/圆领/淘宝代剪(300-800/条)，AI视频技能可差异化定价300-500/条。TikTok短剧出海有兴趣：Seedance国内生成+TikTok Drama Center免费翻译，3-6个月项目非救急。
 §
-Yasin财务紧急(2026-08)：月支出1万，撑不过1个月，一切建议救急赚钱优先，先推执行(注册/接单)不谈长期计划。已验证渠道：U客直谈真实(免费版对接剪辑单，勿买98联系卡/198会员/押金)、快马日结真实(蓝领150-300/天需出门)、微赚=查无此司骗局、短剧出海"一次性费用"项目=割韭菜(央视/新华曝光)、游戏搬砖时薪7-15元不适合。他对TikTok短剧出海有兴趣，有AI视频技术栈(product-video-director/Remotion/剪映/火山Seedance)，链路=Seedance国内生成+TikTok Drama Center免费翻译，属3-6个月项目非救急方案。
-§
-DeepSeek key sk-ce1a8ba... 被多端共用：服务器Hermes+服小助(ai_cs_package/.env)+红蓝/六分身落地页(server.py硬编码)+Mac上的Hermes实例(主要消耗源)。对账时控制台总量>>agent.log统计=差额在其他端。官方价(2026-08直抓)：v4-flash缓存命中¥0.05-0.1/M、未命中¥1.5-3/M、输出¥4.5-9/M，高峰(北京9-12/14-18)=2倍。每次调用固定5-6万token行李，cron首调用缓存命中仅19-26%。
+DeepSeek key sk-ce1a8ba... 多端共用：服务器Hermes+服小助(ai_cs_package/.env)+红蓝/六分身落地页(server.py硬编码)+Mac实例(主要消耗源)，对账控制台总量>>agent.log=差额在其他端。官方价(2026-08)：v4-flash缓存命中¥0.05-0.1/M、未命中¥1.5-3/M、输出¥4.5-9/M，高峰(北京9-12/14-18)=2倍；每次调用固定5-6万token行李，cron首调用缓存命中仅19-26%。
