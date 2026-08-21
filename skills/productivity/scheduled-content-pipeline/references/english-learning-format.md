@@ -79,6 +79,26 @@ if m: print('META:', html.unescape(m.group(1)))
 ### 反 clickbait 规则
 LinkedIn/pulse 和大量 Medium 的 "新版 GPT" 文章常是 AI 生成或纯编造。在真实媒体（The Verge / TechCrunch / Ars Technica）上查不到 datePublished 验证的，一律丢弃。
 
+### 主路径：AnySearch MCP（2026-08-21 实战验证 — DDG 与 curl 双超时）
+中国服务器上 DDG web_search 持续超时；本会话连 `curl news.ycombinator.com` 也 exit 28 超时。
+**优先用 AnySearch MCP 搜索**（可靠、结果带日期）：
+- `mcp__anysearch__search`（Path 1 general，直接 query，无需 get_sub_domains）
+- 并行打多路 query 交叉验证：通用路（"trending AI news today OpenAI Anthropic Google announcement"）
+  + 垂直路（"new AI model release this week August 2026"）
+  + 具体产品验证路（"<candidate> release announcement"）
+- 新鲜度校准源（带日期，能确认"本周到底发了什么"）：aireleasetracker.com、llm-stats.com/llm-updates、
+  llmgateway.io/timeline、releasebot.io/updates/<vendor>
+
+### web_extract 后端限制（重要）
+当前环境 `web_extract` 后端是 ddgs（search-only），抓 URL 直接报错：
+"DuckDuckGo (ddgs) is a search-only backend and cannot extract URL content. Set web.extract_backend to firecrawl, tavily, exa, or parallel."
+→ 替代：`mcp__anysearch__extract`。但它也抓不动 paywall/反爬站（axios.com、openai.com 均失败）。
+→ OpenAI 发布信息用 releasebot.io/updates/openai 提取可行（内容全、带日期、无 Cloudflare 拦截）。
+
+### 多候选选题启发式（英语学习素材）
+多个新鲜候选并存时，选：①日期最新 ②贴近日常生活（词汇难度适中）③故事性强。
+例：ChatGPT for Teens（8/18，家长控制+青少年学习，生活化）> GLM-5.3（8/14，benchmark 术语，对雅思 6-7 水平太技术）。
+
 ### 备用源（旧方法仍有效）
 - HN Firebase API（topstories.json）→ 过滤 >200 pts 的 AI/技术内容（curl 优先，urllib 慢）
 - GitHub README：用 API base64 解码，不用 raw.githubusercontent.com（已知 blank 问题）
