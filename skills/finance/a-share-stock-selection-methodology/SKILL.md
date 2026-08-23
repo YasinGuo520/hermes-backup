@@ -1,6 +1,6 @@
 ---
 name: a-share-stock-selection-methodology
-description: A股短线选股方法论 — 多因子量化分析 × 板块轮动 × 风控。涵盖从技术面到资金面的完整分析框架，以及命中率优化方案。
+description: A股短线交易总纲 — 新浪/baostock行情数据获取 + 多因子量化选股 × 板块轮动 × 风控。覆盖从数据到命中的完整分析框架。
 version: 2.1.0
 tags: [finance, a-share, stock-selection, quantitative, short-term]
 ---
@@ -497,3 +497,45 @@ text = raw.decode("gbk")  # 不能用text=True，那会强制utf-8解码失败
 - **Kronos加载失败**：国内服务器从huggingface.co下载会Connection reset。优先 `local_files_only=True` 从 `~/.cache/huggingface/hub/` 加载
 - **东方财富push2资金流API盘后不稳定**：尤其非交易时段经常返回空。加Referer头+重试2次，失败自动降级不影响主体评分\n- **东方财富批量行情API（push2.eastmoney.com/api/qt/ulist.np/get）不可靠**：2026-07-22确认在多家服务器网络下持续返回空数据。**勿作行情主数据源**，优先用新浪`hq.sinajs.cn`。如需流通市值字段，通过个股池预设+手动维护实现\n- **新浪行情代码必须剥离交易所前缀**：Sina返回`var hq_str_sh600519="..."`格式，`sh600519`需提取为`600519`，否则与股票池数字代码不匹配\n- **curl -H参数格式必须精确**：`-H "Referer: https://finance.sina.com.cn"`（含头字段名），不能只有值\n- **A股价格过滤不宜设100元**：宁德时代382元、寒武纪1350元、迈瑞医疗152元等蓝筹皆超100元，设100会漏掉核心龙头。建议上限500或跳过价格过滤纯用市值\n- **新浪实时行情必须加Referer头**：否则返回403
 - **A股因子方向会变化**：2026年上半年实测显示简单动量因子的RankIC为-0.23（强负相关），说明当期A股以均值回归为主而非追涨。**不要假设因子方向永远不变**，建议每月重算各因子RankIC，方向跟着走。多因子框架应允许权重可正可负
+
+---
+
+## 市场数据获取速查（合并自 a-share-market-data）
+
+> 原独立技能 a-share-market-data 已并入本技能。数据获取脚本与参考资料全部在本技能目录下，**路径已更新**：
+> - 脚本：`~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/`（sina_ashare.py / backtest_quant_logs.py / verify_v2_daily.py）
+> - 参考：`references/sina-finance-api.md` / `eastmoney-kline-api.md` / `eastmoney-sector-api.md` / `baostock-data-guide.md`（另存 `baostock-data-guide-market-data.md` 为市场数据版）/ `quant-recommendation-verification.md` / `quant-cron-drift-diagnosis.md` / `quant-ensemble-health-diagnostics.md`
+
+### 实时行情（首选新浪）
+```bash
+curl -s -H "Referer: https://finance.sina.com.cn" "https://hq.sinajs.cn/list=sh688256,sz002185" | iconv -f GBK -t UTF-8
+```
+- 字段索引（逗号分隔，从0起）：0名称 1开盘 2昨收 3当前价 4最高 5最低 8成交量 9成交额；涨跌幅=(当前-昨收)/昨收
+- **必须带 `Referer: https://finance.sina.com.cn` 头**（否则403）；GBK 解码（`subprocess.run` 别用 text=True，用 `capture_output=True` 再 `.decode('gbk')`）
+- 单次请求 ≤30只（超了 Connection reset）；代码剥离 sh/sz 前缀与股票池匹配
+- **除权除息日口径**：hq 昨收是交易所调整后参考价、K线前收是原始价（实测潍柴动力差一个分红幅度）——日报用 hq 口径，累计准确率用脚本口径并注明差异
+
+### K线数据源（按稳定性）
+1. **baostock**（TCP socket，国内最稳，不走HTTP）：`bs.login()` → `query_history_k_data_plus("sh.600000","close,volume,amount",start,end,"d","2")` → `bs.logout()`；行业分类 `query_stock_industry()`（索引1=code含前缀, 3=industry）；总股本 `query_profit_data()`（索引9）；股票名 `query_stock_basic()`（**索引1=名称，索引2=IPO日期**——取错显示成日期）
+2. **新浪K线**（HTTP最稳）：`https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh688256&scale=240&ma=no&datalen=100`（scale=240日线/60=60分钟；无Referer要求；不含成交额/换手率）
+3. **东方财富K线**（含换手率/成交额）：`https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=1.600000&klt=101&fqt=1&lmt=100`（secid: 1.=沪 0.=深；klt=101日线/102周线/60=60分；urllib 偶发 SSL 失败用 curl）
+
+### 板块排名
+`https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=20&po=1&np=1&fields=f12,f14,f3,f62,f184,f66&fs=m:90+t:2`（t:2=行业 t:3=概念；f3=涨跌幅 f14=板块名 f62=主力净流入）；JSONP 需 strip 括号；偶发空响应重试；频率≤2次/秒。
+
+### 资金流向
+东财 `push2.eastmoney.com/api/qt/ulist.np/get?fields=f2,f3,f12,f14,f62` 的 f62=主力净流入（元）；**盘后/非交易时段常空响应**（Connection reset），交易时段较稳；Referer 必须 `https://quote.eastmoney.com/`；失败自动降级不阻塞主评分。
+
+### 验证与回测脚本（路径已更新）
+```bash
+# 批量行情（quote）+ 板块排名（sectors / concept）
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/sina_ashare.py quote sh688432 sz002185
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/sina_ashare.py sectors --top 10
+# 多日回测 + 因子健康度（Kronos饱和/flow全0/重复代码 红旗检测）
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/backtest_quant_logs.py ~/Desktop/hermes/quant-skill/logs --top 8 --window 5
+# 当日口径累计准确率（推荐日收盘 vs 前一交易日收盘；T+1口径用 backtest 脚本）
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/verify_v2_daily.py ~/Desktop/hermes/quant-skill/logs --top 8
+```
+- **因子失效红旗**：Kronos 连续全 1.0/0.0 = 信号饱和（strength 放大系数降到 2~3）；flow 连续全 0 = 东财 API 空转（权重自动重分配）；top_k 反复同批代码 = 只剩 MA 排序在推大盘蓝筹
+- **cron 无日志排查**：先查 `~/.hermes/cron/jobs.json` 的 last_status/last_error 区分休市 vs 故障；`RuntimeError: Skipped to prevent unintended spend: global inference config drifted` = 模型配置漂移被安全守卫拦截（**不是非交易日**）→ 改回 config.yaml + jobs.json 四字段（provider/model/provider_snapshot/model_snapshot）
+

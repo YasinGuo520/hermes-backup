@@ -771,12 +771,12 @@ proj.save()  # 打开剪映即可看到草稿
 
 **带货短视频标准流程：**
 1. **VC 出文案**（不要手工写，VC 有爆款拆解能力）：`python3 ~/Desktop/hermes/viral_copywriter.py --mode A --product "<产品名>" --category "<品类>" --target "<目标人群>" --price <价格> --platform douyin`（或 alias `vc`）。
-2. **转 LLM-video-maker 出片**：VC 文案整理成 `brief.json` → `npx hyperframes init projects/<id>` → 写 HTML/GSAP 构图（文案分段/动画/转场）→ `npx hyperframes render` → edge-tts 配音（+15%）→ ffmpeg 音画合成。详见 `llm-video-maker` skill。
+2. **转 HyperFrames 出片**：VC 文案整理成 `brief.json` → `npx hyperframes init projects/<id>` → 写 HTML/GSAP 构图（文案分段/动画/转场）→ `npx hyperframes render` → edge-tts 配音（+15%）→ ffmpeg 音画合成。详见下文「HyperFrames 确定性渲染」章节。
 3. **交付**：成片存 `~/Desktop/hermes/video-maker/projects/<id>/renders/`；改文案重跑 VC，改画面调 HTML/GSAP 重渲染。
 
 **要点：**
 - 12 款视频工具按场景/平台/成本选型速查：`references/video-tools-catalog.md`。
-- Manim 程序化动画（像素画/几何/数学确定性动画）：见 `manim-creative-scenes` skill（环境 `~/Desktop/hermes/manim-venv`，v0.20.1）。
+- Manim 程序化动画（像素画/几何/数学确定性动画）：见下文「Manim 创意动画场景」章节（环境 `~/Desktop/hermes/manim-venv`，v0.20.1）。
 - 带货视频字幕放**底部**（H-180）；转场必须**淡入淡出**不要硬切。
 
 ## 短视频内容方案模板库（合并自 xiaohuangben-video-creator）
@@ -789,3 +789,69 @@ proj.save()  # 打开剪映即可看到草稿
 - **管线映射**：晒过程→Seedance(火山方舟) 首选、Ken Burns 降级、百炼 I2V 兜底；教知识/聊观点→本 skill 文字视频；讲故事→llm-video-maker
 - **文案字数**：10s≈40字 / 12s≈50字 / 15s≈60字 / 20s≈85字（260字/分钟）
 - **执行铁律**：用户给图先做3件事（查水印/查HEIF格式/判断模特实拍）；先出配音再算视频长度；产品A/B对应关系必须用 vision_analyze 确认
+
+---
+
+## HyperFrames 确定性渲染（合并自 llm-video-maker）
+
+**触发**：带货/种草/测评/产品宣传类短视频，需要 100% 确定性画面（文字不飘、数据准确）时用 HyperFrames（HTML/GSAP 代码驱动 → Chrome headless 渲染 MP4）。与 moviepy 管线互补：moviepy 快糙猛，HyperFrames 精致可控。
+
+**工作流**：
+1. 写 brief JSON（必需字段：`id`、`platform`(tiktok/reels/shorts/youtube/square)、`story`、`source`）→ `npx hyperframes init projects/<id>`（墙内 clone GitHub 超时就 Ctrl+C，脚手架已生成）
+2. 读 brief → facts.json（画面事实必须可溯源）→ design.md（配色/字体/动效）→ storyboard.json → assets/ → index.html（HTML/GSAP 构图）
+3. 校验：`npx hyperframes lint` + `npx hyperframes validate`（WCAG AA 对比度，最多3轮）
+4. 渲染：`npx hyperframes render projects/<id> -o projects/<id>/renders/<id>.mp4`（draft 档快速迭代）
+5. 音画合成：HyperFrames 默认无音频 → edge-tts 配音（中文用 Xiaoxiao +15%）+ ffmpeg amix 混音（weights=0.3 1，adelay 500ms）
+
+**环境**：项目根 `~/Desktop/hermes/video-maker/`；Kokoro TTS venv 需 `export PATH="/Users/mac/.video-maker/runtime/python/bin:$PATH"`；Chromium 下载挂起时设 `PUPPETEER_DOWNLOAD_BASE_URL=https://npmmirror.com/mirrors/chromium-browser-snapshots/`。
+
+**AI 关键帧**：产品/时尚素材用百炼 `bl image generate --model qwen-image-2.0-pro --size 9:16 --seed <N> --watermark false` 生成静态关键帧 + Ken Burns 慢推（GSAP `tl.fromTo()`，避免 CSS transform 冲突 lint 错）；NSFW 提示词会被拒，保持产品向措辞（"精致蕾丝内衣"而非"暴露"）。
+
+**核心坑**：
+- GSAP `repeat: -1` 破坏确定性 capture → 用有限 repeat（`Math.floor(remaining/cycle)-1`）
+- 竖屏必须 `data-width="1080" data-height="1920"`（根 div + viewport meta 两处）
+- `backdrop-filter` 触发慢速截图渲染（30s 视频 30s→3min+）→ 用 rgba 半透明层/渐变替代
+- `hyperframes init` 墙内 clone 超时 → Ctrl+C 继续
+- 章节级编辑（edit-video）：clock/narration/caption 三层锁定，只重写目标章 scenes 后整片重渲；project/chapter ID 匹配 `^[a-z0-9][a-z0-9-]*$` 防路径穿越
+- Pexels 实拍背景：4K 需降到 1080×1920 + 30fps
+
+**支持文件**：脚本 `scripts/validate-brief.mjs`/`plan-scenes.mjs`/`fetch-assets.mjs`/`analyze-codebase.mjs`/`capture-demo.mjs`/`normalize-transcript.mjs`（`node "$SKILL_DIR/scripts/<name>.mjs"`）+ `scripts/llm-video-maker-schema.json`；参考 `references/hyperframes-composition-template.md`（竖屏构图）、`references/hyperframes-product-video-template.md`（30s 产品片6镜头）、`references/pexels-stock-video-sourcing.md`（免费实拍）、`references/hyperframes-audio-post-processing.md`（配音合成）、`references/llm-video-install-notes.md`。
+
+## Remotion 数据/文字视频（合并自 remotion-video-production）
+
+**触发**：需要**精确文字/真实数据**的视频（AI 生视频会写错字）——量化 Top8 榜单、数据复盘、排行榜、网页动效转视频。0 成本本地渲染，与 AI 生视频互补：AI 出画面，Remotion 出数据与文字。
+
+**环境**：项目 `~/Desktop/hermes/remotion-lab/`（remotion + @remotion/cli + react）；2核机 `remotion.config.ts` 里 `Config.setConcurrency(2)`（超核数报错）；chrome-headless-shell 在 `node_modules/.remotion/`。
+
+**工作流**：写组件（index.tsx registerRoot → Root.tsx Composition 注册分辨率/时长/fps → 主组件）→ **先单帧预览** `npx remotion still src/index.tsx <CompId> out/preview.png --frame=180` → vision_analyze 检查布局/溢出/配色 → 全片渲染 `npx remotion render`（后台+notify_on_complete，300帧@1080x1920 约3分钟/1.8MB）→ ffprobe 验证。
+
+**必备配置**：`tsconfig.json`（缺失报 "Could not find a tsconfig.json"）+ `remotion.config.ts`（`setVideoImageFormat("jpeg")`/`setOverwriteOutput(true)`/`setConcurrency(2)`）。
+
+**常用动画**：粒子背景（useMemo+固定种子防每帧重生成抖动，frame 驱动 sin/cos 漂移）、行渐入（spring + stagger delay）、数字滚动（interpolate + clamp + `fontVariantNumeric:"tabular-nums"` 防宽度跳动）、渐变紫标题（WebkitBackgroundClip:text）。
+
+**A股配色铁律**：红涨 `#ef4444` 绿跌 `#22c55e`；数据视频底部加权重 + "信号仅供研究"声明；改 Root.tsx 宽高/时长后需重新 bundle。
+
+**支持文件**：`templates/remotion-data-showcase.tsx`（通用数据榜单组件，改 STOCKS 数组即出新片）、`references/remotion-quant-top8-example.md`（粒子+玻璃卡片+逐行弹入+分歧度三色完整实例）。
+
+## Manim 创意动画场景（合并自 manim-creative-scenes）
+
+**触发**：像素画逐格点亮、作品/角色画廊巡游、海报动态化等**非数学**创意展示动画（数学/算法解释视频见 bundled `manim-video`）。环境：`~/Desktop/hermes/manim-venv`（manim v0.20.1）。
+
+**核心模式**：
+- 像素矩阵逐格点亮：`LaggedStart(*[GrowFromCenter(sq) for sq in cells], lag_ratio=0.012)` 一次搞定，不要逐格 play
+- 多作品共用一个 Scene 基类 + `type()` 动态生成（10 作品 = 10 行代码）
+- 画廊节奏：金框+画布 Create → 标题 Write（画框下方，博物馆标签式）→ 逐格点亮 → 轻微浮动 → 淡出
+
+**实战坑（全部验证）**：
+1. **画幅裁剪（最坑）**：mobject 超出默认 14.22×8 画幅被直接裁掉 → `self.camera.frame_width/height` 调大（保持16:9）；或缩小元素（canvas 7.6/frame 8.4/cell 0.42 是安全组合）
+2. **`-s` 预览黑帧**：结尾 FadeOut 全清 → 预览图纯黑，视觉模型误判失败 → 用 `manim -ql --format mp4` + ffmpeg 抽中间帧
+3. **中文字体**：`fc-list :lang=zh` 确认 + 显式 `font=`（服务器 WenQuanYi Zen Hei）
+4. 系统依赖：`apt install pkg-config libcairo2-dev libpango1.0-dev libffi-dev` 后再 pip 装 manim
+5. 中文 Scene 类名出片名含中文 → cp 成英文名再给前端
+
+**页面集成**：每作品 11s 720p mp4 仅 180-300KB 网页直接播；卡片缩略图抽动画中间帧（`-ss 7`）；点击卡片深色遮罩弹窗 + `<video controls autoplay loop>`。
+
+**支持文件**：`references/manim-pixel-art-scenes.md`（完整可跑脚本模板 + 10作品动态类生成 + 踩坑详录）。
+
+
+

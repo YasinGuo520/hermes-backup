@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260816-162923",
-  "last_run_at": "2026-08-16T16:29:23.182941+00:00",
-  "last_run_duration_seconds": 1207.956167,
-  "last_run_summary": "auto: 5 marked stale, 1 reactivated; llm: All verifications pass — every re-homed file resolves, cross-references point to the correct umbrellas, and the library is clean. The consolidation pass is complete.\n\n## Human-readable summary\n\n**Clusters processed (19 skills consolidated i…\narchived 20 skill(s):\n  • ai-analysis-landing-pages → server-service-deployment\n  • aliang-bailian → china-ai-platforms\n  • claude-mem → agent-performance\n  • content-risk-detector → douyin-livestream-ecommerce\n  • data-dashboard → ux-pro-max\n  • decision-co-pilot → project-recommendation-workflow\n  • design-inspiration → ux-pro-max\n  • feishu-lark → china-im-channels\n  • html-project-hub → server-service-deployment\n  • immersive-html-experiences → ux-pro-max\n  … and 10 more\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260823-171809",
+  "last_run_at": "2026-08-23T17:18:09.278589+00:00",
+  "last_run_duration_seconds": 744.942849,
+  "last_run_summary": "auto: 3 marked stale, 2 reactivated; llm: All consolidation work is complete and verified. Here is the summary.\n\n## Curator pass summary — umbrella consolidation\n\n### Clusters processed (10 archives, 6 umbrellas)\n\n**1. AI视频生产 (video production)** — `ai-video-production` was already…\narchived 10 skill(s):\n  • a-share-market-data → a-share-stock-selection-methodology\n  • ai-image-to-3d → china-ai-platforms\n  • coze-template-authoring → ai-saas-productization\n  • deepseek-api-cost-control → china-ai-platforms\n  • enterprise-agent-platform → ai-saas-productization\n  • hermes-multi-machine → hermes-advanced-setup\n  • llm-video-maker → ai-video-production\n  • macos-backup-automation → hermes-advanced-setup\n  • manim-creative-scenes → ai-video-production\n  • remotion-video-production → ai-video-production\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin a-share-stock-selection-methodology",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 9
+  "run_count": 10
 }

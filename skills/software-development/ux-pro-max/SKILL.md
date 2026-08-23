@@ -1,6 +1,6 @@
 ---
 name: ux-pro-max
-description: 前端视觉设计蒸馏规则集 — 配色/间距/阴影/质感/动效/设计流程 + 组件模式库/沉浸式页面/数据看板/灵感参考。
+description: 前端视觉设计蒸馏规则集 — 配色/间距/阴影/质感/动效/设计流程 + 组件模式库/沉浸式页面/数据看板/54套设计系统/快速草图变体。
 ---
 
 # UX Pro Max — 视觉设计速查
@@ -528,3 +528,36 @@ Hero 区排版细节见上文「Hero 首屏铁律」。
 - ❌ 暖白背景(#F4F1EA)+衬线字体+陶土色强调
 - ❌ 纯黑背景+荧光绿/朱红强调
 - ❌ 报纸式布局+细分割线+零圆角+密集列
+
+---
+
+## 设计系统库：54 套真实品牌样式（合并自 popular-web-designs）
+
+用户说「做得像 Stripe/Linear/Vercel/Notion」或想要已知品牌视觉时，从 bundled `popular-web-designs` 技能加载对应设计系统（每家含完整色板/字体层级/组件样式/间距阴影 + 可直接粘贴的 Hermes 实现说明）：`skill_view(name='popular-web-designs', file_path='templates/<site>.md')`。目录索引（AI&ML: claude/cohere/elevenlabs/minimax/mistral/ollama/opencode/replicate/runwayml/together/x.ai/voltagent；DevTools: cursor/expo/linear/lovable/mintlify/posthog/raycast/resend/sentry/supabase/superhuman/vercel/warp/zapier；云厂商: clickhouse/composio/hashicorp/mongodb/sanity/stripe；设计效率: airtable/cal/clay/figma/framer/intercom/miro/notion/pinterest/webflow；金融: coinbase/kraken/revolut/wise；企业消费: airbnb/apple/bmw/ibm/nvidia/spacex/spotify/uber）。
+
+**字体替换表**（专有字体→Google Fonts）：Geist→Geist；sohne-var(Stripe)→Source Sans 3；Berkeley Mono→JetBrains Mono；Circular/figmaSans/Pin Sans/UberMove/CoinbaseDisplay→DM Sans 或 Inter；IBM Plex→原版；Space Grotesk 替 Sanity waldenburgNormal。替换字体时**字重/字号/字距比字体本身更承载视觉身份**，严格照模板值。
+
+**选型速查**：开发者工具/看板→Linear/Vercel/Supabase/Raycast/Sentry；文档站→Mintlify/Notion/Sanity/MongoDB；营销落地页→Stripe/Framer/Apple/SpaceX；深色→Linear/Cursor/ElevenLabs/Warp；终端风→Ollama/OpenCode/x.ai/VoltAgent。
+
+## 设计流程与反AI味（合并自 claude-design）
+
+单页/原型/Deck 等一次性 HTML artifact 的设计**过程与品味**准则（与本技能上文规则互补——规则给数值，本节约流程）：
+
+1. **从上下文出发，不靠感觉**：先读品牌文档/现有截图/repo 组件/设计 token 再动手；缺失时问简短聚焦问题（输出格式/受众/保真度/素材/品牌体系/变体数）。有 repo 就读实际源文件，文件树只是菜单
+2. **Surface-First（最高杠杆的反AI味规则）**：动手前先承诺一种 surface 原型——Monitor(看状态)/Operate(操作)/Compare(对比)/Configure(配置)/Decide-Learn(说服,唯一适合 hero 的)/Explore(浏览)/Command-Inspect(键盘驱动)。**hero+三卡布局只在 Decide/Learn 正确**，看板是 Monitor 不是 Decide——这是 80% AI 设计 slop 的根因（构图问题，不是配色问题）
+3. **三变体**：默认给 3 个方向（保守/强拟合/发散），每个是不同设计立场不是换色；用户选定后收敛，不留一堆选项
+4. **Slop 诊断（先打分再修）**：10 项 tell（①技术渐变 ②默认indigo ③功能磁贴×3 ④左色条 ⑤无依据玻璃拟态 ⑥巨型数字 ⑦圆角图标帽 ⑧全居中 ⑨默认Inter字体 ⑩错误surface），每项1分，10=最AI。**诊断与修复分开做**：构图类(3/8/10)→重排版；配色类(1/2/9)→换色换字体；装饰类(4/5/6/7)→删装饰。修复只处理诊断点名的项，重打分后再宣布完成
+5. **内容纪律**：不填假数据/装饰性指标/占位好评/泛泛标签；每元素必须挣得位置；文案未定标 draft
+6. **验证**：文件存在 + 浏览器打开查 console + 至少主视口截图；有浏览器工具就截图自查再交付，别说「完成了」却没写文件
+7. **Deck 规则**：1920×1080 固定画布缩放适配；键盘导航+页码+localStorage 记忆；文字≥24px；1-2 背景色
+8. **Tweaks 面板**：本地 artifact 加小型页内控制（主题/密度/强调色/动效/变体开关），隐藏时设计要完整；localStorage 持久化
+
+完整文档见 `references/claude-design-doctrine.md`（含 React 使用边界、原型规则、变体规则、版权红线、可移植开场提示词模式）。
+
+## 快速草图/变体对比（合并自 sketch）
+
+用户要「看几个方向再定」（"sketch this screen"「2-3 takes」「对比布局A/B」）：**2-3 个完整独立 HTML 变体一次给出**，每个变体是一个设计立场（密度/强调/审美/布局/接地方式选一条轴拉开），不是换像素。命名用立场不用编号（001-calm-editorial/）。
+
+流程：intake（感觉/参考/核心动作三问，一次一问，用户已给就跳过）→ 变体（单文件自包含 HTML：内联 style、真实文案非 lorem、至少一个可交互状态、Tailwind CDN 可用）→ **browser_vision 逐个目检**（抓字体导入失败/flex 塌陷等源码检查看不到的 bug）→ 头对头对比表（带观点：「我的看法：xx 适合谁」）→ 用户选/合并/再来一轮。默认 CSS reset + 系统字体栈起步。变体是消耗品——值得保留的升级成正式代码，别当资产收藏。主题化时共享 `sketches/themes/tokens.css`（三色一字体足够，别过度 token 化）。
+
+

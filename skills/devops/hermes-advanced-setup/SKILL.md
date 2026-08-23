@@ -1,6 +1,6 @@
 ---
 name: hermes-advanced-setup
-description: 配置 Hermes Agent 高级功能——Kanban看板、Holographic记忆、GitHub备份、Dashboard鉴权。覆盖 David Ondrej 7级路线图 Level 4-6。
+description: 配置 Hermes Agent 高级功能——Kanban看板/Holographic记忆/GitHub备份/Dashboard鉴权/多机部署/自动备份/升级。覆盖 David Ondrej 7级路线图 Level 4-6。
 category: devops
 ---
 
@@ -368,3 +368,48 @@ curl -sS --max-time 60 https://api.siliconflow.cn/v1/chat/completions \
 | Holographic Memory | 无 | 无 | ~/.hermes/memory_store.db |
 | GitHub Backup | 无 | PAT token | private GitHub repo |
 | Gateway | 9119 | 无（127.0.0.1） | ~/.hermes/sessions/ |
+
+---
+
+## 多机部署与协作（合并自 hermes-multi-machine）
+
+**触发**：两台以上 Hermes 实例（服务器+Mac）的分工/通信/远程装新机（「装 Hermes 到任意电脑/新电脑/Windows」）。
+
+### 分工原则
+| 实例 | 角色 | 特点 |
+|------|------|------|
+| **服务器**（24h在线） | 后台大脑 | cron/渠道值守/搜索调研/数据采集/长分析 |
+| **Mac/本地**（人在才开） | 创作主力 | 剪映/GUI/浏览器登录态/本地大文件 |
+
+铁律：每实例独立 `~/.hermes/` + 独立 SOUL.md（服务器=行动派「先做再说」；Mac=先想后动、深度优先、模糊反问、质疑再信）；定时任务按实例归属防双跑；渠道分配（飞书→服务器、微信→Mac、QQ→服务器）。
+
+### 网络桥接（Tailscale）
+服务器 `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`（Mac 装 dmg），两边**同一账号**登录自动组网 → `tailscale status` 查对方 IP（100.x.x.x）→ `ssh mac@100.x.x.x`。零公网端口暴露。
+
+### 代理隧道（Mac翻墙→服务器复用）
+`ssh -L 7890:127.0.0.1:7890 -N -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes mac@100.x.x.x`（Mac 7890 为 Clash 默认；Surge 6152/v2ray 1087 先 `netstat -an` 探测）→ 验证 `curl -s -o /dev/null -w '%{http_code}' https://www.google.com`（200=通）；bashrc 加自动重连（pgrep 检查 + 后台拉起）。局限：依赖 Mac 在线；HuggingFace 等慢站可能超时。
+
+### 跨机 Skill 同步
+- **macOS TCC 坑**：SSH 读 Mac 的 `~/Desktop` 报 Operation not permitted——skill 库走 `~/.hermes/skills/` 不碰 Desktop
+- 对比：两边 `find ~/.hermes/skills -name SKILL.md | sed 's|.*/skills/||; s|/SKILL.md||' | sort` + `comm -23`（comm 要求先 sort）
+- 传输：`cd ~/.hermes/skills && ssh mac@<ip> 'cd ~/.hermes/skills && tar czf - <skill>' | tar xzf -`（保留 references/）
+- 筛选原则：同主题剔除 / .archive 里归档过谨慎 / Mac 专属剔除 / 同类 N 选 1 / 已自动化功能不拉对应 skill
+- 品牌名清理：patch 前 `grep -rn 品牌名` 找全所有位置（不只 description，正文引用行也要改）
+
+### 远程装 Hermes（Windows/任意电脑）
+先问清是哪台电脑（别默认 Mac）；装 Hermes ≠ 配 key（只装不配 = 空壳，能跑 doctor 但一问问题报「没配模型」）。SSH 优先（Windows 先开 OpenSSH Server：设置→系统→可选功能；本地账户无密码先 `net user <用户名> <新密码>` 设临时密码；微软账户用邮箱密码或密钥认证）；**必须 Git Bash**：`curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash`；`HTTP 400 No models provided` = config.yaml 被记事本存成 UTF-8 BOM（重存无 BOM）；墙内拉脚本 `export https_proxy=http://127.0.0.1:7890`；装完 tar over ssh 同步 skills + DeepSeek key + 按角色定制独立 SOUL.md。
+
+**支持文件**：`scripts/mac-hermes-diagnostic.sh`（跨机诊断：系统版本/进程/配置/Python/端口/网络/磁盘）。
+
+## macOS 自动备份（合并自 macos-backup-automation）
+
+**触发**：把 Hermes 数据（config/会话/skills/工作区/知识库）每日自动备份到外置盘（与上文 Level 4 GitHub 备份互补：GitHub 管配置，外置盘管全量）。
+
+**核心坑：/Volumes 挂载点 root 属主**——`ls /Volumes/<name>` → Permission denied、mkdir/cp/tar 全失败、osascript 也失败（Finder 能成但会挂起）。检测：`ls /Volumes/<name>/ 2>/dev/null || echo 不可读` + `df -h | grep <name>`（**df 比 ls 可靠**：ls 在盘已挂载但目录 root 属主时也报错）。
+
+**策略**：本地先打包到 /tmp → cp 外置盘 → 盘未挂载/不可写就优雅跳过（cron 在盘没插时也要能跑，测试拔盘场景）。脚本 `scripts/hermes-backup-macos.sh`：`df -h` 动态探测挂载点（强制弹出后 macOS 留 root 属主 stub，卷会挂成 `<name> 1`——**不能硬编码路径**），7 天滚动保留，日志 `~/Desktop/hermes/backup-log.txt`。注册：`hermes cron create "0 3 * * *" --name 外置盘备份 --no-agent --script hermes-backup.sh`。
+
+**其他坑**：APFS 快照卷（Preboot/VM 等）不是外置盘别备份；备份 I/O 可能触发边缘故障 USB 桥接强制弹出（插 Windows 重初始化，或 `sudo killall -STOP -c usbd; sleep 2; sudo killall -CONT -c usbd` 复位 USB 总线）；用户说「你的命令之后盘弹出了」要信用户时序帮恢复，别争因果；「一插就发烫」≠桥接板烧毁，多为 Mac USB 控制器/NVRAM 状态异常，先 Windows 交叉验证。
+
+**支持文件**：`scripts/hermes-backup-macos.sh`（实际运行的备份脚本，自动检测挂载点）、`references/macos-external-disk-troubleshooting.md`（5层排查：换线→换口→直插→换机验证→NVRAM 重置）。
+

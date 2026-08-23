@@ -1,6 +1,6 @@
 ---
 name: ai-saas-productization
-description: AI工具/自动化项目的SaaS产品化方法论——把AI工具、Agent、自动化Pipeline变成可售卖SaaS产品的完整框架。覆盖：项目评估→SaaS vs 自建决策→多租户架构→定价策略→成本测算→渠道规划
+description: AI工具/自动化项目的SaaS产品化方法论——把AI工具、Agent、自动化Pipeline变成可售卖SaaS产品的完整框架。覆盖：项目评估→SaaS vs 自建决策→多租户架构→定价策略→成本测算→渠道规划→企业Agent平台→Coze模板上架
 category: productivity
 triggers:
   - 产品化
@@ -953,3 +953,32 @@ zip -r package.zip package_dir/ -x "*/__pycache__/*" "*.pyc"
 | 客户要全链路验证 | ✅ 可以自己配置开放平台 |
 | 客户不会装Python | ❌ 需要用pyinstaller打包成exe |
 | 客户要求Windows双击即用 | ❌ 需要打包Python运行时（体积>50MB） |
+
+---
+
+## 企业级 Agent 平台搭建咨询（合并自 enterprise-agent-platform）
+
+**触发**：「公司用Agent怎么搭」「多部门几十人怎么搞」「各部门Agent功能是什么」——真实公司多部门 AI Agent 架构咨询（区别于本技能上文的产品化：那是把工具变产品卖，这是给企业设计内部平台）。
+
+### 一问四答框架
+1. **架构模式**：部门=工作区、Agent=部门内助手、知识库=部门文件（独享）、工具=API（ERP/数据库/爬虫）、机器人=飞书/企微 bot 对话入口
+2. **平台选型**：Dify（综合企业平台，原生多租户+可自部署，**首推**）/ FastGPT（知识库问答为主）/ Coze（快速验证，SaaS 不可自部署）/ RAGFlow（复杂文档解析）
+3. **部门 Agent 模板**：产品/运营/物流/财务/人事/市场逐部门 Agent 功能定义，见 `references/enterprise-department-agents.md`
+4. **成本估算**：DeepSeek V4 ¥5/亿tokens，10人≈¥30-60/月、30人≈¥90-180/月、50人≈¥150-300/月（预算×2）；服务器 ¥100/月；简单问答走 flash、复杂推理才用强模型
+
+**设计范式（Anthropic Managed Agents 三层解耦）**：Brain（无状态推理+控制循环）/ Session（append-only 事件日志）/ Sandbox（隔离执行环境）；**Pet 变 Cattle**（组件可独立崩溃恢复，不丢 session）；接口稳定>实现稳定；凭据不进沙箱；Brain↔Sandbox 统一 `execute(name, input) → string` 接口。完整参考 `references/managed-agents-architecture.md`。
+
+**用户状态判断**：「了解下/暂时不用」→ 只给概念+成本不 push；「帮我搭/想试试」→ 转执行模式；「给预算方案」→ 细化到具体人数+部门。
+
+## Coze（扣子）模板上架变现（合并自 coze-template-authoring）
+
+**触发**：「做个扣子模板」「上架扣子商店卖模板」。渠道优先级：扣子模板商店（自然流量最大）→ 抖音/B站演示视频（带购买链接）→ 小红书教程 → 私域。分成：创作者拿 70-80%，平台抽 20-30%。
+
+**方向与定价**：C端小模板 ¥9.9-39.9 走量（短视频爆款文案/小红书知识卡片/书单视频/直播话术/商品主图）；B端企业模板 ¥99-299（智能客服/销售陪练/数据分析）；**¥19.9 是黄金价格带**（超 ¥49.9 转化率断崖，促销后 ¥9.9 还有赚）。
+
+**设计流程**：需求定位 → 模板文档（人设提示词+工作流配置+插件列表+定价+上架 checklist，完整到可直接复制粘贴）→ 工作流节点（开始/LLM/插件/代码/条件/循环/结束；**DeepSeek-R1 是扣子上性价比首选**；变量引用 `{{变量名}}`）→ 定价测算（冲量¥9.9→稳定¥19.9→成熟¥29.9-39.9）→ **配套本地 Python 工具**（先本地跑通验证逻辑，再搬上扣子；双版本方案：扣子版上架卖 + 本地版自用，本地工具必须支持配置文件持久化）。
+
+**铁律与坑**：扣子是 React SPA 无公开 API，**不爬模板排行**（用交叉验证法推断热门方向）；工作流最少节点原则+输入校验+LLM 节点兜底输出；上架前全链路测试（空值/边界/插件/输出格式/多轮记忆）；模板商店会促销，定价留余量；用户偏好带货向优先+本地工具 alias（2-3字母短命令）。
+
+**实战案例**：`references/coze-viral-copywriter-template.md`（爆款文案带货特工：人设+双工作流+插件列表+定价完整设计）、`references/coze-viral-copywriter-local-tool.md`（配套本地工具模板：两种模式+配置持久化）。
+
