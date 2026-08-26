@@ -136,6 +136,18 @@ From session history with Yasin:
 4. Everything must be **"拿来就能参考"** — immediately actionable, not theoretical.
 5. "写清楚XX用XX工具通过X方式赚了多少钱" — not vague claims like "可月入过万" but specifics like "月入$1,400".
 
+## Cron Job Consolidation（合并定时任务省钱）
+
+**Why:** DeepSeek 缓存按「前缀完全一致」命中。每个 cron 任务都是独立新会话，首调时 system prompt 行李（5-6万 tokens）大多按未命中全价计（¥1.5-3/M），实测 cron 首调命中率仅 19-26%。多个独立 cron = 多次全价首调。合并成一个任务 = 1 次首调 + 后续部分同会话高命中（前缀不断累积，实测命中率 84.2%，usage.jsonl 验证），输入费可省 40-50%。
+
+**操作模式（2026-08 实测可行）：**
+1. **完整 prompt 在 `/home/ubuntu/.hermes/cron/jobs.json`**（`cronjob action='list'` 只有 preview），合并前先从这里提取各任务原文
+2. **合并 = 一个 cron job + 一个多部分 prompt**（`第1部分：...` / `第2部分：...` / `第3部分：...` 用分隔线隔开）。不要用 `context_from` 链——那只是注入文本，各任务仍是独立会话，省不了首调全价
+3. prompt 开头写「**同一个会话里按顺序完成，共享搜索结果**」——前部分搜过的源（GitHub/Product Hunt/HN）后面直接复用，减少重复搜索和时间
+4. **部分失败保底**：prompt 写「某部分数据不足时保底输出，不能卡住拖垮其他部分」，避免单点失败全挂
+5. **回滚安全**：pause 旧任务而非 remove，保留配置随时可恢复
+6. **体验考量**：交付时间推迟到合并任务跑完（20-30 分钟）。有严格时间窗口的任务（如用户早上要练的英语）保留单独 cron；纯资讯类可合并。合并任务带上原任务挂的 skills（如 monetization-case-daily-pipeline）
+
 ## Delivery Configuration
 
 ```

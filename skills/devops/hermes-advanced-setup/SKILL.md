@@ -32,7 +32,9 @@ category: devops
 - 升级 = 源码树 `git fetch gitcode main` → `--ff-only` merge → 重应用本地补丁 → `pip install --user --break-system-packages -e .`
 - **必须先 stash 本地补丁**（feishu adapter 的 channel tag 注释，上游没修），merge 后 apply
 - **网关重启不能从网关进程内做**（SIGTERM 传播杀会话），用 crontab flag 技巧让 cron 在进程树外重启
-- 完整流程+坑：`references/update-hermes.md`
+- ⚠️ **GitHub 被墙时 `git fetch origin` 可能静默失败**（exit 0 但没拉到），版本以 `git ls-remote gitcode HEAD` 为准
+- ⚠️ **依赖重装三连坑**：bashrc 7890 代理劫持（unset 代理）、uv 连不上（用 venv 内 pip3.11 + 腾讯内网源）、旧 editable root 属主 pyc 卡权限（sudo find -delete）
+- 完整流程+坑：`references/update-hermes.md`；**DeepSeek 扣费/成本排查**（定价表、缓存命中率、pro扣费排查链、锁死只准 v4-flash）：`references/deepseek-billing-diagnosis.md`
 
 ## config.yaml 格式陷阱：gateway.platforms 必须 dict 不能 list（v0.20+）
 
@@ -387,7 +389,20 @@ curl -sS --max-time 60 https://api.siliconflow.cn/v1/chat/completions \
 服务器 `curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up`（Mac 装 dmg），两边**同一账号**登录自动组网 → `tailscale status` 查对方 IP（100.x.x.x）→ `ssh mac@100.x.x.x`。零公网端口暴露。
 
 ### 代理隧道（Mac翻墙→服务器复用）
-`ssh -L 7890:127.0.0.1:7890 -N -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes mac@100.x.x.x`（Mac 7890 为 Clash 默认；Surge 6152/v2ray 1087 先 `netstat -an` 探测）→ 验证 `curl -s -o /dev/null -w '%{http_code}' https://www.google.com`（200=通）；bashrc 加自动重连（pgrep 检查 + 后台拉起）。局限：依赖 Mac 在线；HuggingFace 等慢站可能超时。
+⚠️ **2026-08-26 已修复并重新配置**：旧配置 `.bashrc` 里 `ssh -L 7890:127.0.0.1:7890 mac@100.80.117.5` + 3行 export 是**坏配置**——Mac 的 Clash Verge (mihomo) 混合代理端口是 **7897**（GUI 控制口 33331 不是代理口），7890 转发到空端口从未生效，还持续劫持 pip/uv 报 ProxyError。已删除坏配置，改成：
+
+```bash
+# 正确隧道（17897 本地端口 → Mac 7897 混合代理口）
+ssh -L 17897:127.0.0.1:7897 -N -f -o StrictHostKeyChecking=no -o ExitOnForwardFailure=yes mac@100.80.117.5
+# git 全局走代理
+git config --global http.proxy http://127.0.0.1:17897
+git config --global https.proxy http://127.0.0.1:17897
+```
+
+- 默认**不 export 全局代理变量**（避免劫持 pip/uv），需要时 `proxy-on`/`proxy-off` 函数（在 .bashrc，已配置）
+- keepalive.sh 已加 `start_tunnel()` 保活（17897 断了自动拉起）
+- 隧道活着但 curl 000 → **Mac 端 Clash 代理没启动**（`lsof -iTCP:7897 -sTCP:LISTEN` 无输出），需用户开 Clash Verge 选节点
+- 完整配置+踩坑（[s]sh 防自匹配、非交互 shell 不加载函数、代理劫持 pip）：见 server-service-deployment 技能 `references/mac-proxy-tunnel.md`
 
 ### 跨机 Skill 同步
 - **macOS TCC 坑**：SSH 读 Mac 的 `~/Desktop` 报 Operation not permitted——skill 库走 `~/.hermes/skills/` 不碰 Desktop

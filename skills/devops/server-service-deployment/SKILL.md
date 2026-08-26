@@ -16,6 +16,12 @@ created_by: agent
 - **资源**: 2核 / 3.6G内存 / 69G磁盘（约56G空闲）
 - **已装**: Python 3.11, pip, git, nginx（可选），Docker
 
+## 工作方式铁律（Yasin 明确要求）
+
+- **给最直接的方案，不要层层递进**。用户说"搞复杂了/弄个最直接的"时，立刻收敛到最小可运行路径（例：翻墙需求→直接配置隧道+git代理+保活，不要先分析再给函数再测试再解释）。
+- **诊断命令别绊自己**：`pgrep -f "xxx"` 会匹配到自己的命令行字符串 → 误判"进程复活"。用 `[x]xx` 中括号技巧或直接 `ss -tlnp` 看端口。
+- 服务器维护类任务用户信任你放手干（approvals off），但**不要为了"完美"加多余步骤**。
+
 ## Server Capability Assessment（资源盘点）
 
 **触发场景：** 用户问"服务器能做什么"、"还有多少余量"、"还能挂几个应用"
@@ -436,21 +442,63 @@ systemctl --user status hermes-gateway.service  # systemd服务状态
 
 ## Hermes升级（腾讯云特供版）
 
-**问题**：`hermes update` 走 `git pull`，GitHub 在腾讯云上直连超时/被墙。
+> ⚠️ **2026-08 实测修正**：`pip install --upgrade hermes-agent` 已不可用——PyPI 停在 0.19.0，v0.20+ 只在 GitHub main 源码树，pip 安装已非官方支持平台。正确升级走 **git 源码树 + GitCode 镜像**，完整流程见 `hermes-advanced-setup` 技能的 `references/update-hermes.md`（含代理劫持/uv不可用/pyc权限三连坑）。本节保留历史排查记录。
 
-**替代方案** — 用 venv pip 走腾讯 PyPI 镜像：
+**问题**：`hermes update` 走 `git pull`，GitHub 在腾讯云上直连超时/被墙（`fatal: unable to access ... Recv failure: Connection reset by peer`）。注意 `curl https://github.com` 可能通但 git 端点被重置——先别下结论。
+
+**先验证是否真的需要升级**（省得白跑）：
+```bash
+cd ~/.hermes/hermes-agent
+timeout 60 git fetch origin main        # ⚠️ GitHub 被墙时可能静默失败(exit 0但没拉到)——别只信这个
+timeout 60 git ls-remote gitcode HEAD    # 用 GitCode 镜像确认真实最新 hash（gitcode remote 需先 add）
+git rev-parse HEAD; git rev-parse origin/main   # 两个一致 = 已最新，落后数=0 不用升
+git log --oneline HEAD..origin/main | wc -l    # 落后commit数
+hermes version    # 会显示 "Up to date" / 落后提示（⚠️ 基于 stale origin，不可靠）
+```
+
+**已弃用方案** — 用 venv pip 走腾讯 PyPI 镜像（PyPI 只有 0.19.0，v0.20+ 不在此路）：
 ```bash
 ~/.hermes/hermes-agent/venv/bin/pip3 install --upgrade hermes-agent
 ```
 
-腾讯云镜像 `mirrors.tencentyun.com` 默认可用，无需换源。
+### 手动升级实测路径（2026-08-26 v0.20.0→0.20.5，GitHub被墙时）
 
-**验证版本**：
+**终案（2026-08-26 实测）**：把 origin remote 整体 set-url 到 gitcode 镜像（fetch+push 都改），之后 `hermes update` 内部走 origin 就直接通 gitcode，不再撞 GitHub；同时 `git config --global --unset http.proxy https.proxy` 清掉代理（GitHub 借 Mac 代理的方案已弃用，见 `references/mac-proxy-tunnel.md`）：
 ```bash
-~/.hermes/hermes-agent/venv/bin/pip3 show hermes-agent
+cd ~/.hermes/hermes-agent
+git remote set-url origin https://gitcode.com/GitHub_Trending/he/hermes-agent.git
+git remote set-url --push origin https://gitcode.com/GitHub_Trending/he/hermes-agent.git
+git config --global --unset http.proxy 2>/dev/null; git config --global --unset https.proxy 2>/dev/null
+git remote -v   # 两条都应指向 gitcode
 ```
 
-当前 venv 中 pip 版本是 Hermes 的发布版（PyPI），git 仓库是开发版源码。PyPI 版不一定追平 git main，但功能更稳定，正常使用足够了。
+`hermes update` 内部走 GitHub fetch 必挂（`Recv failure: Connection reset by peer`），但代码可经 gitcode 镜像手动切：
+
+```bash
+cd ~/.hermes/hermes-agent
+# 1. 用 gitcode 镜像确认最新 hash（git remote -v 应已有 gitcode remote；没有先加）
+timeout 60 git fetch gitcode main
+git log --oneline HEAD..gitcode/main | wc -l    # 落后数
+git show gitcode/main:pyproject.toml | grep -E "^version"   # 确认版本号
+
+# 2. 保留本地补丁（本地修改过的插件文件 diff 存文件），再切分支
+git diff plugins/platforms/feishu/adapter.py > /tmp/feishu_patch.patch
+git stash push -m "feishu fix" plugins/platforms/feishu/adapter.py
+git checkout -B main-upgrade gitcode/main
+git apply /tmp/feishu_patch.patch   # 上游没改这块就还能打上
+
+# 3. 重装依赖：先 unset 代理（见 mac-proxy-tunnel.md 坑4），pip 走腾讯内网源
+unset http_proxy https_proxy all_proxy HTTP_PROXY HTTPS_PROXY ALL_PROXY
+venv/bin/pip3.11 install -e ".[all]"
+
+# 4. 权限坑：旧 editable 安装的 root 属主 pyc 会挡 pip 卸载
+sudo find venv/lib/python3.11/site-packages/__pycache__ -name "*editable*" -delete
+#    然后重跑 pip install -e ".[all]"
+```
+
+**验证**：`hermes --version` 显示 `v0.20.5 ... local <hash>`；grep 确认本地补丁行还在。
+
+**⚠️ 依赖重装必须 unset 代理**：`.bashrc` 全局 `export https_proxy=...` 会让 uv/pip 全部走隧道代理，代理不通时报 `ProxyError / tunnel error / Connection reset by peer`——即使内网源 curl 直连 200 也一样。装依赖前 unset 全部代理变量（GOPROXY 是 go 专用，保留无妨）。
 
 ## 服务器定期维护（大脑清理）
 
@@ -573,6 +621,8 @@ crontab:
 **新服务上线必须同步加进 keepalive.sh 的 两处**（否则下轮网关重启又挂）：
 1. 对应类型数组（STATIC/FASTAPI/PYTHON_SERVICES）— 启动逻辑
 2. `check_all()` 的端口列表 — 否则状态表永远不显示它，挂了也看不出 ❌（8896 踩过：dashboard 挂了 nginx 8897 变 502，但 keepalive 状态表全 ✅，因为列表里没 8896）
+
+**隧道类已弃用（2026-08-26 实测推翻）**：Mac 代理隧道（17897→Mac Clash 7897，git 翻墙用）曾加 `start_tunnel()` 进 keepalive——**全部撤销**。原因：Mac 的 Clash Verge 实际走 **TUN 模式**（mihomo 不监听 7897），服务器 SSH 隧道借不到代理（隧道端口在听、SSH ESTABLISHED，但经隧道访问 Google 全 000）。服务器翻墙**终案**：不借 Mac 代理，git remote 整体切 gitcode 镜像（fetch+push 都改），装依赖走腾讯内网源。完整弃用结论与过渡方案见 `references/mac-proxy-tunnel.md`。
 
 ### ⚠️ 服务改由 nginx 托管后，必须从 keepalive.sh 移除该端口（否则回滚顶掉 nginx）
 
@@ -723,6 +773,8 @@ docker ps | grep <PORT>
 ps aux | grep "[s]erver.py" | awk '{print $2}' | xargs -r kill
 ```
 （`[s]erver.py` 中括号技巧避免 grep 匹配自身）
+
+**⚠️ 同一陷阱对 pgrep 有效且更隐蔽**：`pgrep -f "ssh -L 17897"` 会匹配到**诊断命令自己**（命令行里含同样字符串），导致误判"进程复活/杀不死"。用 `pgrep -f "[s]sh -L 17897"`（中括号正则只匹配真实 ssh），或 python 读 `/proc/PID/cmdline` 精确判断。诊断端口/隧道时优先 `ss -tlnp` 而不是 pgrep 进程名。
 
 ### 4.3 交互式 LLM 页面模式（静态页 + LLM 后端）
 

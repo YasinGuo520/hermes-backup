@@ -36,6 +36,8 @@ description: 搜索/安装社区 Skill 与 GitHub 工具（克隆/venv/软链/�
 - ❌ 用户发来一个Skill推荐视频/文章时，不要直接安装——先检查内置能力
 - ❌ Skill名称不同但功能相同的情况很多（如"长期记忆"类有多个），优先复用已有
 - ✅ 用户偏好已记录在memory中：『先检查Hermes是否已有自带工具/能力实现相同功能』
+- ❌ **省token类skill先看省的哪端**：输出压缩类（如 caveman，实测省输出65%）对输入主导的账单（5-6万 system prompt 行李+缓存未命中）总影响仅5-10%。推荐前先判断用户费用结构——大头在输入·未命中缓存时，优先推荐输入端优化（cron合并/同会话复用），别迷信输出压缩
+- ❌ **skills.sh 页面可能列出仓库里不存在的派生skill**：如 juliusbrussee/caveman 的 `caveman-cn` 有页面但仓库 `skills/` 目录实际没有——安装前用 GitHub API `contents/skills` 列出真实结构，或 jsDelivr 试拉验证。主 skill 常自带保语言规则（caveman 按用户语言回复），中文用户未必需要 -cn 变体
 
 ## 辨别：单Skill vs. GitHub项目工具
 

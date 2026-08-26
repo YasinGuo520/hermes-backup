@@ -117,6 +117,7 @@ deepseek-v4-pro 是 flash 的 **3倍**；2026-08-23 起周末全天低谷价；*
 3. **烧钱大头排序**：输入未命中缓存 ≫ 输出/thinking > 固定行李
 
 ### 扣费排查五步
+0. **先 `date` 确认当前日期，再查日志** — 跨天会话极易用错日期（实测：会话开始8/19、实际执行8/22，用8/19过滤日志全空白查一轮）。日志文件名 `agent.log`/`agent.log.1` 轮转，旧档也保留。
 1. 控制台 → 用量 → 模型维度，看「输入未命中缓存」×高峰价 = 最大扣费项
 2. `grep "API call" ~/.hermes/logs/agent.log | grep 日期 | grep -oP 'model=\S+ provider=\S+' | sort | uniq -c`（cron 会话 ID 格式 `[cron_xxx_时间戳]`；交互会话 `[YYYYMMDD_HHMMSS_hash]`；`agent.log.1` 轮转旧档也要查 pro 调用）
 3. cron 审计：`cat ~/.hermes/cron/jobs.json`（`{"jobs":[...]}` 结构）遍历 model/provider 字段

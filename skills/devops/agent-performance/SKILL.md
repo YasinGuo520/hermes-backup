@@ -486,7 +486,9 @@ script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影�
 - 会话内缓存命中率通常 90-100%（命中 ¥0.05/M 极便宜）；**但 cron 任务首次调用缓存命中率只有 19-26%**（新会话前缀不同→缓存失效→按未命中 ¥1.5-3/M 全价收），cron 多 = 未命中量大头
 - **⚠️ 多服务共享同一个 DeepSeek key**：Hermes + 服小助(ai_cs_package/.env) + 红蓝/六分身落地页(server.py 硬编码) 全用 sk-ce1a8ba...。控制台总量 >> agent.log 统计时，差额来自其他服务或**用户 Mac 上的另一个 Hermes 实例**（多实例用户，先问 Mac 端是否也跑 cron）
 - **费用大头铁律：先看「输入·未命中缓存」**（价差30倍）。别信「thinking占大头」的结论——用控制台输出token总量证伪（当日输出0.26M撑不起87%）
-- **会话经济学：老会话=缓存钱包，别删、别频繁 /new**（新会话=未命中全价）；只有快触发压缩（threshold 0.5）才开新会话。详见 `references/cost-billing-audit.md` §4.5-4.6
+- **会话经济学：老会话=缓存钱包，别删、别频繁 /new**（新会话=未命中全价）；只有快触发压缩（threshold 0.5）才开新会话。实测 usage.jsonl：长会话缓存命中率 84.2%。详见 `references/cost-billing-audit.md` §4.5-4.6
+- **cron 合并省钱（降未命中量大头实操）**：多个 LLM cron 各是独立新会话、各自付一次全价首调（命中 19-26%），合并成一个「多部分 prompt 单任务」= 1 次首调 + 后续同会话高命中，输入费省 40-50%。完整操作步骤（jobs.json 提取 prompt、共享搜索、pause 回滚、体验考量）见 scheduled-content-pipeline 技能「Cron Job Consolidation」章节
+- **输出压缩类 skill 收益有限（实测）**：caveman 类（压缩回复风格，宣称/实测省输出 token 65%）对总账单影响仅 5-10%——费用大头在「输入·未命中缓存」端，输出只占小头。省 token 优先做输入端优化（cron 合并、同会话复用、错峰），别迷信输出压缩类 skill
 - 余额只剩几毛时给用户省钱建议：钉同一会话少 /new；cron 挪到空闲时段（价格减半）；Mac 与服务器 cron 去重
 
 ## 快捷指令
