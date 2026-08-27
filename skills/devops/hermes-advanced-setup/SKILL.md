@@ -322,7 +322,13 @@ hermes memory status
 
 ## 模型 Fallback 配置（抗 Provider 过载）
 
+> **2026-08-27 主/备已反转**：当前主模型=硅基流动（custom provider，deepseek-ai/DeepSeek-V4-Flash），fallback=DeepSeek 官方。下方示例仍为「主官方→备硅基」写法，但**机制完全一致**，只需互换两端。当前锁定配置矩阵见 `china-ai-platforms` 技能的「模型锁死清单」。
+
 当用户看到 `⚠️ The model provider failed after retries` 报错：主模型 provider 高峰过载（典型：DeepSeek 官方 API 国内上午 10-11 点连续 503 "Service is too busy"），Hermes 重试 3 次全失败后显示该提示。不是 Hermes 挂了，解法是配 fallback 链，主模型失败自动切换。
+
+**主模型切 custom provider 的 key 格式**：`model.api_key: ${SILICONFLOW_API_KEY}`（`${VAR}` env 引用，源码 model_setup_flows.py 确认）；fallback_providers 数组条目用 `key_env: SILICONFLOW_API_KEY`——两种格式都行，主配置用 api_key、fallback 用 key_env。
+
+⚠️ **改全局 provider 后 cron 会 fail closed**：有 `provider_snapshot` 的 cron job（创建时快照了旧 provider）下次运行直接失败而不是跟随新配置——config set 会打印警告，必须逐个 `hermes cron edit <job_id> --model <model> --provider <provider>` pin 到新值。当前会话也保留启动时的 provider 快照，改配置只对新会话/cron 生效。
 
 ### 诊断（先确认根因再动手）
 ```bash

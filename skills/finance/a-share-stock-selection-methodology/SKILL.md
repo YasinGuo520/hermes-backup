@@ -294,6 +294,31 @@ Softmax风格更新: 表现好的信号源加权重, 差的减权重.
    ```
 5. **总结统计**：上涨/下跌/涨停各多少只，平均涨幅，命中率
 
+### 用户问"这个skill胜率如何/还有必要吗"
+
+**直接给数字，别拉大盘对比。** 用户要的是本skill输出的实测胜率，不是指数基准分析。最短路径：
+
+```bash
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/verify_v2_daily.py ~/Desktop/hermes/quant-skill/logs --top 8
+python3 ~/.hermes/skills/finance/a-share-stock-selection-methodology/scripts/backtest_quant_logs.py ~/Desktop/hermes/quant-skill/logs --top 8 --window 5
+```
+
+输出：累计命中率 + 平均涨幅 + 因子健康度红旗（flow全0/Kronos饱和）。**不要额外拉上证指数/沪深300做跑赢跑输对比**——除非用户明确要求，那是过度分析（2026-08-27被用户纠正："你在拉什么，直接统计最近这个skill输出的胜率效果就行啦"）。
+
+**判定与建议：**
+- 命中率 >65% 且跑赢大盘 = 健康
+- **命中率 ≤50% = 抛硬币，不跟单，建议先停早报cron**（推了白推还烧token）
+- 先分根因：数据源故障（flow因子空转/Kronos饱和）≠ 方法论失效——修好数据源前测不出真实水平
+- skill保留价值在框架（评分体系/因子库/A股配色规范），不在每日清单
+
+详细证据见 `references/win-rate-evaluation-2026-08.md`；开源替代调研（GitHub量化skill对比表+结论"无公开可验证A股高胜率skill"）+ **三个补丁改进路线**（①regime门控②因子IC验证/中性化③低波换手因子）见 `references/github-quant-skill-survey.md`
+
+## 用户问"要不要开模拟盘/别人模拟盘效果如何"
+
+**结论：公开世界没有可验证的「别人模拟盘战绩」**（大赛月赚40%冠军无一实盘复现；Guangli v22 只晒流程不晒战绩）。模拟盘胜率虚高三大因：成交理想化（涨停买不进）、零成本、心理差异——**纸面口径 > 模拟盘口径 > 实盘口径**。
+
+模拟盘真正价值 = ①成交修正因子（想买的票实际成交几成，反推真实可执行胜率）②大盘环境分布（哪些日子该空仓）。执行模式抄 Guangli automation-spec（09:00筛选/09:30对账/14:00只卖、幂等键、T+1口径）。详见 `references/paper-trading-validation.md`
+
 ### 每日自进化cron验证流程（4b176d3f9c5e，工作日15:30）
 
 收盘后验证当日早报推荐的固定流程（cron prompt已固化）：

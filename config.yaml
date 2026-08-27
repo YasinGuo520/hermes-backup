@@ -1,12 +1,12 @@
 model:
-  base_url: ''
-  default: deepseek-v4-flash
-  provider: deepseek
+  base_url: https://api.siliconflow.cn/v1
+  default: deepseek-ai/DeepSeek-V4-Flash
+  provider: custom
+  api_key: ${SILICONFLOW_API_KEY}
 fallback_providers:
-  - provider: custom
-    model: deepseek-ai/DeepSeek-V4-Flash
-    base_url: https://api.siliconflow.cn/v1
-    key_env: SILICONFLOW_API_KEY
+  - provider: deepseek
+    model: deepseek-v4-flash
+    key_env: DEEPSEEK_API_KEY
 agent:
   max_turns: 90
   context_length: 32000
@@ -27,11 +27,15 @@ auxiliary:
     base_url: https://api.siliconflow.cn/v1
     api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
   compression:
-    provider: deepseek
-    model: deepseek-v4-flash
+    provider: custom
+    model: deepseek-ai/DeepSeek-V4-Flash
+    base_url: https://api.siliconflow.cn/v1
+    api_key: ${SILICONFLOW_API_KEY}
   session_search:
-    model: deepseek-v4-flash
-    provider: deepseek
+    model: deepseek-ai/DeepSeek-V4-Flash
+    provider: custom
+    base_url: https://api.siliconflow.cn/v1
+    api_key: ${SILICONFLOW_API_KEY}
 display:
   language: zh
   platforms:

@@ -103,13 +103,14 @@ related:
 **触发**：「为什么DeepSeek扣费严重」「感觉没用多少token却扣钱」「只能调v4-flash锁死」。核心：**先归因（钱烧在哪），再锁死（防止再烧）**。
 
 ### 定价要点（deepseek-v4-flash，百万token）
-| 项目 | 空闲时段 | 高峰时段(9-12/14-18) |
-|---|---|---|
-| 输入·缓存命中 | ¥0.05 | ¥0.10 |
-| 输入·缓存未命中 | ¥1.5 | **¥3.0** |
-| 输出 | ¥4.5 | ¥9.0 |
+**2026-08-27 主模型已切硅基流动**（官方→硅基反转）：主=SiliconFlow custom、fallback=DeepSeek 官方，见下方锁死清单。
 
-deepseek-v4-pro 是 flash 的 **3倍**；2026-08-23 起周末全天低谷价；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
+| 平台 | 输入·未命中 | 输出 | 缓存命中 | 高峰加成 |
+|---|---|---|---|---|
+| **硅基流动（当前主）** | ¥1.0 | ¥2.0 | ¥0.02 | 无 |
+| DeepSeek 官方（fallback） | ¥1.5 / 高峰¥3.0 | ¥4.5 / 高峰¥9.0 | ¥0.05 / ¥0.10 | 2倍 |
+
+硅基比官方便宜 55-78% 且无高峰 2 倍价。deepseek-v4-pro 是 flash 的 **3倍**；2026-08-23 起官方周末全天低谷价；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
 
 ### 成本三大规律
 1. **贵不贵看缓存命中率，不看总量**：同样10万token，命中90%≈¥0.5，命中0%≈¥30，差60倍。新会话/cron冷启动/上下文压缩→前缀变→全价未命中
@@ -124,18 +125,25 @@ deepseek-v4-pro 是 flash 的 **3倍**；2026-08-23 起周末全天低谷价；*
 4. 全站模型扫描：落地页 server.py 的 MODEL 行、服小助 app/config.py（常共用同一 DeepSeek key——三处都要查）
 5. 跨机：Mac 查 `~/.hermes/logs/agent.log` + `gui.log`（桌面 GUI 走 `hermes serve` 写 gui.log 不写 agent.log）
 
-### 模型锁死清单（只允许 deepseek-v4-flash）
+### 模型锁死清单（只允许 deepseek-v4-flash；2026-08-27 主模型已切硅基）
 | 位置 | 做法 |
 |---|---|
-| config.yaml | `model.default: deepseek-v4-flash` + fallback_providers SiliconFlow `deepseek-ai/DeepSeek-V4-Flash` |
-| cron jobs | 每个 LLM job 显式 `model: deepseek-v4-flash` |
+| config.yaml 主模型 | `provider: custom` + `default: deepseek-ai/DeepSeek-V4-Flash` + `base_url: https://api.siliconflow.cn/v1` + `api_key: ${SILICONFLOW_API_KEY}`（custom 支持 env 引用格式 `${VAR}`） |
+| config.yaml fallback | fallback_providers = `[{provider: deepseek, model: deepseek-v4-flash, key_env: DEEPSEEK_API_KEY}]`（官方兜底，反转前是硅基） |
+| 辅助模型 | `auxiliary.compression` / `auxiliary.session_search` 同切硅基（`hermes config set auxiliary.*.provider/model/base_url/api_key`） |
+| cron jobs | 每个 LLM job 显式 pin：`hermes cron edit <id> --model deepseek-ai/DeepSeek-V4-Flash --provider custom` |
 | 落地页 server.py | **硬编码** `MODEL = "deepseek-v4-flash"`，不要 os.environ.get（可被覆盖成 pro） |
 | 服小助 | `app/config.py` 硬编码 `DEEPSEEK_CHAT_MODEL` |
 
-config.yaml 受安全保护，patch/write_file 会被拒，只能 `hermes config set` 或 sed；改完落地页要 kill 旧进程重启（keepalive 只在端口挂了才拉起，不会因代码变更自动重启——`ps -o lstart -p PID` 验证）。
+**切换 provider 的坑（2026-08-27 实测）**：
+- 标量用 `hermes config set model.provider/default/base_url/api_key`（安全）；数组（fallback_providers）只能 python yaml——`config set` 会把数组存成字符串被静默忽略
+- ⚠️ 改全局 provider 后，**有 provider_snapshot 的 cron job 下次运行会 fail closed**——config set 会打印警告，必须 `hermes cron edit <job_id> --model <model> --provider <provider>` 把 job pin 到新值
+- ⚠️ **当前会话保留启动时的 provider 快照**——改配置只对新会话/cron 生效，当前会话继续按旧 provider 计费；要全切就重启 gateway 或让用户新开会话
+- 验证：`hermes chat -q "只回复两个字：正常"` 跑通即新 provider 生效；`python3 -c "import yaml; yaml.safe_load(open('~/.hermes/config.yaml'))"` 确认无语法错
+- config.yaml 受安全保护，patch/write_file 会被拒，只能 `hermes config set` 或 python yaml；改完落地页要 kill 旧进程重启（keepalive 只在端口挂了才拉起，不会因代码变更自动重启——`ps -o lstart -p PID` 验证）
 
 ### 优化动作（按 ROI）
-少开新会话（缓存命中）> cron 挪空闲时段（单价减半）> cron 之间错开 > 压缩阈值调高/降频（历史重写=缓存全废）> 删不用 skills（只提速省钱微小）。
+少开新会话（缓存命中）> **cron 合并成单会话**（同类 LLM job 并成一个，实测省 40-50% 输入费，完整流程见 `references/cron-merge-token-savings.md`）> cron 挪空闲时段（单价减半）> cron 之间错开 > 压缩阈值调高/降频（历史重写=缓存全废）> 删不用 skills（只提速省钱微小）。
 
 **支持文件**：`scripts/deepseek_watch.sh`（balance API 基线观察，0 token，可 cron no_agent 部署）、`references/deepseek-billing-incidents.md`（8/11 pro 调用历史、8/22 ¥0.62 未查明、keepalive 端口顶替案例）。
 

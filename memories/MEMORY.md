@@ -10,7 +10,7 @@
 §
 媒体工具：Remotion ~/Desktop/hermes/remotion-lab；Manim ~/Desktop/hermes/manim-venv(CE v0.20.1,中文字体，像素/展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)混元3D唯一可用(Tripo/Meshy被墙)，密钥~/Desktop/hermes/mecha3d/.env。
 §
-API：①DeepSeek真key在Hermes配置.env(config.yaml的sk-gaw是SiliconFlow非DeepSeek；高峰503→fallback SiliconFlow V4-Flash api.siliconflow.cn/v1 key_env=SILICONFLOW_API_KEY；config set写数组变字符串须python yaml)；key sk-ce1a8ba...多端共用(服务器+服小助ai_cs_package/.env+落地页server.py+Mac主耗)，价：v4-flash缓存命中¥0.05-0.1/M、未命中¥1.5-3/M、输出¥4.5-9/M，高峰(9-12/14-18)=2倍；每次调用5-6万token行李，cron首调缓存命中19-26%。②硅基key在.env，Qwen-Image $0.02/张≈¥0.14，python直连报错须curl。③火山方舟key在~/backend/.env，见china-ai-platforms技能。
+API：①主模型=硅基custom(deepseek-ai/DeepSeek-V4-Flash, api.siliconflow.cn/v1, key=${SILICONFLOW_API_KEY})；fallback=DeepSeek官方(deepseek-v4-flash, DEEPSEEK_API_KEY)；compression/session_search同硅基；英语cron已pin硅基。价(硅基)：入¥1/M、出¥2/M、缓存¥0.02/M，无高峰加成，比官方便宜55-78%。config set写数组变字符串须python yaml。DeepSeek key sk-ce1a8ba...多端共用(服务器+服小助ai_cs_package/.env+落地页server.py+Mac主耗)；每调用5-6万token行李，cron首调缓存命中19-26%。②硅基key在.env，Qwen-Image $0.02/张≈¥0.14，python直连报错须curl。③火山方舟key在~/backend/.env，见china-ai-platforms技能。
 §
 Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡读~/Desktop但~/.hermes/skills可读，跨机同步走skills目录。Mac是主要烧费端(¥12-27/天 vs 服务器¥2-3)，查扣费差额先怀疑Mac端cron/新会话；Windows SSH连不上用向日葵兜底。
 §
@@ -18,7 +18,7 @@ Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡读~/Desktop但~/.h
 §
 web_search国内超时→AnySearch MCP；web_extract后端ddgs仅搜索不能抓URL，抓URL用mcp__anysearch__extract
 §
-LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价,旧3任务paused可回滚)。wechat-keepalive已暂停(未配微信，配置后开)。运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh。
+LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价)。运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh。
 §
 翻墙：两台iPhone 11共用美区ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；TikTok高度敏感(切节点=换区+风控)，FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版，其余平台切英国等节点无影响(FB偶验证)。机场飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付。
 §
@@ -28,10 +28,10 @@ LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30�
 §
 Yasin财务紧急：月支1万撑不过1个月，救急赚钱优先。已验证：U客直谈真实(勿买98/198会员)、快马日结真实(蓝领150-300/天需出门)、微赚=骗局、短剧出海'一次性费用'=割韭菜、游戏搬砖时薪7-15不适合；避一品威客(4.8万会员费)。剪辑接单：U客直谈/牛片网(需作品集)/圆领/淘宝代剪300-800/条，AI视频差异化300-500/条。TikTok短剧出海：Seedance国内生成+TikTok Drama Center免费翻译，3-6个月非救急。
 §
-模型锁死铁律(Yasin指令)：所有任务只允许deepseek-v4-flash，禁v4-pro/chat/reasoner。已强制：落地页(8920-8923)server.py硬编码；config.yaml默认+fallback SiliconFlow V4-Flash；服小助config硬编码。
+模型锁死铁律(Yasin指令)：所有任务只允许deepseek-v4-flash，禁v4-pro/chat/reasoner。已强制：Hermes主模型=硅基deepseek-ai/DeepSeek-V4-Flash；落地页(8920-8923)server.py硬编码；服小助config硬编码。
 §
 memory replace=整条替换非子串；改局部须传完整entry，先读MEMORY.md。
 §
-.bashrc 7890代理隧道已删除(2026-08-26)：原配置 ssh -L 7890→Mac但Mac Clash Verge实际监听33331，隧道从未生效且劫持pip/uv报ProxyError。装依赖若遇代理错误先unset http_proxy https_proxy all_proxy；pip走腾讯内网源mirrors.tencentyun.com(pip.conf已配)。升级Hermes用gitcode镜像(git ls-remote gitcode HEAD查真实版本，GitHub被墙时git fetch origin可能静默失败exit 0)。
+代理坑：pip/uv报ProxyError先unset http_proxy https_proxy all_proxy；pip走腾讯内网源mirrors.tencentyun.com(pip.conf已配)；升级Hermes用gitcode镜像(git ls-remote gitcode HEAD查真实版本，GitHub被墙时git fetch origin可能静默失败exit 0)。
 §
-caveman skill已装(输出token压缩65%实测，但总账单仅省5-10%因费用大头在输入·未命中缓存；触发词'caveman mode'/'less tokens'；Yasin的数据表格保留、cron日报内容不压缩)。
+caveman skill已装：触发词'caveman mode'/'less tokens'，输出token省65%但总账单仅省5-10%(费用大头在输入·未命中缓存)；Yasin的数据表格保留、cron日报内容不压缩。

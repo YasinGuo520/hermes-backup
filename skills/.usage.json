@@ -16,14 +16,14 @@
     "archived_at": null,
     "created_at": "2026-07-09T02:10:24.443450+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-23T17:29:58.549437+00:00",
-    "last_used_at": "2026-08-23T17:29:58.509990+00:00",
-    "last_viewed_at": "2026-08-23T17:29:58.502706+00:00",
-    "patch_count": 65,
+    "last_patched_at": "2026-08-27T14:07:15.627068+00:00",
+    "last_used_at": "2026-08-27T14:05:34.230310+00:00",
+    "last_viewed_at": "2026-08-27T14:05:34.222985+00:00",
+    "patch_count": 71,
     "pinned": false,
     "state": "active",
-    "use_count": 64,
-    "view_count": 64
+    "use_count": 71,
+    "view_count": 71
   },
   "agent-performance": {
     "archived_at": null,
@@ -43,13 +43,13 @@
     "created_at": "2026-07-06T15:41:45.716468+00:00",
     "created_by": null,
     "last_patched_at": "2026-07-10T01:34:03.265303+00:00",
-    "last_used_at": "2026-08-14T09:01:14.270539+00:00",
-    "last_viewed_at": "2026-08-14T09:01:14.263602+00:00",
+    "last_used_at": "2026-08-27T00:02:29.746863+00:00",
+    "last_viewed_at": "2026-08-27T00:02:29.737448+00:00",
     "patch_count": 7,
     "pinned": false,
     "state": "active",
-    "use_count": 16,
-    "view_count": 16
+    "use_count": 17,
+    "view_count": 17
   },
   "ai-3d-model-pipeline": {
     "archived_at": "2026-08-02T15:46:59.326538+00:00",
@@ -471,14 +471,14 @@
     "archived_at": null,
     "created_at": "2026-08-16T16:40:33.334292+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-26T15:18:34.252803+00:00",
-    "last_used_at": "2026-08-26T15:18:17.485818+00:00",
-    "last_viewed_at": "2026-08-26T15:18:17.478757+00:00",
-    "patch_count": 4,
+    "last_patched_at": "2026-08-26T19:14:24.571485+00:00",
+    "last_used_at": "2026-08-26T19:14:04.609675+00:00",
+    "last_viewed_at": "2026-08-26T19:14:04.599172+00:00",
+    "patch_count": 8,
     "pinned": false,
     "state": "active",
-    "use_count": 6,
-    "view_count": 6
+    "use_count": 9,
+    "view_count": 9
   },
   "china-ai-services": {
     "archived_at": null,
@@ -1173,27 +1173,27 @@
     "archived_at": null,
     "created_at": "2026-07-29T03:31:57.867277+00:00",
     "created_by": "agent",
-    "last_patched_at": "2026-08-26T16:20:18.343434+00:00",
-    "last_used_at": "2026-08-26T16:20:08.167869+00:00",
-    "last_viewed_at": "2026-08-26T16:20:08.162045+00:00",
-    "patch_count": 20,
+    "last_patched_at": "2026-08-26T19:14:33.811077+00:00",
+    "last_used_at": "2026-08-26T19:14:28.930910+00:00",
+    "last_viewed_at": "2026-08-26T19:14:28.922918+00:00",
+    "patch_count": 21,
     "pinned": false,
     "state": "active",
-    "use_count": 26,
-    "view_count": 26
+    "use_count": 28,
+    "view_count": 28
   },
   "hermes-agent": {
     "archived_at": null,
     "created_at": "2026-07-01T00:53:18.587263+00:00",
     "created_by": null,
     "last_patched_at": null,
-    "last_used_at": "2026-08-26T15:13:30.625181+00:00",
-    "last_viewed_at": "2026-08-26T15:13:30.616101+00:00",
+    "last_used_at": "2026-08-26T19:11:13.805735+00:00",
+    "last_viewed_at": "2026-08-26T19:11:13.799357+00:00",
     "patch_count": 0,
     "pinned": false,
     "state": "active",
-    "use_count": 45,
-    "view_count": 45
+    "use_count": 47,
+    "view_count": 47
   },
   "hermes-agent-skill-authoring": {
     "archived_at": null,
@@ -1668,12 +1668,12 @@
     "created_at": "2026-07-19T02:02:21.475103+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-07-19T04:40:17.481755+00:00",
-    "last_used_at": "2026-08-26T00:35:17.363487+00:00",
+    "last_used_at": "2026-08-27T00:30:29.384274+00:00",
     "last_viewed_at": "2026-07-27T02:41:02.951438+00:00",
     "patch_count": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 41,
+    "use_count": 42,
     "view_count": 4
   },
   "nano-pdf": {
@@ -2201,13 +2201,13 @@
     "created_at": "2026-07-09T02:01:42.319673+00:00",
     "created_by": "agent",
     "last_patched_at": "2026-08-26T16:39:30.963593+00:00",
-    "last_used_at": "2026-08-26T17:06:58.033268+00:00",
-    "last_viewed_at": "2026-08-26T17:06:58.024562+00:00",
+    "last_used_at": "2026-08-27T00:02:42.041985+00:00",
+    "last_viewed_at": "2026-08-27T00:02:42.033533+00:00",
     "patch_count": 14,
     "pinned": false,
     "state": "active",
-    "use_count": 24,
-    "view_count": 24
+    "use_count": 26,
+    "view_count": 26
   },
   "scrapling": {
     "archived_at": "2026-07-26T15:02:14.269054+00:00",

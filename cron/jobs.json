@@ -6,10 +6,10 @@
       "prompt": "\u4f60\u662f\u4e00\u4e2a\u82f1\u8bed\u5b66\u4e60\u52a9\u624b\u3002\u4eca\u5929\u7684\u4efb\u52a1\u662f\uff1a\n\n1. \u7528web_search\u641c\u7d22\u4e00\u9879\u4eca\u5929\u7684\u70ed\u95e8AI\u5de5\u5177/\u9879\u76ee/\u65b0\u95fb\uff08\u7528\u82f1\u6587\u641c\uff0c\u6bd4\u5982 \"trending AI tool today\" \u6216 \"new AI paper\" \u6216 \"OpenAI today\"\uff09\n2. \u7528\u82f1\u6587\u4ecb\u7ecd\u8fd9\u4e2a\u5de5\u5177/\u9879\u76ee\uff083-5\u53e5\uff09\uff0c\u7ed9\u51fa\u539f\u6587\u94fe\u63a5\n3. \u7528\u4e2d\u6587\u7b80\u5355\u603b\u7ed3\uff082-3\u53e5\uff09\n4. \u6700\u540e\u7ed92-3\u4e2a\u53e5\u5b50\u8ba9\u7528\u6237\u586b\u7a7a\u7ec3\u542c\u529b/\u8bed\u6cd5\n\n\u8981\u6c42\uff1a\n- \u5185\u5bb9\u65b0\u9c9c\uff0c\u4e0d\u8981\u8001\u6389\u7259\u7684\n- \u82f1\u6587\u8bed\u6cd5\u6b63\u786e\uff0c\u96be\u5ea6\u9002\u4e2d\n- \u4e2d\u6587\u89e3\u91ca\u8981\u6e05\u6670\n- \u8f93\u51fa\u683c\u5f0f\uff1a\n  ---\n  # AI\u82f1\u8bed\u6bcf\u65e5\u4e00\u7ec3\n  **Topic**: xxx\n  ...\n  ---",
       "skills": [],
       "skill": null,
-      "model": "deepseek-v4-flash",
-      "provider": "deepseek",
-      "provider_snapshot": "deepseek",
-      "model_snapshot": "deepseek-v4-flash",
+      "model": "deepseek-ai/DeepSeek-V4-Flash",
+      "provider": "custom",
+      "provider_snapshot": null,
+      "model_snapshot": null,
       "base_url": null,
       "script": null,
       "no_agent": false,
@@ -22,15 +22,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 45
+        "completed": 46
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-08-27T08:00:00+08:00",
-      "last_run_at": "2026-08-26T08:14:45.890580+08:00",
+      "next_run_at": "2026-08-28T08:00:00+08:00",
+      "last_run_at": "2026-08-27T08:02:13.568775+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -356,15 +356,15 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 36
+        "completed": 37
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-08-27T04:00:00+08:00",
-      "last_run_at": "2026-08-26T04:06:11.711050+08:00",
+      "next_run_at": "2026-08-28T04:00:00+08:00",
+      "last_run_at": "2026-08-27T04:03:02.885816+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -451,15 +451,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 187
+        "completed": 193
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-08-27T04:00:00+08:00",
-      "last_run_at": "2026-08-27T00:00:08.186334+08:00",
+      "next_run_at": "2026-08-28T04:00:00+08:00",
+      "last_run_at": "2026-08-28T00:00:04.529553+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -497,15 +497,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 31
+        "completed": 32
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-08-28T03:00:00+08:00",
-      "last_run_at": "2026-08-26T03:00:31.731276+08:00",
+      "next_run_at": "2026-08-29T03:00:00+08:00",
+      "last_run_at": "2026-08-27T03:00:39.871838+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -537,15 +537,15 @@
       "schedule_display": "50 8 * * 1-5",
       "repeat": {
         "times": null,
-        "completed": 19
+        "completed": 20
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T00:36:20.608043+08:00",
-      "next_run_at": "2026-08-27T08:50:00+08:00",
-      "last_run_at": "2026-08-26T08:50:17.652761+08:00",
+      "next_run_at": "2026-08-28T08:50:00+08:00",
+      "last_run_at": "2026-08-27T08:50:35.318958+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -583,15 +583,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 7799
+        "completed": 8087
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-08-27T03:05:00+08:00",
-      "last_run_at": "2026-08-27T03:00:11.889843+08:00",
+      "next_run_at": "2026-08-28T03:05:00+08:00",
+      "last_run_at": "2026-08-28T03:00:58.030771+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -631,17 +631,17 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 0
+        "completed": 1
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-08-27T00:38:38.134384+08:00",
-      "next_run_at": "2026-08-27T08:30:00+08:00",
-      "last_run_at": null,
-      "last_status": null,
-      "last_error": null,
+      "next_run_at": "2026-08-28T08:30:00+08:00",
+      "last_run_at": "2026-08-27T08:30:30.115904+08:00",
+      "last_status": "error",
+      "last_error": "RuntimeError: Skipped to prevent unintended spend: global inference config drifted since this job was created (provider 'deepseek' -> 'custom'; model 'deepseek-v4-flash' -> 'deepseek-ai/deepseek-v4-flash'), and this job is unpinned. No inference call was made. To run on the new config, pin it explicitly: `cronjob action=update job_id=e88a6c79fe52 provider=<provider> model=<model>` (or pin the original values to keep them). See #44585.",
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -656,8 +656,9 @@
         "terminal",
         "file"
       ],
-      "workdir": null
+      "workdir": null,
+      "fire_claim": null
     }
   ],
-  "updated_at": "2026-08-27T03:00:11.890378+08:00"
+  "updated_at": "2026-08-28T03:00:58.031359+08:00"
 }
