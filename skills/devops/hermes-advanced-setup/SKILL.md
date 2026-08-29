@@ -328,7 +328,9 @@ hermes memory status
 
 **主模型切 custom provider 的 key 格式**：`model.api_key: ${SILICONFLOW_API_KEY}`（`${VAR}` env 引用，源码 model_setup_flows.py 确认）；fallback_providers 数组条目用 `key_env: SILICONFLOW_API_KEY`——两种格式都行，主配置用 api_key、fallback 用 key_env。
 
-⚠️ **改全局 provider 后 cron 会 fail closed**：有 `provider_snapshot` 的 cron job（创建时快照了旧 provider）下次运行直接失败而不是跟随新配置——config set 会打印警告，必须逐个 `hermes cron edit <job_id> --model <model> --provider <provider>` pin 到新值。当前会话也保留启动时的 provider 快照，改配置只对新会话/cron 生效。
+⚠️ **改全局 provider 后 cron 会 fail closed**：有 `provider_snapshot` 的 cron job（创建时快照了旧 provider）下次运行直接失败而不是跟随新配置——config set 会打印警告，必须逐个 `hermes cron edit <job_id> --model <model> --provider <provider>` pin 到新值。
+
+⚠️ **没钉模型的 cron 同样被跳过**（2026-08-29 实测）：任务 `model/provider` 为 null（跟随全局）时，全局推理配置变更后运行输出全是同一份 FAILED 占位文件，报「已跳过以避免非预期消耗：自该任务创建后全局推理配置已发生变更（服务商由 deepseek 变为 custom…）」。修复同一条命令：`hermes cron edit <job_id> --model <model> --provider <provider>`。判断方法：`ls -la ~/.hermes/cron/output/<job_id>/` 看连续几天文件大小完全一致（都是 FAILED 占位）→ 就是被跳过。对照：显式钉了 model/provider 的任务（如 AI英语任务）不受影响。当前会话也保留启动时的 provider 快照，改配置只对新会话/cron 生效。
 
 ### 诊断（先确认根因再动手）
 ```bash

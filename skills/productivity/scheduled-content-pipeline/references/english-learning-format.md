@@ -77,7 +77,7 @@ if m: print('META:', html.unescape(m.group(1)))
 `datePublished` 确认新鲜度（当天/昨天），meta description 即官方摘要，可直接作为英文介绍的事实基础。重磅消息（如 "$60B 收购"）必须等权威媒体确认后再写。
 
 ### 反 clickbait 规则
-LinkedIn/pulse 和大量 Medium 的 "新版 GPT" 文章常是 AI 生成或纯编造。在真实媒体（The Verge / TechCrunch / Ars Technica）上查不到 datePublished 验证的，一律丢弃。
+LinkedIn/pulse 和大量 Medium 的 "新版 GPT" 文章常是 AI 生成或纯编造。在真实媒体（The Verge / TechCrunch / Ars Technica）上查不到 datePublished 的，一律丢弃。
 
 ### 主路径：AnySearch MCP（2026-08-21 实战验证 — DDG 与 curl 双超时）
 中国服务器上 DDG web_search 持续超时；本会话连 `curl news.ycombinator.com` 也 exit 28 超时。
@@ -88,6 +88,23 @@ LinkedIn/pulse 和大量 Medium 的 "新版 GPT" 文章常是 AI 生成或纯编
   + 具体产品验证路（"<candidate> release announcement"）
 - 新鲜度校准源（带日期，能确认"本周到底发了什么"）：aireleasetracker.com、llm-stats.com/llm-updates、
   llmgateway.io/timeline、releasebot.io/updates/<vendor>
+
+### 2026-08-29 增补：批量多路搜索优先 execute_code；tool_call 直调 AnySearch 传参易断
+当日实战（英语每日一练 cron）：DDG 单发 web_search 30s 超时，但 **execute_code + hermes_tools.web_search 批量多 query 一把跑最稳**：
+```python
+from hermes_tools import web_search
+for q in ["<candidate> release announcement", "<candidate> news <month year>", ...]:
+    try:
+        r = web_search(q, limit=6)
+        for it in r.get("data", {}).get("web", []):
+            print("-", it.get("title"), "|", it.get("url"))
+    except Exception as e:
+        print("ERR", q, e)
+```
+- 单 query 超时不拖垮整批（try/except 兜底），一次循环 4 路 query 3 路有结果
+- 直接 tool_call 调 `mcp__anysearch__search`/`batch_search` 时，`arguments` 必须是最外层合法 JSON 对象；嵌套/字符串会反复报 "arguments is not valid JSON"，链路长（tool_search→tool_describe→tool_call）不如 execute_code 一条命令
+- curl 抓官方 dev docs（例 ai.google.dev/gemini-api/docs/latest-model）可能返回空（重 JS/反爬），不要死磕；改打精确多角度 query，用 官方 blog 标题 + 科技媒体日期（9to5google/The Verge）+ 定价平台（OpenRouter/Artificial Analysis）三源交叉拼出 发布日期/定位/价格/上下文窗口，即可支撑英文介绍，无需抓到正文
+- 当日走通案例：Gemini 3.7 Flash（2026-08-13 发布，官方 blog + 9to5google + OpenRouter 三源）——"most intelligent workhorse model for coding and agents"，intro 价 $0.75/1M in、$3.75/1M out（至 2026 年底），1M token 上下文、多模态，驱动 Gemini Spark 与 Google Search AI Mode。距查询日 16 天仍算"本月新模型"热点，满足新鲜度
 
 ### web_extract 后端限制（重要）
 当前环境 `web_extract` 后端是 ddgs（search-only），抓 URL 直接报错：

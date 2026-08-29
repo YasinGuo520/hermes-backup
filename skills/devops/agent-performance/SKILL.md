@@ -418,16 +418,21 @@ since creation (provider 'deepseek' -> 'openai-api'; model 'deepseek-v4-flash'
 -> 'gpt-5.5') and this job is unpinned.
 ```
 
-**修复方法（先尝试 cronjob update，如无效则直接编辑 jobs.json）：**
+**修复方法（按优先级；本次实测 2026-08-29 验证过方法C）：**
 
 ```bash
+# 方法C（✅ 最干净，官方 CLI 参数，直接钉死，实测成功）：
+hermes cron edit <job_id> --model <模型> --provider <provider>
+# 例：hermes cron edit e88a6c79fe52 --model deepseek-ai/DeepSeek-V4-Flash --provider custom
+# 输出 "Updated job: <id>" 即成功，不需要改 jobs.json
+
 # 方法A：update cronjob（只重置创建时间戳，不一定总能修复drift检测）
 hermes cron action=update job_id=<id> name="<原name>" schedule="<原schedule>"
 
 # ⚠️ cronjob update 工具没有 provider/model 参数，所以 drift 检测可能依然存在
-# 如果 update 后仍然 drift，使用方法B
+# 如果 update 后仍然 drift，使用方法B或C
 
-# 方法B（可靠）：直接编辑 jobs.json 中的 provider_snapshot/model_snapshot
+# 方法B（可靠但繁琐）：直接编辑 jobs.json 中的 provider_snapshot/model_snapshot
 python3 << 'PYEOF'
 import json
 
@@ -447,6 +452,8 @@ with open('/home/ubuntu/.hermes/cron/jobs.json', 'w') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 PYEOF
 ```
+
+**预防（本次挂两天的根因教训）**：LLM cron 任务创建/编辑时**显式钉 model+provider**（即使当时与全局一致）。否则任何一次全局配置变更（deepseek→custom 等）都会让未钉任务被安全阀跳过，且**连续多天静默失败**（用户只收到跳过通知，任务不跑）。已钉任务（如英语每日一练）不受影响。
 
 **验证修复：** `hermes cron action=run job_id=<id>` — 返回 `execution_success: true` 即修复成功。
 

@@ -18,7 +18,7 @@ Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡读~/Desktop但~/.h
 §
 web_search国内超时→AnySearch MCP；web_extract后端ddgs仅搜索不能抓URL，抓URL用mcp__anysearch__extract
 §
-LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价)。运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh。
+LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价)。cron全局配置变更坑：服务商/模型切换后未钉模型的cron被安全阀跳过(晨间三合一挂3天)，修复=hermes cron edit <id> --model <model> --provider custom显式钉模型。运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh。
 §
 翻墙：两台iPhone 11共用美区ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；TikTok高度敏感(切节点=换区+风控)，FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版，其余平台切英国等节点无影响(FB偶验证)。机场飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付。
 §
@@ -35,3 +35,7 @@ memory replace=整条替换非子串；改局部须传完整entry，先读MEMORY
 代理坑：pip/uv报ProxyError先unset http_proxy https_proxy all_proxy；pip走腾讯内网源mirrors.tencentyun.com(pip.conf已配)；升级Hermes用gitcode镜像(git ls-remote gitcode HEAD查真实版本，GitHub被墙时git fetch origin可能静默失败exit 0)。
 §
 caveman skill已装：触发词'caveman mode'/'less tokens'，输出token省65%但总账单仅省5-10%(费用大头在输入·未命中缓存)；Yasin的数据表格保留、cron日报内容不压缩。
+§
+cron任务须显式钉model/provider(hermes cron edit <id> --model <m> --provider <p>)，否则全局配置变更后被安全阀静默跳过连挂数天(2026-08实例：晨间三合一e88a6c79fe52连挂3天，修复=钉custom/deepseek-ai/DeepSeek-V4-Flash)。抖音视频页提取：browser_navigate到www.douyin.com/video/<id> + browser_console取document.title+meta[name=description]+body.innerText，一次拿全标题/作者/点赞/章节要点(AI摘要)；curl抓HTML是混淆JS没用。勿用web_extract抓URL(ddgs仅搜索)。
+§
+TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，base api.tikhub.io Bearer认证，免费端点billboard/fetch_hot_account_search_list(搜账号)+热榜+get_user_info，付费端点handler_user_profile_v4(画像)+fetch_user_post_videos(视频)；openapi.json查端点方法；402=需付费额度/405=方法错/422=body字段错(如fetch_query_user要ttwid cookie)。脚本douyin_creator.py已跑通对标账号分析。淘宝/拼多多/京东无公开数据API(销售数据锁商家后台)；蝉妈妈/飞瓜无API；抖查查/FastMoss有API需账号；同花顺openapi.10jqka.com.cn是A股行情不是抖音数据。抖音/百度/搜狗全反爬，服务器无桌面浏览器→先走TikHub别爬。
