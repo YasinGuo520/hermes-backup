@@ -283,3 +283,17 @@ sources: [source description]
 - `references/douyin-video-ingestion.md` — Extracting content from Douyin videos (no transcript API, login wall bypass via synthesis)
 - `references/structured-reference-notes.md` — Generating comprehensive reference notes from structured data sources (JSON, CSV, YAML): parsing large files, grouping by category, formatting tables with proper escaping, and writing to the vault
 - `references/sub-agent-role-templates.md` — Fixed job descriptions for delegate_task sub-agents (red-blue validator, six-persona analyst, research, executor, QA reviewer)
+
+
+## Obsidian 基础文件操作（合并自 obsidian skill）
+
+处理 Obsidian 笔记的基本文件操作规范（本技能管「知识库构建与维护」，基础操作按此执行）：
+
+- **Vault 路径解析**：优先读 `OBSIDIAN_VAULT_PATH` 环境变量（如 `${HERMES_HOME:-~/.hermes}/.env` 中定义）；未设置则回退 `~/Documents/Obsidian Vault`。文件工具不展开 shell 变量——不要传含 `$OBSIDIAN_VAULT_PATH` 的路径，先解析成绝对路径。路径可能含空格，这也是优先文件工具而非 shell 命令的原因。首次解析成功后存入 memory。
+- **读笔记**：`read_file`（带行号分页），不用 cat。
+- **列笔记/搜索**：`search_files`（列文件 target="files" pattern="*.md"；内容搜 target="content" + file_glob="*.md"），不用 find/grep/ls。
+- **新建笔记**：`write_file` 全量 markdown，避免 heredoc/echo 的引号问题。
+- **追加**：优先 read_file → patch（有稳定锚点如标题后/已知尾块前）；无稳定上下文且简单追加可用 terminal。
+- **定向修改**：patch（内容给足稳定上下文），不用 sed 重写。
+- **Wiki 链接**：`[[Note Name]]` 语法建关联。
+

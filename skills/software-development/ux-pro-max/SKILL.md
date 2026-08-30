@@ -533,7 +533,7 @@ Hero 区排版细节见上文「Hero 首屏铁律」。
 
 ## 设计系统库：54 套真实品牌样式（合并自 popular-web-designs）
 
-用户说「做得像 Stripe/Linear/Vercel/Notion」或想要已知品牌视觉时，从 bundled `popular-web-designs` 技能加载对应设计系统（每家含完整色板/字体层级/组件样式/间距阴影 + 可直接粘贴的 Hermes 实现说明）：`skill_view(name='popular-web-designs', file_path='templates/<site>.md')`。目录索引（AI&ML: claude/cohere/elevenlabs/minimax/mistral/ollama/opencode/replicate/runwayml/together/x.ai/voltagent；DevTools: cursor/expo/linear/lovable/mintlify/posthog/raycast/resend/sentry/supabase/superhuman/vercel/warp/zapier；云厂商: clickhouse/composio/hashicorp/mongodb/sanity/stripe；设计效率: airtable/cal/clay/figma/framer/intercom/miro/notion/pinterest/webflow；金融: coinbase/kraken/revolut/wise；企业消费: airbnb/apple/bmw/ibm/nvidia/spacex/spotify/uber）。
+用户说「做得像 Stripe/Linear/Vercel/Notion」或想要已知品牌视觉时，从本技能加载对应设计系统模板（每家含完整色板/字体层级/组件样式/间距阴影 + 可直接粘贴的 Hermes 实现说明）：`skill_view(name='ux-pro-max', file_path='templates/<site>.md')`。目录索引（AI&ML: claude/cohere/elevenlabs/minimax/mistral/ollama/opencode/replicate/runwayml/together/x.ai/voltagent；DevTools: cursor/expo/linear/lovable/mintlify/posthog/raycast/resend/sentry/supabase/superhuman/vercel/warp/zapier；云厂商: clickhouse/composio/hashicorp/mongodb/sanity/stripe；设计效率: airtable/cal/clay/figma/framer/intercom/miro/notion/pinterest/webflow；金融: coinbase/kraken/revolut/wise；企业消费: airbnb/apple/bmw/ibm/nvidia/spacex/spotify/uber）。
 
 **字体替换表**（专有字体→Google Fonts）：Geist→Geist；sohne-var(Stripe)→Source Sans 3；Berkeley Mono→JetBrains Mono；Circular/figmaSans/Pin Sans/UberMove/CoinbaseDisplay→DM Sans 或 Inter；IBM Plex→原版；Space Grotesk 替 Sanity waldenburgNormal。替换字体时**字重/字号/字距比字体本身更承载视觉身份**，严格照模板值。
 

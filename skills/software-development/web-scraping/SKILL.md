@@ -175,3 +175,18 @@ def _get_product_cards(page):
 - 浏览器自动化（需登录/交互的场景）：见上文「Playwright 浏览器自动化」章节
 - 抖音精选联盟选品脚本（Playwright + openpyxl 输出 Excel，可作模板）：`references/douyin-scraper.md`
 - 抖音视频页内容提取（无需登录，拆解/分析视频用）：`references/douyin-page-extraction.md`
+- 被墙/付费墙/WAF 页面恢复（Wayback/archive.today/Jina/API pivot 梯子 + 假成功清单）：`references/blocked-page-recovery.md` + `scripts/recover_page.py`
+
+
+## 被墙/付费墙/WAF 页面恢复（合并自 blocked-page-recovery）
+
+当目标页面抓不到（403/429、Cloudflare "Just a moment..."、付费墙、反爬拦截页）时，不要放弃也不要死循环同一 URL——第三方往往存有副本。完整梯子、来源规范、手工路由与「假成功」清单见 `references/blocked-page-recovery.md`，一键脚本 `scripts/recover_page.py`：
+
+```bash
+python3 scripts/recover_page.py "https://example.com/blocked-article" --json
+```
+
+梯子速查：①Wayback Machine（archive.org available API，快照+时间戳，来源最好先试）→ ②archive.today（archive.ph/.md/.li/.is 轮换）→ ③Jina Reader（需 JINA_API_KEY，服务端渲染，能过 JS SPA）→ ④API-first pivot（同站 /api/、/graphql、.json、RSS、sitemap）→ ⑤真实浏览器兜底（最贵最后用）。
+
+引用纪律：Wayback/archive.today 的副本必须标快照日期（"as archived 2026-08-06"），不能当活页引用；用户要当前数据（价格/库存/突发新闻）时快照只是上下文，要明说并标注时效。**假成功**：Google Cache 已死（2024年中起，返回的是搜索拦截页）；AMP cache 返回 meta-refresh 跳回原页；代理中转站是中间人，绝不传 cookie/Authorization。
+

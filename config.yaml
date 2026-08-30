@@ -3,10 +3,7 @@ model:
   default: deepseek-ai/DeepSeek-V4-Flash
   provider: custom
   api_key: ${SILICONFLOW_API_KEY}
-fallback_providers:
-  - provider: deepseek
-    model: deepseek-v4-flash
-    key_env: DEEPSEEK_API_KEY
+fallback_providers: []
 agent:
   max_turns: 90
   context_length: 32000
@@ -53,7 +50,7 @@ delegation:
   max_iterations: 50
 skills:
   external_dirs:
-    - ~/.agents/skills
+  - ~/.agents/skills
 curator:
   consolidate: true
 approvals:
@@ -91,6 +88,6 @@ platforms:
 plugins:
   disabled: []
   enabled:
-    - agency-agents-router
-    - web/ddgs
-    - lightclawbot
+  - agency-agents-router
+  - web/ddgs
+  - lightclawbot

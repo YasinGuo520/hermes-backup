@@ -1,6 +1,6 @@
 ---
 name: humanizer-zh
-description: 去除中文文字中的AI生成痕迹，使内容更自然、更像真人书写。适用于短视频文案、带货话术、小红书种草文案、直播脚本等场景。
+description: 去除中/英文文字中的AI生成痕迹，使内容更自然、更像真人书写。中文适用短视频文案/带货话术/种草笔记/直播脚本；英文适用博客/邮件/PR/文档。
 ---
 
 # Humanizer-ZH: 中文去AI味润色
@@ -43,3 +43,14 @@ description: 去除中文文字中的AI生成痕迹，使内容更自然、更�
 - 直播话术 → 去掉模板感，加真实感
 - 小红书种草笔记 → 去掉"种草感"，加自然分享感
 - 产品描述 → 去掉宣传腔，直接说人话
+
+
+## 英文去AI味（合并自 humanizer skill）
+
+英文文本（博客/邮件/PR描述/文档/推文/简历）同样适用去AI味。完整 34 模式 + 语音校准 + 添加灵魂方法见 `references/english-ai-patterns.md`。速查：
+
+- **核心模式类**：过度升华意义（serves as a testament / pivotal moment / evolving landscape）、宣传腔（vibrant / nestled / groundbreaking）、-ing 假深度（highlighting…/ showcasing…）、模糊归因（Industry reports / Experts argue）、三段式（rule of three）、同义反复（elegant variation）、虚假范围（from X to Y）、破折号滥用、否定排比（Not only… but…）
+- **AI 高频词**：delve / crucial / landscape / testament / additionally / it's important to note / at the end of the day / in a world where
+- **聊天机器人痕迹**：I hope this helps / Certainly! / Great question!；**知识截止声明**：as of my last update；**过度委婉**：could potentially possibly；**金句结尾**：And that's okay.
+- **过程同上**：识别 → 改写 → 保留意思 → 匹配语气（有用户样本先读样本：句长/用词/段落开头/标点习惯）→ 加灵魂（有观点、节奏变化、承认复杂性、用 "I"、允许不完美）→ 终审自问「哪里还像AI」再改一轮。语音样本缺失时用默认自然多变有观点风格。
+

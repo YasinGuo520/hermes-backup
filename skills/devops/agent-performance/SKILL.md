@@ -235,6 +235,37 @@ print(f'Active search provider: {get_active_search_provider().name() if get_acti
 
 详见 `references/duckduckgo-china-block.md`。
 
+**⚠️ cron 任务内搜索空转（废壳陷阱，实测 2026-08-30）：**
+
+LLM cron 任务里如果 prompt 写死 web_search，在国内服务器上会连锁触发：
+1. ddgs 后端超时（30s/次）
+2. agent 反复重试 → 触发 per-turn 50次搜索保护（`loop_web_search_cap`）
+3. 任务 **last_status=ok 但产出废壳**——报告只有一句 "I stopped retrying web_search..."，用户以为任务正常，实际什么都没收到
+
+**症状识别：** cron 输出文件异常小 / 结尾只有 stop-retrying 说明 / 日志出现 `Blocked web_search: this turn has already made 50 web searches`
+
+**修复（实测有效）——prompt 顶部注入「搜索通道铁律」段，并全局替换 prompt 内 web_search/web_extract 为 MCP 调用：**
+```
+【搜索通道铁律（最高优先级）】
+- 所有搜索一律使用 AnySearch MCP：mcp__anysearch__search(query="...")
+- 抓取页面用：mcp__anysearch__extract(url="...")
+- 禁止使用 web_search（后端 ddgs 国内超时，会触发50次搜索保护导致任务空转）
+- 每部分最多搜索15次，搜到够用的数据就停，防止触发循环保护
+- 搜索超时/失败时用 GitHub Trending 页面 (https://github.com/trending) 兜底，不能卡住
+- 不要中途停止，任务全部部分完成后再一次性输出
+```
+修改后 `hermes cron action=run job_id=<id>` 验证产出真实内容而非废壳。
+
+**⚠️ fallback 欠费拖慢主通道（实测 2026-08-30）：**
+
+用户反馈"这两天很慢"，查过主通道健康后**一定要查 fallback 余额**：
+```bash
+curl -s https://api.deepseek.com/user/balance -H "Authorization: Bearer $DEEPSEEK_API_KEY"
+```
+症状机制：主通道（硅基）一次失败 → Hermes 自动切 fallback（DeepSeek 官方）→ **fallback 余额 -0.52（欠费）** → 402 拒绝 → 重试再失败 → 才放弃。每次白跑一圈 10-30 秒，整体响应拉慢。**主通道 817 次成功但用户仍觉得慢 = 病根在 fallback 白跑。**
+证据链：`grep "402\|Insufficient" agent.log | wc -l` + 余额查询 + `grep -oE "model=deepseek" agent.log | sort | uniq -c` 对比主/备调用次数。
+修复：给 fallback 充值，或移除/替换 fallback_providers（如换火山方舟兜底）。
+
 **搜索优先级：** 检查 memory 是否有搜索优先级设置。常见模式：MCP搜索优先（如 AnySearch），无结果回退 web_search。当两种搜索都不可靠时，Agent 的"变傻"感最明显。
 
 ### 第九步：检查 skills 膨胀（#1变傻元凶）

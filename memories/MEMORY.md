@@ -39,3 +39,7 @@ caveman skill已装：触发词'caveman mode'/'less tokens'，输出token省65%�
 cron任务须显式钉model/provider(hermes cron edit <id> --model <m> --provider <p>)，否则全局配置变更后被安全阀静默跳过连挂数天(2026-08实例：晨间三合一e88a6c79fe52连挂3天，修复=钉custom/deepseek-ai/DeepSeek-V4-Flash)。抖音视频页提取：browser_navigate到www.douyin.com/video/<id> + browser_console取document.title+meta[name=description]+body.innerText，一次拿全标题/作者/点赞/章节要点(AI摘要)；curl抓HTML是混淆JS没用。勿用web_extract抓URL(ddgs仅搜索)。
 §
 TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，base api.tikhub.io Bearer认证，免费端点billboard/fetch_hot_account_search_list(搜账号)+热榜+get_user_info，付费端点handler_user_profile_v4(画像)+fetch_user_post_videos(视频)；openapi.json查端点方法；402=需付费额度/405=方法错/422=body字段错(如fetch_query_user要ttwid cookie)。脚本douyin_creator.py已跑通对标账号分析。淘宝/拼多多/京东无公开数据API(销售数据锁商家后台)；蝉妈妈/飞瓜无API；抖查查/FastMoss有API需账号；同花顺openapi.10jqka.com.cn是A股行情不是抖音数据。抖音/百度/搜狗全反爬，服务器无桌面浏览器→先走TikHub别爬。
+§
+Yasin方向转向(2026-08-30明确)：AI项目变现难→直播达人带货+短视频带货。对标账号：AI智能玩具源头工厂(1.5万粉,小号起量打法)+AI智能机器狗专场(12.4万粉,腰部)，机器狗=2026国潮玩具爆品，赛道头部89万粉未垄断、新人仍有空间。复制打法：痛点场景文案模板(孩子难哄/养狗/送礼6变体)+评论区转化。之前红蓝方法论博主定位已让位给带货执行。
+§
+性能坑修复(2026-08-30)：fallback_providers指向DeepSeek官方余额-0.52欠费→硅基偶发失败时fallback白跑10-30秒拖慢全局(实测硅基5/5成功、均延迟4.4s)。修复=config.yaml清空fallback_providers+重启网关生效；记忆瘦身cron(791dff1e6cc4)同因挂掉，已钉硅基custom。用户决策规则：硅基掉线不严重→清空fallback；严重→换火山方舟兜底。cron搜索铁律：禁web_search走ddgs(国内超时+50次保护空转)，改curl直连GitHub Trending/HN Algolia/国内科技媒体兜底+每部分限15次(已注入晨间三合一prompt)。
