@@ -22,15 +22,15 @@
       "schedule_display": "0 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 49
+        "completed": 50
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-08-31T08:00:00+08:00",
-      "last_run_at": "2026-08-30T08:04:27.226772+08:00",
+      "next_run_at": "2026-09-01T08:00:00+08:00",
+      "last_run_at": "2026-08-31T08:03:26.893185+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -44,7 +44,8 @@
       },
       "enabled_toolsets": null,
       "workdir": null,
-      "fire_claim": null
+      "fire_claim": null,
+      "failure_streak": 0
     },
     {
       "id": "99bf3a31759a",
@@ -356,17 +357,17 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 40
+        "completed": 41
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-08-31T04:00:00+08:00",
-      "last_run_at": "2026-08-30T04:00:24.820318+08:00",
-      "last_status": "error",
-      "last_error": "RuntimeError: HTTP 402: Insufficient Balance",
+      "next_run_at": "2026-09-01T04:00:00+08:00",
+      "last_run_at": "2026-08-31T04:11:33.350114+08:00",
+      "last_status": "ok",
+      "last_error": null,
       "last_delivery_error": null,
       "deliver": "local",
       "origin": {
@@ -378,7 +379,8 @@
       },
       "enabled_toolsets": null,
       "workdir": null,
-      "fire_claim": null
+      "fire_claim": null,
+      "failure_streak": 0
     },
     {
       "id": "580726f67d74",
@@ -451,15 +453,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 211
+        "completed": 217
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-08-31T04:00:00+08:00",
-      "last_run_at": "2026-08-31T00:00:56.589027+08:00",
+      "next_run_at": "2026-09-01T04:00:00+08:00",
+      "last_run_at": "2026-09-01T00:00:05.046114+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -498,15 +500,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 35
+        "completed": 36
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-09-01T03:00:00+08:00",
-      "last_run_at": "2026-08-30T03:02:28.662260+08:00",
+      "next_run_at": "2026-09-02T03:00:00+08:00",
+      "last_run_at": "2026-08-31T03:01:43.622949+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -515,9 +517,10 @@
       "enabled_toolsets": null,
       "workdir": null,
       "fire_claim": {
-        "at": "2026-08-31T03:00:25.145196+08:00",
-        "by": "VM-0-5-ubuntu:461260:4ea907a25fb943988622ed25255af4ac"
-      }
+        "at": "2026-09-01T03:00:08.832363+08:00",
+        "by": "VM-0-5-ubuntu:461260:692fb5b5ea4643ff93d00543391efb60"
+      },
+      "failure_streak": 0
     },
     {
       "id": "084374e236cc",
@@ -541,15 +544,15 @@
       "schedule_display": "50 8 * * 1-5",
       "repeat": {
         "times": null,
-        "completed": 21
+        "completed": 22
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T00:36:20.608043+08:00",
-      "next_run_at": "2026-08-31T08:50:00+08:00",
-      "last_run_at": "2026-08-28T08:50:07.153830+08:00",
+      "next_run_at": "2026-09-01T08:50:00+08:00",
+      "last_run_at": "2026-08-31T08:50:31.644470+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -563,7 +566,8 @@
       },
       "enabled_toolsets": null,
       "workdir": null,
-      "fire_claim": null
+      "fire_claim": null,
+      "failure_streak": 0
     },
     {
       "id": "5add78ef8e02",
@@ -587,15 +591,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 8951
+        "completed": 9239
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-08-31T03:05:00+08:00",
-      "last_run_at": "2026-08-31T03:00:25.401874+08:00",
+      "next_run_at": "2026-09-01T03:05:00+08:00",
+      "last_run_at": "2026-09-01T03:00:09.122988+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -636,15 +640,15 @@
       "schedule_display": "30 8 * * *",
       "repeat": {
         "times": null,
-        "completed": 6
+        "completed": 7
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-08-27T00:38:38.134384+08:00",
-      "next_run_at": "2026-08-31T08:30:00+08:00",
-      "last_run_at": "2026-08-30T10:15:43.671938+08:00",
+      "next_run_at": "2026-09-01T08:30:00+08:00",
+      "last_run_at": "2026-08-31T08:54:18.032881+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -662,8 +666,9 @@
         "file"
       ],
       "workdir": null,
-      "fire_claim": null
+      "fire_claim": null,
+      "failure_streak": 0
     }
   ],
-  "updated_at": "2026-08-31T03:00:25.402409+08:00"
+  "updated_at": "2026-09-01T03:00:09.123612+08:00"
 }

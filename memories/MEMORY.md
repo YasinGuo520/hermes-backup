@@ -6,19 +6,17 @@
 §
 设计系统：背景网格≥0.08opacity粒子≥1.5px，模板优先html5up.net(curl ZIP)部署8890-8899，前端先基础版不做第三轮新构图；角色/贴纸用AI生成立绘(Qwen-Image→色键抠图→帧动画+3D视差)不用CSS手绘。
 §
-端口: 8000=AI爆款主图, 8001=中年人生API, 8002=服小助, 8894=中年人生前端(反代8001), 8895=Hub, 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d；midage.icu=portfolio(郭岳兴)，中年人生走IP:8894；www-data需o+x进/home/ubuntu读portfolio。
+端口: 8000=AI爆款主图, 8001=中年人生API, 8002=服小助, 8894=中年人生前端(反代8001), 8895=Hub, 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d；midage.icu=portfolio(郭岳兴)，中年人生走IP:8894
 §
 媒体工具：Remotion ~/Desktop/hermes/remotion-lab；Manim ~/Desktop/hermes/manim-venv(CE v0.20.1,中文字体，像素/展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)混元3D唯一可用(Tripo/Meshy被墙)，密钥~/Desktop/hermes/mecha3d/.env。
 §
-API：①主模型=硅基custom(deepseek-ai/DeepSeek-V4-Flash, api.siliconflow.cn/v1, key=${SILICONFLOW_API_KEY})；fallback=DeepSeek官方(deepseek-v4-flash, DEEPSEEK_API_KEY)；compression/session_search同硅基；英语cron已pin硅基。价(硅基)：入¥1/M、出¥2/M、缓存¥0.02/M，无高峰加成，比官方便宜55-78%。config set写数组变字符串须python yaml。DeepSeek key sk-ce1a8ba...多端共用(服务器+服小助ai_cs_package/.env+落地页server.py+Mac主耗)；每调用5-6万token行李，cron首调缓存命中19-26%。②硅基key在.env，Qwen-Image $0.02/张≈¥0.14，python直连报错须curl。③火山方舟key在~/backend/.env，见china-ai-platforms技能。
+API：主模型=硅基custom(deepseek-ai/DeepSeek-V4-Flash, api.siliconflow.cn/v1, key=${SILICONFLOW_API_KEY})；fallback=官方deepseek-v4-flash(DEEPSEEK_API_KEY)；compression/session_search同硅基。价(硅基)：入¥1/M出¥2/M缓存¥0.02/M无高峰加成，比官方便宜55-78%。config set写数组变字符串须python yaml。DeepSeek key多端共用(服务器+服小助ai_cs_package/.env+落地页server.py+Mac)，每调用5-6万token行李，cron首调缓存命中19-26%。②硅基key在.env，Qwen-Image $0.02/张≈¥0.14，python直连报错须curl。③火山方舟key在~/backend/.env，见china-ai-platforms技能
 §
 Mac Tailscale IP 100.80.117.5(yasin)，SSH用户mac@；TCC挡读~/Desktop但~/.hermes/skills可读，跨机同步走skills目录。Mac是主要烧费端(¥12-27/天 vs 服务器¥2-3)，查扣费差额先怀疑Mac端cron/新会话；Windows SSH连不上用向日葵兜底。
 §
-接码用hero-sms.com/5sim（sms-activate已停）。
+web_search国内超时→AnySearch MCP；抓URL用mcp__anysearch__extract
 §
-web_search国内超时→AnySearch MCP；web_extract后端ddgs仅搜索不能抓URL，抓URL用mcp__anysearch__extract
-§
-LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价)。cron全局配置变更坑：服务商/模型切换后未钉模型的cron被安全阀跳过(晨间三合一挂3天)，修复=hermes cron edit <id> --model <model> --provider custom显式钉模型。运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh。
+cron铁律：须显式钉model/provider(hermes cron edit <id> --model <m> --provider <p>)，否则服务商/模型切换后未钉模型的cron被安全阀静默跳过连挂数天(2026-08晨间三合一挂3天实例)；LLM任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30晨间三合一(资讯+变现案例+GitHub,多部分单任务省首调全价)；cron搜索禁web_search走ddgs(国内超时+50次保护空转)，改curl直连GitHub Trending/HN Algolia/国内科技媒体兜底+每部分限15次(已注入prompt)
 §
 翻墙：两台iPhone 11共用美区ID下Shadowrocket，一台留iOS 15.7翻墙专用(只切App Store不切iCloud)；TikTok高度敏感(切节点=换区+风控)，FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版，其余平台切英国等节点无影响(FB偶验证)。机场飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付。
 §
@@ -26,20 +24,20 @@ LLM定时任务9点前跑完避高峰价：8:00英语(单独,早上要用)+8:30�
 §
 拼多多2026运营：赛马制核心(低价爆款+高转化)，流量四来源(搜索/场景/活动/付费)，售后是最大亏点，APP百亿补贴C位。雨刮器(标品)适合百亿补贴/秒杀，服装(非标)适合9块9+场景推荐。
 §
-Yasin财务紧急：月支1万撑不过1个月，救急赚钱优先。已验证：U客直谈真实(勿买98/198会员)、快马日结真实(蓝领150-300/天需出门)、微赚=骗局、短剧出海'一次性费用'=割韭菜、游戏搬砖时薪7-15不适合；避一品威客(4.8万会员费)。剪辑接单：U客直谈/牛片网(需作品集)/圆领/淘宝代剪300-800/条，AI视频差异化300-500/条。TikTok短剧出海：Seedance国内生成+TikTok Drama Center免费翻译，3-6个月非救急。
+Yasin财务紧急：月支1万撑不过1个月，救急赚钱优先。已验证：U客直谈真实(勿买98/198会员)、快马日结真实(蓝领150-300/天需出门)、微赚=骗局、短剧出海'一次性费用'=割韭菜、游戏搬砖时薪7-15不适合；避一品威客(4.8万会员费)。剪辑接单：U客直谈/牛片网(需作品集)/圆领/淘宝代剪300-800/条，AI视频差异化300-500/条。TikTok短剧出海：Seedance国内生成+TikTok Drama Center免费翻译，3-6个月非救急。接码：hero-sms.com/5sim(sms-activate已停)
 §
 模型锁死铁律(Yasin指令)：所有任务只允许deepseek-v4-flash，禁v4-pro/chat/reasoner。已强制：Hermes主模型=硅基deepseek-ai/DeepSeek-V4-Flash；落地页(8920-8923)server.py硬编码；服小助config硬编码。
-§
-memory replace=整条替换非子串；改局部须传完整entry，先读MEMORY.md。
 §
 代理坑：pip/uv报ProxyError先unset http_proxy https_proxy all_proxy；pip走腾讯内网源mirrors.tencentyun.com(pip.conf已配)；升级Hermes用gitcode镜像(git ls-remote gitcode HEAD查真实版本，GitHub被墙时git fetch origin可能静默失败exit 0)。
 §
 caveman skill已装：触发词'caveman mode'/'less tokens'，输出token省65%但总账单仅省5-10%(费用大头在输入·未命中缓存)；Yasin的数据表格保留、cron日报内容不压缩。
 §
-cron任务须显式钉model/provider(hermes cron edit <id> --model <m> --provider <p>)，否则全局配置变更后被安全阀静默跳过连挂数天(2026-08实例：晨间三合一e88a6c79fe52连挂3天，修复=钉custom/deepseek-ai/DeepSeek-V4-Flash)。抖音视频页提取：browser_navigate到www.douyin.com/video/<id> + browser_console取document.title+meta[name=description]+body.innerText，一次拿全标题/作者/点赞/章节要点(AI摘要)；curl抓HTML是混淆JS没用。勿用web_extract抓URL(ddgs仅搜索)。
+抖音视频页提取：browser_navigate到www.douyin.com/video/<id>+browser_console取document.title+meta[name=description]+body.innerText，一次拿全标题/作者/点赞/章节要点(AI摘要)；curl抓HTML是混淆JS没用；勿用web_extract抓URL(ddgs仅搜索)
 §
-TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，base api.tikhub.io Bearer认证，免费端点billboard/fetch_hot_account_search_list(搜账号)+热榜+get_user_info，付费端点handler_user_profile_v4(画像)+fetch_user_post_videos(视频)；openapi.json查端点方法；402=需付费额度/405=方法错/422=body字段错(如fetch_query_user要ttwid cookie)。脚本douyin_creator.py已跑通对标账号分析。淘宝/拼多多/京东无公开数据API(销售数据锁商家后台)；蝉妈妈/飞瓜无API；抖查查/FastMoss有API需账号；同花顺openapi.10jqka.com.cn是A股行情不是抖音数据。抖音/百度/搜狗全反爬，服务器无桌面浏览器→先走TikHub别爬。
+TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，base api.tikhub.io Bearer认证，免费端点billboard/fetch_hot_account_search_list(搜账号)+热榜+get_user_info，付费handler_user_profile_v4(画像)+fetch_user_post_videos(视频)；openapi.json查端点方法；402=需付费额度/405=方法错/422=body字段错(如fetch_query_user要ttwid cookie)。淘宝/拼多多/京东无公开数据API(销售数据锁商家后台)；蝉妈妈/飞瓜无API；抖查查/FastMoss有API需账号。抖音/百度/搜狗全反爬→先走TikHub别爬
 §
 Yasin方向转向(2026-08-30明确)：AI项目变现难→直播达人带货+短视频带货。对标账号：AI智能玩具源头工厂(1.5万粉,小号起量打法)+AI智能机器狗专场(12.4万粉,腰部)，机器狗=2026国潮玩具爆品，赛道头部89万粉未垄断、新人仍有空间。复制打法：痛点场景文案模板(孩子难哄/养狗/送礼6变体)+评论区转化。之前红蓝方法论博主定位已让位给带货执行。
 §
-性能坑修复(2026-08-30)：fallback_providers指向DeepSeek官方余额-0.52欠费→硅基偶发失败时fallback白跑10-30秒拖慢全局(实测硅基5/5成功、均延迟4.4s)。修复=config.yaml清空fallback_providers+重启网关生效；记忆瘦身cron(791dff1e6cc4)同因挂掉，已钉硅基custom。用户决策规则：硅基掉线不严重→清空fallback；严重→换火山方舟兜底。cron搜索铁律：禁web_search走ddgs(国内超时+50次保护空转)，改curl直连GitHub Trending/HN Algolia/国内科技媒体兜底+每部分限15次(已注入晨间三合一prompt)。
+性能规则：fallback_providers须清空(DeepSeek官方欠费，硅基失败时fallback白跑10-30秒拖慢全局)；硅基掉线不严重→清空fallback；严重→火山方舟兜底；全局变慢先查fallback
+§
+运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh
