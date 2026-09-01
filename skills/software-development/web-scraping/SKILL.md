@@ -161,6 +161,28 @@ def _get_product_cards(page):
 
 翻页按钮同样多选器：`.ant-pagination-next` / `.el-pagination .btn-next` / `aria-label="下一页"`。
 
+### 无头服务器模式（browser-harness 不可用时的替代）⚠️
+
+服务器（无显示器、无 Chrome）上 browser-exec/harness 报 `chrome-not-running` 时，**绕开 harness 直接用 playwright Python**：
+
+```bash
+# 1. 已有 venv 时装 playwright（用国内源/已缓存 chromium）
+source <project>/venv/bin/activate && pip install playwright
+
+# 2. 关键：本机缓存的 chromium 版本可能和新装的 playwright 不匹配，
+#    报 "Executable doesn't exist at .../chromium_headless_shell-1234/"
+#    → 不要重新下载！直接 executable_path 指向缓存版本：
+#    find ~/.cache/ms-playwright/ -name "chrome-headless-shell" -type f
+browser = p.chromium.launch(
+    executable_path="/home/ubuntu/.cache/ms-playwright/chromium_headless_shell-XXXX/.../chrome-headless-shell",
+    args=["--no-sandbox", "--disable-dev-shm-usage"])
+```
+
+**坑点**：
+- browser-harness 版本和本地 playwright 版本可能不匹配——`pip install playwright` 后先跑 `python -c "import playwright"` 验证，再测 launch
+- 无头浏览器对字节系站点（Coze 扣子/抖音）**防不胜防**：一旦触发滑块验证码，别死磕反检测 JS（navigator.webdriver=undefined 之类），验证码 iframe 已经加载，绕不过。正确路径：抓登录后**让用户手机配合**（填手机号→用户把短信验证码给我）。
+- 判定验证码发送是否成功：按钮变倒计时（"60s"）= 发出；按钮仍是"发送验证码"= 还没真正发出去。
+
 ### 坑 & 注意
 
 - **抖音反爬极强**：无登录直接访问搜索页会跳验证码，必须用已登录 session。

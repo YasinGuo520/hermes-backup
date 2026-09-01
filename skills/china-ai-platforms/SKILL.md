@@ -40,12 +40,16 @@ related:
 | 儿童故事 / 有声绘本 / 商品详情图 | **阿里百炼** bl CLI | 完整流水线（story.json + 脚本 + 网页模板） |
 | 图生视频 I2V（实拍产品→动效） | **阿里百炼** happyhorse-1.1-i2v | ¥0.06/条最便宜；完整管线见 `ai-video-production` |
 | 视频生成（氛围/T2V） | 硅基流动 Wan2.2 / 火山 Seedance | 硅基便宜但只能氛围画面；Seedance 质量高需充值 |
+| 智能体/Agent bot 对话 API | **Coze 扣子** api.coze.cn | PAT 认证、`POST /v3/chat`（实测有效），1个月过期、bot 免费额度烧完会哑火；详见 `references/coze-api.md` |
+| 自托管 AI 应用平台（知识库/工作流/私有化） | **Dify 社区版（Docker 完整版）** | 3.6G 内存完整版可跑通，端口 8850（nginx 统一入口）。**禁止精简**（砍 plugin-daemon 必连环 500）；启动必须 `--profile postgresql`（profile 名不是 db_postgres）；详见 `references/dify-deployment.md` |
 
 ## 各平台完整文档
 
 - `references/siliconflow-image.md` — 硅基流动生图：模型表、curl 调用、prompt 技巧、立绘抠图、角色贴纸工作流
 - `references/volcengine-ark.md` — 火山方舟：Key 类型、模型开通、视频/图像任务 API、价格表、常见错误
 - `references/bailian-cli.md` — 阿里百炼 bl CLI：TTS/播客/儿童故事/有声绘本/商品详情图全工作流
+- `references/coze-api.md` — 扣子 Coze API：PAT 认证（1个月过期）、`POST /v3/chat` 实测端点、错误码、bot_id 获取、字节风控登录坑
+- `references/dify-deployment.md` — Dify 社区版国内服务器（3.6G内存）精简 Docker 部署实录：镜像源选型、精简 compose、端口/验证/防火墙坑
 
 ## 跨平台关键坑（易踩）
 
@@ -53,10 +57,13 @@ related:
 - Seedance 视频模型开通前需**先充值**（免费额度开不了视频）；API 路径是 `generations`（复数）不是 `generators`——拼错返回 404 空 body
 - 百炼**系统音色** `cosyvoice-v3-flash` 加 `--instruction` 会报 428，禁止用；**克隆音色**是 `cosyvoice-v3.5-flash`，两个模型不能混用，克隆音色创建必须去百炼控制台手动操作
 - 百炼 TTS 输出的 `.mp3` 实为 WAV(PCM)，ffmpeg 拼接必须 `-c:a libmp3lame` 转码
-- **硅基流动必须用 curl 不要用 python urllib**（本环境 urllib 会 Connection reset）；图片 URL 有效期 24h，必须下载后再发送
+- 硅基流动必须用 curl 不要用 python urllib（本环境 urllib 会 Connection reset）；图片 URL 有效期 24h，必须下载后再发送
+- **硅基 key 验证（2026-09-01 实测）**：`/v1/user/info` 端点已弃用——返回 410 code 20092「endpoint is deprecated」，别拿它测 key 误判。正确验证：`curl -s https://api.siliconflow.cn/v1/models -H "Authorization: Bearer $KEY"` 返回 HTTP 200（模型列表）即 key 有效；或直接 curl `/v1/chat/completions` 发一句 "hi"。返回 401 + `{"code":30014,"message":"Token is invalid."}` = 这把 key 无效（复制不全/旧 key）——去测 `.env` 里那把，别在报错现场猜
 - 硅基 Qwen-Image 每次生成背景色值略有不同：抠图时逐图采样四角像素均值，不能写死色值
 - 生图用途决定背景色：贴纸抠图用深蓝/纯色底；**图生3D用纯黑底**（见 `ai-image-to-3d` 技能）
 - 百炼 `bl video generate` 是同步阻塞调用，并行多条会中断（exit 130）——逐条串行
+- **Dify web 容器 SSR 回环超时**（腾讯云）：CONSOLE_API_URL 配公网 IP 会让 web 容器内 SSR fetch 被防火墙拦回环 → 页面报「渲染此组件时发生意外错误」；**最终修复（2026-09-01 完整版实测）**：CONSOLE_API_URL/APP_API_URL **留空**（走 nginx 同源，SSR+浏览器全走 8850 一个口），不写公网 IP 也不写 host.docker.internal。⚠️ `host.docker.internal` 方案容器内通但**浏览器白屏转圈**——已证伪弃用。启动必须 `--profile postgresql`；api↔plugin_daemon 401 **根因（2026-09-01 已查明，非猜测）**：api 源码 `core/plugin/impl/base.py:156` 用 `X-Api-Key: PLUGIN_DAEMON_KEY` 调 daemon，该值必须等于 daemon 容器的 `SERVER_KEY`——不是 PLUGIN_DIFY_INNER_API_KEY（两容器该值本就一致）；修法：根 .env 写 `PLUGIN_DAEMON_KEY=<daemon的SERVER_KEY实测值>` + `--force-recreate api`。**Dify 1.17 模型供应商是插件**：`model-providers` 返回 `{"data":[]}` 是正常（未装插件）；装 SiliconFlow 走 UI Marketplace 搜索安装，别猜市场 API——市场搜索端点 404，UI 点 3 下完事。登录 API curl 明文 401（RSA 加密，用 Playwright 真实登录拿 cookie+CSRF）。详见 `references/dify-deployment.md`
+- **Coze 免费额度耗尽 bot 哑火**：豆包免费 token 用完 bot 不回复，不是配置问题；Coze 自动化登录被字节风控（滑块验证码+webdriver 检测）拦，反检测 JS 不够用——别死磕，用 PAT 直调 API。详见 `references/coze-api.md`
 - 账单查询：百炼去控制台 bailian.console.aliyun.com（`bl usage stats` 需 console login）；火山按产品线分开开通分开计费
 
 ## 支持文件

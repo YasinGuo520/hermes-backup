@@ -6,7 +6,7 @@
 §
 设计系统：背景网格≥0.08opacity粒子≥1.5px，模板优先html5up.net(curl ZIP)部署8890-8899，前端先基础版不做第三轮新构图；角色/贴纸用AI生成立绘(Qwen-Image→色键抠图→帧动画+3D视差)不用CSS手绘。
 §
-端口: 8000=AI爆款主图, 8001=中年人生API, 8002=服小助, 8894=中年人生前端(反代8001), 8895=Hub, 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d；midage.icu=portfolio(郭岳兴)，中年人生走IP:8894
+端口: 8000=AI爆款主图, 8001=中年人生API, 8002=服小助, 8894=中年人生前端(反代8001), 8895=Hub, 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d, 5678=n8n(2026-09部署,公网待放行)；midage.icu=portfolio(郭岳兴)，中年人生走IP:8894
 §
 媒体工具：Remotion ~/Desktop/hermes/remotion-lab；Manim ~/Desktop/hermes/manim-venv(CE v0.20.1,中文字体，像素/展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)混元3D唯一可用(Tripo/Meshy被墙)，密钥~/Desktop/hermes/mecha3d/.env。
 §
@@ -41,3 +41,7 @@ Yasin方向转向(2026-08-30明确)：AI项目变现难→直播达人带货+短
 性能规则：fallback_providers须清空(DeepSeek官方欠费，硅基失败时fallback白跑10-30秒拖慢全局)；硅基掉线不严重→清空fallback；严重→火山方舟兜底；全局变慢先查fallback
 §
 运维：保活scripts/keepalive.sh+crontab每3分钟+@reboot；网关重启杀background http.server(hub坑6)；8897=网关须nginx反代改写Host；改Hub/工具箱只动导航页/勿丢card-link，改完跑linkcheck.sh
+§
+__tmp_usage_check__
+§
+Coze/扣子：星刃bot=Yasin的Coze bot(已发飞书,不在服务器)，免费额度耗尽会哑火；PAT pat_开头 1个月有效(约2026-10-01到期须重生成，到期前提醒Yasin)；API主端点POST api.coze.cn/v3/chat，认证过=4200缺bot_id，bot_id从bot页面URL取。Dify已部署(2026-09-01)：8850=nginx统一入口(web/install向导)、8851=API、8852=web容器内；Postgres+Redis+Chroma；模型未配，待控制台加SiliconFlow。端口8800/8851/8852已占用。用户偏好：发招聘截图=要分析岗位工作内容本身(职责拆解/死法活法/技能对照表)，不是查公司背景；用户说"别查了"=立即停止外部调研，直接分析手头材料。

@@ -21,6 +21,7 @@ created_by: agent
 - **给最直接的方案，不要层层递进**。用户说"搞复杂了/弄个最直接的"时，立刻收敛到最小可运行路径（例：翻墙需求→直接配置隧道+git代理+保活，不要先分析再给函数再测试再解释）。
 - **诊断命令别绊自己**：`pgrep -f "xxx"` 会匹配到自己的命令行字符串 → 误判"进程复活"。用 `[x]xx` 中括号技巧或直接 `ss -tlnp` 看端口。
 - 服务器维护类任务用户信任你放手干（approvals off），但**不要为了"完美"加多余步骤**。
+- **开源平台（Dify等）别自作主张砍组件精简部署**（2026-09-01 用户明确纠正："你别精简啦。直接完整安装不行吗"）。精简版砍掉 plugin-daemon 等核心组件 → 连环故障（白屏转圈/SSR超时/权限/迁移/setup 500），最终完整版一次跑通。**知名开源软件一律官方完整 compose 起步，不做预裁剪**；端口沿用用户已建过的（"端口你还是用刚才创建的8850不就行啦"）。
 
 ## Server Capability Assessment（资源盘点）
 
@@ -663,6 +664,24 @@ env -i HOME=/home/ubuntu PATH=/usr/bin:/bin /home/ubuntu/Desktop/hermes/scripts/
 **修复：** 前端 API 改相对路径 `const API = ''`（同源自动走 https://midage.icu，nginx 已反代好接口路径）。改完注意 **nginx 静态缓存**（`expires 7d`）会让用户端还是旧版——用 `?v=时间戳` 参数绕过，或 `nginx -s reload`。
 
 **排查链：** 浏览器 console 里 `document.querySelectorAll('script:not([src])')` 看实际加载的 JS 是否还是旧值（缓存）；`apiStatus` 元素文本可直读「✅ 正常 / ❌ 加载失败」。
+
+## Docker 镜像国内拉取（腾讯云实测 2026-09-01）
+
+**坑：默认 daemon.json 的 daocloud 镜像源在腾讯云会 403/401，GitHub 被墙拉不到原始镜像。**
+
+实测可用源（腾讯云 43.138.221.174 上验证）：
+- `docker.1ms.run` ✅ 能拉（`docker pull docker.1ms.run/langgenius/dify-*`）
+- `docker.m.daocloud.io` ❌ 403 Forbidden（manifest HEAD 403）
+- `ccr.ccs.tencentyun.com` ❌ 404（无该镜像）
+- GitHub 直连 ❌ 超时
+
+**用法**：镜像名前加 `docker.1ms.run/` 前缀即可（如 `docker.1ms.run/langgenius/dify-api:latest`）。401 属正常（registry 匿名 token 流程），403/404 才是真失败。
+
+**Dify 部署（腾讯云完整版实测 2026-09-01）**：完整流程、镜像名、profile 参数、nginx 反代、全部故障链（SSR超时/白屏转圈/host.docker.internal/权限/迁移/plugin_daemon）见 `china-ai-platforms` 技能的 `references/dify-deployment.md`。要点：官方 `docker-compose.yaml`+`envs/` 全套（gh-proxy 拉 GitHub），`--profile postgresql`（不是 db_postgres！）启动数据库，`EXPOSE_NGINX_PORT` 映射到非80端口避开系统 nginx。**不要走精简 compose**（砍 plugin_daemon 会让 Dify 1.17 模型绑定全部报错）。`docker compose up -d` 会被 Hermes 终端判成长驻进程需 background 跑。首次安装后跑 `flask db upgrade` 做数据库迁移，不然 `relation \"dify_setups\" does not exist` 500；挂载目录必须 `chmod 777`（root 属主导致容器内写不了 → setup 500）。
+
+**Dify 模型供应商 401 排查**：Dify 控制台配 SiliconFlow key 报 `CredentialsValidateFailedError 401 {"code":30014,"message":"Token is invalid."}` = **用户填的 key 无效**（复制错/旧key），不是服务端配置问题。验证失败 Dify 不保存凭据（`provider_credentials` 表为空即证明）。用 `~/.hermes/.env` 的 SILICONFLOW_API_KEY 走 `/v1/chat/completions` 独立验证 200 后，把有效 key 给用户重填即可。⚠️ 验证别用 `/v1/user/info`（已废弃返回 410 code 20092）。详见 `references/docker-n8n-deployment.md`。
+
+**容器应用公网访问前置**：容器起来 ≠ 公网可访问——**先 `curl http://43.138.221.174:PORT/` 测公网**，000 且本机在听 = 腾讯云防火墙没放行。已放行端口全被占用时改映射端口无用（新口也未放行），唯一路径：指引用户去控制台加规则（一句话）或 nginx 80 反代。已放行端口实测清单 + N8N 单容器部署（SQLite、`N8N_ENCRYPTION_KEY` 必填、`docker.1ms.run/n8nio/n8n` 镜像）见 `references/docker-n8n-deployment.md`（2026-09-01 实测）。
 
 ## 常见坑
 
