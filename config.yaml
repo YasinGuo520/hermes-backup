@@ -1,8 +1,8 @@
 model:
-  base_url: https://api.siliconflow.cn/v1
-  default: deepseek-ai/DeepSeek-V4-Flash
-  provider: custom
-  api_key: ${SILICONFLOW_API_KEY}
+  base_url: https://api.deepseek.com/v1
+  default: deepseek-v4-flash
+  provider: deepseek
+  api_key: ${DEEPSEEK_API_KEY}
 fallback_providers: []
 agent:
   max_turns: 90
@@ -24,15 +24,15 @@ auxiliary:
     base_url: https://api.siliconflow.cn/v1
     api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
   compression:
-    provider: custom
-    model: deepseek-ai/DeepSeek-V4-Flash
-    base_url: https://api.siliconflow.cn/v1
-    api_key: ${SILICONFLOW_API_KEY}
+    provider: deepseek
+    model: deepseek-v4-flash
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
   session_search:
-    model: deepseek-ai/DeepSeek-V4-Flash
-    provider: custom
-    base_url: https://api.siliconflow.cn/v1
-    api_key: ${SILICONFLOW_API_KEY}
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
 display:
   language: zh
   platforms:
@@ -50,7 +50,7 @@ delegation:
   max_iterations: 50
 skills:
   external_dirs:
-  - ~/.agents/skills
+    - ~/.agents/skills
 curator:
   consolidate: true
 approvals:
@@ -88,6 +88,6 @@ platforms:
 plugins:
   disabled: []
   enabled:
-  - agency-agents-router
-  - web/ddgs
-  - lightclawbot
+    - agency-agents-router
+    - web/ddgs
+    - lightclawbot

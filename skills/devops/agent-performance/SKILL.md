@@ -514,7 +514,7 @@ script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影�
 触发词：「扣了XX块」「token很厉害」「余额怎么没了」。**先查证再解释**——用户常把「累计多天消耗」或「别的平台扣费」误当成「刚才聊几句烧的」。实测案例：用户怀疑下午量化任务扣了10块，实际该任务单次仅 ¥0.04-0.7；「聊几句扣10块」实为 6-7 天累计 + 长会话。
 
 排查流程（命令与脚本详见 `references/cost-billing-audit.md`）：
-1. **查余额**：DeepSeek `GET https://api.deepseek.com/user/balance`（.env 的 DEEPSEEK_API_KEY）；SiliconFlow `GET https://api.siliconflow.cn/v1/user/info`——两个都查，fallback 通道可能也在烧
+1. **查余额**：DeepSeek `GET https://api.deepseek.com/user/balance`（.env 的 DEEPSEEK_API_KEY，实测可用，返回 balance_infos）；**SiliconFlow 没有公开余额端点**（`/v1/user/info` 已 deprecated 返回 code 20092，`/v1/balance`、`/v1/usage` 404）——硅基余额/今日消费只能看控制台 console.siliconflow.cn，拿不到就请用户截图对账（2026-09-02 实测）
 2. **统计日志**：正则解析 agent.log 的 `API call #N: ... in=X out=Y cache=Z/N`，按 session/cron 聚合
 3. **按官方价格估算**——deepseek-v4-flash 官方价（2026-08-19 直抓 api-docs.deepseek.com）：缓存命中 ¥0.05/M（高峰0.10）、未命中 ¥1.5/M（高峰3.0）、输出 ¥4.5/M（高峰9.0）。**别用早期估算价（0.02/1/2）或 V3 旧价（0.5/2/8）**，会把账单低估/高估 50 倍。价格可能变动，对账前先抓官方页；完整价格表+抓取命令见 `references/cost-billing-audit.md`
 4. **对账结论模板**：单次 cron ¥0.03-0.2、日常对话 ¥0.2-1、一天全自动跑（5-6 个 cron + 聊天）¥2-10。「10块」通常是多天累计或别处扣费（GPT 订阅/机场/苹果内购/其他服务）
@@ -532,6 +532,21 @@ script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影�
 ## 快捷指令
 
 用户喊 **「醒脑」** → 立即执行一次：磁盘清理脚本 + 记忆瘦身 + curator技能检查 + 重建技能档案库(`build-skill-manifest.py` → `kb_summary.py`) + cron drift检查 + 检查磁盘/内存/记忆状态。
+
+## 防绕路纪律（2026-09-01 复盘固化，教训来源：Dify 全权控制）
+
+**触发场景**：**所有任务通用**（用户 2026-09-01 明确：任何事情都要先调查清楚再动手，不陷入自己的误区）。尤其警惕：控制第三方服务、拿权限、打通通道、报错后重试、用户喊「又在绕」「绕来绕去」。
+
+**五条铁律：**
+1. **通道优先**：先列出所有可能通道再选最短的。优先级：官方服务端密钥（admin key/inner key/API token）> 模拟用户登录（RSA/扫码/验证码）> 数据库操作。**先查服务端有没有 server-to-server 认证通道**——源码认证入口文件（login manager / ext_login / auth loader）列了全部认证方式，第一个翻它。
+2. **错误信息是路标**：报错含义=此路成本高就换路。「Invalid encrypted data」=密码要 RSA 加密→直接放弃登录路径去找 API key 通道。别研究错误本身怎么绕过。
+3. **失败 2 次停手重列通道**：同一目标连续 2 次尝试失败→停下来重新枚举通道，禁止换姿势继续钻。
+4. **用户给账号密码 ≠ 必须用密码登录**：凭据=授权你获取权限，不是路径指示。权限可能有更干净的通道（如 Dify ADMIN_API_KEY_ENABLE + X-WORKSPACE-ID，实测 2026-09-01）。
+5. **翻代码顺序**：先看认证/入口（ext_login.py / login.py / token.py loader 部分），再看前端打包（体积巨大，除非后端无解才翻）。Dify 实测：ext_login.py 里 is_admin_api_key_request → 配 ADMIN_API_KEY_ENABLE=true + ADMIN_API_KEY，请求带 X-WORKSPACE-ID 即全权，跳过登录和 CSRF。配置存 ~/Desktop/hermes/dify/admin.conf。
+
+**止损信号**：连续 3 次同目标失败 / 用户主动喊停 → 立即重列通道清单，不许辩解。
+
+**⚠️ 参数校验失败也要计数（2026-09-02 实测：memory 批量 replace 连败 4 次引发用户不满）**：批量 `operations` 里的每个 replace 项必须带 `content`（新文本）+ `old_text`（定位串）——漏 `content` 整批 all-or-nothing 拒绝（报错原文 "Operation 1 (replace): content is required"）；工具连续失败几次后会直接熔断：`Stop retrying memory calls — leave memory unchanged`。连续 2-3 次**相同报错** = 参数契约问题（漏字段/字段名拼错），不是业务问题：停手、重读工具 schema、补齐字段再重试，别靠"换文本内容再来一次"空转。skill_manage patch 同理：`old_string` 是必填字段，每次都要带。**工具报错第一次就检查自己传参缺了什么，别当业务问题处理。**
 
 ## 跨会话长期记忆（claude-mem，合并自 claude-mem skill）
 

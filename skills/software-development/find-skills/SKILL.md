@@ -135,6 +135,20 @@ hermes skills install <owner>/<repo>/skills/<skill-name>
 
 6. **纯手动创建 SKILL.md（最终方案）：** 当网络完全不可用时，通过 `web_search` 搜索项目 README，理解其功能和用法，直接编写适配版 SKILL.md 写入本地。不需要克隆仓库或拉文件。
 
+### ⚠️ 社区skill包的frontmatter格式兼容（批量安装必查）
+
+**实测案例：nexscope-ai/eCommerce-Skills（157技能包，⭐839）。** 同一仓库里的SKILL.md存在**三种frontmatter格式**，只有标准格式能被Hermes识别：
+
+| 格式 | 特征 | Hermes识别？ | 处理 |
+|------|------|:-----------:|------|
+| 标准 | `---` + 顶层 `name:`/`description:` | ✅ | 直接可用 |
+| 命名空间 | `---` + `nexscope:` 子键（name/category/version全在下面） | ❌ | 在原frontmatter块内**追加**顶层 `name:`/`description:`（嵌套命名空间是合法YAML，保留原块兼容） |
+| 无frontmatter | 直接 `# 标题` 开头 | ❌ | 头部补 `---\nname: x\ndescription: x\n---` |
+
+**批量安装流程**：先抽查2-3个SKILL.md头部判断格式分布 → 写脚本统一转换（把顶层name/description注入frontmatter）→ `hermes skills list | grep` 验证enabled。
+
+**父目录陷阱**：skill目录可能是**平台分版的父级**——API列出的 `profit-margin-calculator/` 实际内容是 `profit-margin-calculator-amazon/`、`-shopify/`、`-tiktok/`、`-walmart/` 四个子技能（父目录没有SKILL.md，直接拉会404）。拉取前用 GitHub API `contents/<dir>` 先看真实层级，别按搜索结果里的目录名直接拼URL。
+
 **多脚本 skill 的注意事项：** 如果 skill 依赖多个脚本（如 `.mjs`、`.py`），用 jsDelivr CDN 逐个拉取并写入 `scripts/` 子目录：
 ```bash
 curl -sL "https://cdn.jsdelivr.net/gh/{owner}/{repo}@{tag}/skills/{name}/scripts/{file}" -o ~/.hermes/skills/{name}/scripts/{file}
@@ -203,6 +217,20 @@ ln -sfn "$(pwd)/plugins/<plugin_name>" ~/.hermes/plugins/<plugin_name>
 ```
 
 用 `ln -sfn`（软链）而非复制——git 更新自动生效。
+
+### 3b. npm 全局安装 EACCES 修复（GitHub 工具是 npm 包时）
+
+`npm i -g <pkg>` 报 `EACCES: permission denied, mkdir '/usr/lib/node_modules/...'` = 全局目录无写权限（服务器常见）。**不要 sudo**（污染系统），改用户前缀：
+
+```bash
+npm config set prefix ~/.npm-global
+npm i -g <pkg>
+# 持久化 PATH（写入 ~/.bashrc，grep -q 防重复追加）
+grep -q ".npm-global/bin" ~/.bashrc || echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc && which <pkg>
+```
+
+实测案例：`1688-cli`（superjack2050，供应链CLI）在腾讯云服务器上即此报错，改 prefix 后装通并验证版本。
 
 ### 4. 验证 + 环境变量
 

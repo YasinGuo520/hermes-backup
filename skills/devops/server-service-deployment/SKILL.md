@@ -196,6 +196,32 @@ python -m app.main
 ```
 
 后台运行用 `terminal(background=true)`，不要用 nohup/setsid。
+> ⚠️ 用户明确纠正过（2026-09-02）：**「你别又绕啊」**——background=true + 干净命令直接启动，禁止 nohup/setsid/trailing & 绕法。启动多个服务时写 start_all.sh（循环 & 后台），然后 `terminal(background=true)` 跑脚本；foreground 命令里带 `&` 会被终端工具拒绝。
+
+### 批量部署多个 FastAPI 服务（公司Agent矩阵模式，2026-09-02 实测）
+
+**项目结构（每个Agent一个端口，共享底层）：**
+```
+company-agents/
+├── common/           # 共享：db.py(SQLite) / excel.py / tikhub.py / llm.py(模型锁死封装)
+├── <agent>/app.py    # FastAPI：页面 + API 端点
+├── <agent>/static/index.html
+├── design-system.md  # 统一视觉规范（全站一致性来源）
+└── venv/             # 公共环境（fastapi/uvicorn/pandas/openpyxl）
+```
+启动：`uvicorn <name>.app:app --host 0.0.0.0 --port <port> --app-dir .`
+
+**批量写N个app.py后必做静态检查（本次12个里抓出5+1个bug）：**
+1. **缺 `import datetime`**——用了 datetime 但没 import（5个文件中招）；批量检查：文件含"datetime"字面但无"import datetime" → 补
+2. **SQL INSERT 占位符数量**——`VALUES (?,0,?,?,?)` 里混了字面量0会让 `?` 数少于参数数 → sqlite3.ProgrammingError（compliance 500 实测）；**铁律：VALUES 全部用 `?`，字面量走参数**
+3. **语法**：`python -m py_compile` 全部 .py（裸引号/f-string拼接错立刻暴露）
+4. 逐端口 `urllib` 健康检查 200（Python脚本，别用 shell 反引号）
+
+**批量页面生成的坑**：execute_code 里大段 f-string + `\\n` 转义嵌套极易 SyntaxError——**页面文件直接用 write_file 写**，或用普通字符串 `+` 拼接，不用 f-string。
+
+**健康检查时机**：启动脚本内 sleep+curl 可能全 000（uvicorn 还没 listen）——可靠做法：先启动，等日志出现 `Application startup complete`，再单独调用做端口检查。
+
+**静态页面改动即时生效**：FastAPI StaticFiles 读盘，改 index.html 不用重启服务，浏览器强刷（Ctrl+Shift+R）即可。
 
 **生产持久化用 systemd**（服务器重启自动拉起，nohup 裸进程会丢）：
 ```ini
@@ -222,6 +248,10 @@ sudo systemctl daemon-reload && sudo systemctl enable --now <name>
 sudo systemctl is-active <name>
 ```
 切换 systemd 前先 kill 掉 nohup 裸进程，否则端口冲突。验证：`curl -s http://127.0.0.1:PORT/health`
+
+## 页面视觉规范（公司Agent页/任何新页面，2026-09-02 拍板）
+
+**全站统一深蓝科技风视觉 + 每页布局各异**（用户三次纠正后的结论：否决极简炭黑/Linear风；页头标题居中放大；禁止统一模板批量生成=千篇一律）。完整token、布局模式表、防bug执行序见 `references/deep-blue-tech-design-system.md`。
 
 ## 防火墙与端口管理
 
@@ -748,6 +778,33 @@ curl -s http://localhost:PORT/ | head -3
 
 **一句话判断**：根路径返回 JSON 不一定是"没有页面" — 先查项目里有没有 `static/index.html`。
 
+### 0.1 页面能打开但无样式/布局全乱（"字全偏左"）— 外网 CDN 依赖 ⚠️
+
+**现象：** 页面 HTTP 200 正常打开，但用户说"登录字样全部偏到左边去了/页面光秃秃没样式/布局乱"。后端 API 全通（注册/登录正常响应）——问题在前端资源。
+
+**根因：** 页面引用了外网 CDN（`cdn.tailwindcss.com`、unpkg、jsdelivr 等），国内用户浏览器加载失败/超时 → CSS 没生效 → HTML 全部默认左对齐裸样式。**服务器 curl CDN 返回 200 不代表用户端能加载**（云服务器走国际出口，用户是国内网络）——别被本地 curl 200 误导，用户描述的症状（偏左/无样式）才是铁证。
+
+**诊断三步：**
+1. 先砍后端：`curl -X POST http://127.0.0.1:PORT/api/auth/login -d '{"username":"x","password":"x"}'` — 返回 401"用户名或密码错误" = 后端活着，问题在前端
+2. 查页面外部资源：`grep -rn "https://cdn\.\|https://unpkg\|https://cdn.jsdelivr\|https://cdn.tailwind" <项目>/app/static/*.html`
+3. 服务端 curl 该 CDN 只做参考，**不能排除用户端加载失败**
+
+**修复（CDN 本地化，一劳永逸）：**
+```bash
+# 1. 下载脚本到项目 static 目录（服务器下载一次，用户端直读本地）
+cd <项目>/app/static && curl -sL -o tailwind.js https://cdn.tailwindcss.com
+
+# 2. 批量替换所有 HTML 的 CDN 引用为本地相对路径
+grep -l 'cdn.tailwindcss.com' *.html | while read f; do \
+  sed -i 's|https://cdn.tailwindcss.com|/static/tailwind.js|g' "$f"; done
+
+# 3. 验证
+curl -s http://127.0.0.1:PORT/static/index.html | grep -o 'src="[^"]*tailwind[^"]*"'   # 应指向 /static/tailwind.js
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:PORT/static/tailwind.js      # 200
+```
+
+**铁律：国内服务器托管的页面，前端资源一律本地化**（外网 CDN 下载进 static/ 改本地引用），不要依赖外网 CDN。静态文件改动即时生效，无需重启服务。2026-09-02 服小助 6 页已本地化 `/static/tailwind.js`（index/dashboard/knowledge/channels/billing/setup-guide）。
+
 ### 1. 全端口审计（用户说"打不开"、"帮我弄清楚"）
 
 **一次性扫全，别分步问。** 用户说"你自己弄清楚下" = 禁止逐个询问用户。
@@ -953,6 +1010,7 @@ for p in open('/dev/stdin').read().strip().split():
 - **⚠️ 用户铁律**：改导航页前先备份（`cp build_hub.py build_hub.py.bak`）；只动导航页严禁连带重启其他服务；服务挂了用 `keepalive.sh`（见本 skill 全站服务保活节）不要手动逐个起
 - **工具箱外链**：`build_toolbox.py` 的 SKILLS_DATA 条目支持 `"url": "http://IP:PORT/"` 字段 → 卡片自动渲染「打开页面 →」；重跑后无需重启 8900（静态实时读取）
 - **坑**：网关重启会杀光所有 background http.server（实测 15 端口挂 11 个）→ 靠 crontab `*/3 * * * *` + `@reboot` 保活；卡片链接手写死的话改数据源不生效
+- **卡片内容↔链接错配排查**（用户报「两个链接互换了/网页不对」）：真相源是 nginx 配置（listen+root/proxy_pass），不是卡片文案、不是记忆；改 build_hub.py 的 PROJECTS（端口卡）+ EXTERNAL_LINKS（外链）两处数据源后重跑生成，别直接编辑 index.html。2026-09-02 简历↔中年人生互换实录见 `references/hub-card-mismatch.md`
 - 模板：`references/build_hub_template.py`（深紫科技风模板，生产版已是分类网格版）、`scripts/keepalive.sh`（生产保活脚本）
 
 ## AI 方法论落地页（合并自 ai-analysis-landing-pages）

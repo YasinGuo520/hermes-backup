@@ -399,6 +399,26 @@ html = f'<script>grad.addColorStop(0,"rgba("+c[i]+",0.04)");</script>'
 8. 含涨跌数据必须用中国标准：红涨#ef4444绿跌#22c55e
 9. Python生成HTML时用字符串拼接避免f-string冲突
 
+## 高级感升级流程（用户嫌页面丑时必走）
+
+用户对页面视觉不满（"排版有问题""颜色和布局能不能高级点"）时，**先装载高级设计技能再重做，不要直接手写第二版**（2026-09 实测：用户让我先上GitHub淘skill再生成）。
+
+1. **检查/装载高星设计技能**：`taste-skill`（Leonxlnx ⭐83k，anti-slop 铁律，含 soft/minimalist/redesign 变体）、`frontend-design-toolkit`（wilwaldon ⭐1046，设计资源配方）。装法走 find-skills：jsDelivr 拉 SKILL.md + 补标准 frontmatter
+2. **按 taste-skill 流程**：Design Read（一句话声明：页面类型/受众/氛围，先读需求不跳默认美学）→ 三拨盘（DESIGN_VARIANCE / MOTION_INTENSITY / VISUAL_DENSITY）→ anti-slop 清单
+3. **本技能是数值基数，taste-skill 是品味层**——配色/间距/圆角照本技能，构图/风格判断照 taste-skill
+4. **anti-slop 高频项**（taste-skill 铁律）：禁 AI 紫渐变、禁居中 hero 三等卡、禁无依据玻璃拟态、禁 Inter+slate900 默认组合、禁"所有元素同等地位"
+5. **定稿后存风格指纹**（见下节规则），例：暗金编辑杂志风（选品页 8935 落地款：纸纹底+衬线大标题+不对称双栏+编号分段+细规则线+留白密度4，非表格堆叠）→ `references/dark-gold-editorial-pattern.md`
+
+## 多页批量生成铁律（v3 新增，2026-09 公司Agent矩阵16页实战教训）
+
+**用户明确否过批量模板**：「不要用那个skill的了，千篇一律没有特色」——多个页面共享一个统一CSS模板批量生成 = 被否。原则：
+
+1. **视觉统一、布局各异**：同一套视觉语言（背景/玻璃卡/渐变标题/按钮），但每页布局必须有独立结构，不共享布局模板。16页案例布局见 `references/multi-page-tool-layouts.md`（柱状仪表/时间线/卡片墙/台账/对决卡/聊天窗/领奖台/分屏/扫描仪/评论墙/流水线/分析师桌面12种）
+2. **统一页头：居中放大**（Yasin指定）：`.masthead{text-align:center}` + `h1{font-size:2.2rem;font-weight:800;letter-spacing:2px;渐变四色(蓝#60a5fa→紫#a78bfa→粉#f472b6)-webkit-background-clip:text;drop-shadow发光}` + 副标题居中 `.sub{color:#64748b;0.85rem;letter-spacing:1px}`。所有工具页页头统一此样式，内容区布局自由
+3. **写实现方式：write_file 逐页直写**，不要用 execute_code 里的共享模板函数批量拼接生成——f-string 嵌 HTML 的 `{}` 会 SyntaxError（见十三章技术坑），大 HTML 字符串在 execute_code 参数里反复转义极易毁脚本（`\n` 被写成字面量等）。逐页 `write_file` 最稳，稍多几轮但不出错
+4. **落盘验证再宣称完成**：批量写完后必须逐页 curl/浏览器验证（200 + 页头样式存在 + `hermes skills list` 不适用但服务端口 curl 适用），**别在脚本失败后宣称"搞完了"**（2026-09 实测翻车：上轮 execute_code 语法错误导致整批文件未写，却回复"已完成"）
+5. **数据页内容布局参考**：左操作面板(300-340px)+右数据区是通用骨架，但每页形态不同（有的柱图、有的卡片墙、有的表格台账、有的聊天窗），不要全用同一种
+
 ## 交付强制闭环（v2 新增，必守）
 
 任何页面生成后**必须**走自检闭环，禁止写完直接交付：

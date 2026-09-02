@@ -79,6 +79,10 @@ related:
 - `ai-video-production` — I2V 视频管线、Wan2.2、视频合成（本技能是平台调用层）
 - `volcengine-ark-api` / `siliconflow-image-gen` / `aliang-bailian` 已并入本技能（原内容在 references/ 对应文件）
 
+## TikHub 数据API速查（2026-09-02 实测）
+
+TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API（1066端点）——**免费只有抖音billboard几个，小红书/快手全付费（402=欠额度）**；拿不到任何平台自己的店铺后台数据。抖音端点解析必看：`data.data` 两层嵌套（热榜 word_list / 账号 user_list）。完整端点表+实测结构见 `references/tikhub-endpoints.md`（参考实现：`~/Desktop/hermes/company-agents/common/tikhub.py`）。
+
 ## 腾讯混元3D：2D立绘 → GLB 真3D（合并自 ai-image-to-3d）
 
 把一张2D图片变成可360°旋转的真3D模型（GLB）并放进 Three.js 展示页。墙内可用，成本≈0（免费额度）。**动手前先确认：真3D（可旋转看背面，走本流程）还是伪3D（CSS视差倾斜，见 `ux-pro-max` 的 references/visual-component-patterns.md「AI立绘动态升级」）。**
@@ -110,14 +114,26 @@ related:
 **触发**：「为什么DeepSeek扣费严重」「感觉没用多少token却扣钱」「只能调v4-flash锁死」。核心：**先归因（钱烧在哪），再锁死（防止再烧）**。
 
 ### 定价要点（deepseek-v4-flash，百万token）
-**2026-08-27 主模型已切硅基流动**（官方→硅基反转）：主=SiliconFlow custom、fallback=DeepSeek 官方，见下方锁死清单。
+**2026-09-02 实测：硅基已涨到与官方同价，不再便宜**（原 ¥1/¥2 旧价已作废）。主=**DeepSeek 官方**（2026-09-02 已全切：Hermes 主模型+辅助+3条高耗cron+16公司agents 公共层，硅基弃用；仅 vision 辅助留硅基 Qwen3-VL，官方无等效稳定视觉替代且用量小），见下方锁死清单。
 
-| 平台 | 输入·未命中 | 输出 | 缓存命中 | 高峰加成 |
+| 平台 | 输入·未命中 | 输出 | 缓存命中 | 时段格局 |
 |---|---|---|---|---|
-| **硅基流动（当前主）** | ¥1.0 | ¥2.0 | ¥0.02 | 无 |
-| DeepSeek 官方（fallback） | ¥1.5 / 高峰¥3.0 | ¥4.5 / 高峰¥9.0 | ¥0.05 / ¥0.10 | 2倍 |
+| **硅基流动（当前主）** | ¥1.5 低价 / ¥3.0 高价 | ¥4.5 低价 / ¥9.0 高价 | ¥0.15 / ¥0.30（官方3倍） | 低价=每天凌晨2-8点；高价=0-2 & 8-24（每天18h） |
+| DeepSeek 官方（fallback） | ¥1.5 / 高峰¥3.0 | ¥4.5 / 高峰¥9.0 | ¥0.05 / ¥0.10 | 高峰=工作日9-12、14-18（5h/天） |
 
-硅基比官方便宜 55-78% 且无高峰 2 倍价。deepseek-v4-pro 是 flash 的 **3倍**；2026-08-23 起官方周末全天低谷价；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
+**高峰时段坑（2026-09-02 实测）**：官方高峰只工作日5小时；硅基高价时段每天18小时（**8点整就涨价**）。「9点前跑完避高峰」策略在对官方**重新生效**（官方9点才起高峰，8:00英语/8:30晨间三合一现居空闲价；白天9-18两边同价；18点后+周末官方全天空闲价、硅基仍高价）。deepseek-v4-pro 是 flash 的 **3倍**；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
+
+### 账单/余额查询实证（2026-09-02 实测）
+
+**查 key 先看 `~/.hermes/.env`**（Hermes 专用 key 文件，用户明确纠正过：别全盘 find/grep 找 key）。里面直接有 `DEEPSEEK_API_KEY`、`DEEPSEEK_BASE_URL=https://api.deepseek.com/v1`、`SILICONFLOW_API_KEY`、`OPENAI_API_KEY` 等。key 前缀 `sk-` 长度 35。
+
+**余额/今日消费：**
+- DeepSeek 官方：`curl https://api.deepseek.com/user/balance -H "Authorization: Bearer $KEY"`（实测可用，返回 `balance_infos[]: currency/total_balance/granted_balance(赠)/topped_up_balance(充)`）
+- 硅基流动：**没有公开余额端点**（`/v1/user/info` deprecated / `balance`、`usage` 全 404）→ 余额和「今日消费」只能看控制台 console.siliconflow.cn（需登录，拿不到就请用户截图对账，别编）
+
+**本地 cron 精确账本**：`~/.hermes/cron/usage_audit.jsonl` 每行一条 cron 执行记录，含 `ts`（**UTC，+8=北京**）、`prompt_tokens`、`completion_tokens`、`model`、`job_id`——这是 cron 侧最可靠的 token 账。⚠️ `sessions/sessions.json` 的 input/output/cache 字段**实测全为 0 不可靠**（没在记账）；`request_dump_*.json` 只有 cron 会话有。
+
+**渠道切换前先盘点**：改渠道不是全量改。先 `python3` 读 `~/.hermes/cron/jobs.json` 按 `provider` 字段分组，只改目标渠道的 job（2026-09-02 实测：14 个 cron 里 4 个已钉官方 `provider=deepseek`、3 个走硅基 `provider=custom`）。company-agents 的公共层配置在 `~/Desktop/hermes/company-agents/common/llm.py` 的 `BASE=` 一行。
 
 ### 成本三大规律
 1. **贵不贵看缓存命中率，不看总量**：同样10万token，命中90%≈¥0.5，命中0%≈¥30，差60倍。新会话/cron冷启动/上下文压缩→前缀变→全价未命中
@@ -132,15 +148,17 @@ related:
 4. 全站模型扫描：落地页 server.py 的 MODEL 行、服小助 app/config.py（常共用同一 DeepSeek key——三处都要查）
 5. 跨机：Mac 查 `~/.hermes/logs/agent.log` + `gui.log`（桌面 GUI 走 `hermes serve` 写 gui.log 不写 agent.log）
 
-### 模型锁死清单（只允许 deepseek-v4-flash；2026-08-27 主模型已切硅基）
-| 位置 | 做法 |
+### 模型锁死清单（只允许 deepseek-v4-flash；2026-09-02 已全切 DeepSeek 官方）
+| 位置 | 做法（官方版） |
 |---|---|
-| config.yaml 主模型 | `provider: custom` + `default: deepseek-ai/DeepSeek-V4-Flash` + `base_url: https://api.siliconflow.cn/v1` + `api_key: ${SILICONFLOW_API_KEY}`（custom 支持 env 引用格式 `${VAR}`） |
-| config.yaml fallback | fallback_providers = `[{provider: deepseek, model: deepseek-v4-flash, key_env: DEEPSEEK_API_KEY}]`（官方兜底，反转前是硅基） |
-| 辅助模型 | `auxiliary.compression` / `auxiliary.session_search` 同切硅基（`hermes config set auxiliary.*.provider/model/base_url/api_key`） |
-| cron jobs | 每个 LLM job 显式 pin：`hermes cron edit <id> --model deepseek-ai/DeepSeek-V4-Flash --provider custom` |
+| config.yaml 主模型 | `provider: deepseek` + `default: deepseek-v4-flash` + `base_url: https://api.deepseek.com/v1` + `api_key: ${DEEPSEEK_API_KEY}`（官方模型名**不带前缀**；带 `deepseek-ai/` 前缀的是硅基命名，两边不通用） |
+| config.yaml fallback | 已清空（官方即主渠道，无需兜底） |
+| 辅助模型 | `auxiliary.compression` + `auxiliary.session_search` 同切官方；⚠️ `config set` 对 `auxiliary.session_search.*` 打印 "not a recognized config key" 警告，但**值照样写入 yaml 且生效**（运行时读 yaml，不查 registry） |
+| 辅助 vision | **留硅基** `Qwen/Qwen3-VL-8B-Instruct`（用量小；官方视觉模型仅 vision-exp 不稳定） |
+| cron jobs | 显式 pin：`hermes cron edit <完整12位ID> --model deepseek-v4-flash --provider deepseek`；⚠️ **8位短 ID 报 "Job not found"**，必须完整 12 位 hex（从 `hermes cron list` 或 jobs.json 复制） |
+| 16 公司 agents | `common/llm.py`：`BASE = "https://api.deepseek.com/v1"` + `MODEL = "deepseek-v4-flash"` + 读 `DEEPSEEK_API_KEY`（切完跑 `python3 common/llm.py` 验证连通） |
 | 落地页 server.py | **硬编码** `MODEL = "deepseek-v4-flash"`，不要 os.environ.get（可被覆盖成 pro） |
-| 服小助 | `app/config.py` 硬编码 `DEEPSEEK_CHAT_MODEL` |
+| 服小助 | `app/config.py` 硬编码 `DEEPSEEK_CHAT_MODEL`（本来就是官方 key，无需动） |
 
 **切换 provider 的坑（2026-08-27 实测）**：
 - 标量用 `hermes config set model.provider/default/base_url/api_key`（安全）；数组（fallback_providers）只能 python yaml——`config set` 会把数组存成字符串被静默忽略
@@ -148,6 +166,19 @@ related:
 - ⚠️ **当前会话保留启动时的 provider 快照**——改配置只对新会话/cron 生效，当前会话继续按旧 provider 计费；要全切就重启 gateway 或让用户新开会话
 - 验证：`hermes chat -q "只回复两个字：正常"` 跑通即新 provider 生效；`python3 -c "import yaml; yaml.safe_load(open('~/.hermes/config.yaml'))"` 确认无语法错
 - config.yaml 受安全保护，patch/write_file 会被拒，只能 `hermes config set` 或 python yaml；改完落地页要 kill 旧进程重启（keepalive 只在端口挂了才拉起，不会因代码变更自动重启——`ps -o lstart -p PID` 验证）
+
+**渠道全切一次性清单（2026-09-02 官方全切实测；用户明确要求「别绕，一次搞定」）**：
+1. 查 key：直接读 `~/.hermes/.env`（Hermes 专用 key 文件），别 find/grep 全盘搜（用户纠正过）
+2. 官方余额：`curl https://api.deepseek.com/user/balance -H "Authorization: Bearer $KEY"` → `balance_infos[].total_balance`（⚠️ 切之前查，余额不足先充值——实测切时只剩 ¥9.47，不充值 cron 明早就饿死）
+3. `hermes config set` × 4 键（model.provider/default/base_url/api_key）+ auxiliary.compression × 4 + auxiliary.session_search × 4；`config show` 确认展开后 api_key 前缀正确
+4. 读 `~/.hermes/cron/jobs.json` 按 provider 分组 → 只改旧渠道的 job：`hermes cron edit <完整12位ID> --model deepseek-v4-flash --provider deepseek`
+5. company-agents 公共层：patch `common/llm.py`（BASE/MODEL/key 名三处），跑 `python3 common/llm.py` 验连通
+6. 验证收尾：`config show | grep -A8 Model` + jobs.json grep model/provider + 直调 `https://api.deepseek.com/v1/chat/completions` 看 usage 返回
+
+**官方 API 实测坑（2026-09-02）**：
+- 官方**默认开思考模式**：completion 返回 `completion_tokens_details.reasoning_tokens` 单独计费；`max_tokens` 设太小会被 thinking 全吃掉（实测 max_tokens=10 → 返回 10 个 reasoning token、`content` 为空）——测连通时 `max_tokens` ≥64，且 content 非空才算真通
+- 官方响应带 `prompt_cache_hit_tokens` 字段（缓存命中可观测，能用来对账）
+- 切换后**当前会话仍走旧 provider 快照**——验证要新开会话或等 cron 跑（见上）
 
 ### 优化动作（按 ROI）
 少开新会话（缓存命中）> **cron 合并成单会话**（同类 LLM job 并成一个，实测省 40-50% 输入费，完整流程见 `references/cron-merge-token-savings.md`）> cron 挪空闲时段（单价减半）> cron 之间错开 > 压缩阈值调高/降频（历史重写=缓存全废）> 删不用 skills（只提速省钱微小）。
