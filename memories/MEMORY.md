@@ -10,11 +10,9 @@
 §
 媒体工具：Manim ~/Desktop/hermes/manim-venv(CE v0.20.1，展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)混元3D唯一可用(Tripo/Meshy被墙)，key~/Desktop/hermes/mecha3d/.env。
 §
-模型锁死铁律(Yasin指令)：所有任务只允许deepseek-v4-flash，禁v4-pro/chat/reasoner；已强制：Hermes主模型=硅基custom、落地页server.py、服小助config。API：api.siliconflow.cn/v1 key=${SILICONFLOW_API_KEY}；价入¥1/M出¥2/M缓存¥0.02/M；DeepSeek key多端共用(服务器+服小助+落地页+Mac)每调用5-6万token；Qwen-Image $0.02/张≈¥0.14 python直连报错须curl；火山方舟key在~/backend/.env见china-ai-platforms技能
-§
 Mac Tailscale 100.80.117.5(yasin)，SSH用户mac@；TCC挡读~/Desktop但~/.hermes/skills可读，跨机同步走skills目录；Mac主要烧费端(¥12-27/天vs服务器¥2-3)，查扣费先怀疑Mac端cron。
 §
-cron铁律：须显式钉model/provider(hermes cron edit --model --provider)，否则模型切换后未钉的cron被安全阀静默跳过；LLM任务9点前跑完避高峰价：8:00英语+8:30晨间三合一；cron搜索禁web_search走ddgs，改curl直连GitHub Trending/HN Algolia/国内媒体+限15次
+cron铁律：须显式钉model/provider(hermes cron edit --model --provider，用完整12位ID，8位短ID报Job not found)；disabled任务edit报Cannot activate须先改jobs.json或resume。避高峰：DeepSeek官方9点起高峰、8点前全空闲价→LLM cron已全挪7:00-7:55(三合一7:10/英语7:30/看板同步7:50)；注意变现日报cbab278b/AI资讯99bf3a31/GitHub热门580726f6/量化早报ea324446/自进化4b176d3f共5任务已停用(2026-09-02确认,恢复前不跑)。cron搜索禁web_search走ddgs，改curl直连GitHub Trending/HN Algolia/国内媒体+限15次。
 §
 翻墙：两台iPhone 11共用美区ID Shadowrocket，一台留iOS 15.7专用(只切App Store不切iCloud)；TikTok切节点=换区+风控，FB/TikTok须美国节点+English(US)，TikTok拔SIM卡或网页版；机场飞鸟FlyingBird(¥15/100G全IPLC)+山海(¥6)月付。
 §
@@ -28,10 +26,12 @@ TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，a
 §
 Yasin方向转向(2026-08-30)：AI项目变现难→直播达人带货+短视频带货。对标：AI智能玩具源头工厂(1.5万粉,小号起量)+AI智能机器狗专场(12.4万粉,腰部)；机器狗=2026国潮爆品，赛道头部89万粉未垄断、新人仍有空间。复制：痛点文案模板(孩子难哄/养狗/送礼6变体)+评论区转化。红蓝博主定位已让位给带货执行。
 §
-Coze：星刃bot免费额度耗尽会哑火(已发飞书,不在服务器)；PAT pat_开头1个月有效(2026-10-01须重生成)；POST api.coze.cn/v3/chat，4200=缺bot_id(bot页URL取)。Dify已部署：8850=nginx入口、8851=API、8852=web容器；模型未配待加SiliconFlow。用户偏好：发招聘截图=分析岗位工作内容(职责拆解/死法活法/技能对照表)不查公司背景；说'别查了'=停止调研直接分析手头材料。
+Coze：星刃bot免费额度耗尽会哑火(已发飞书,不在服务器)；PAT pat_开头1个月有效(2026-10-01须重生成)；POST api.coze.cn/v3/chat，4200=缺bot_id(bot页URL取)。Dify已部署：8850=nginx入口、8851=API、8852=web容器；模型未配，配时用DeepSeek官方非硅基(同Hermes key)。用户偏好：发招聘截图=分析岗位工作内容(职责拆解/死法活法/技能对照表)不查公司背景；说'别查了'=停止调研直接分析手头材料。
 §
 电商运营Agent矩阵项目(2026-09-02立项)：自用版16个agent，全挂Hub「⚙️公司流程化Agent」单入口→agent-hub.html二级页(走8895同目录免开端口)，端口8924-8940(8931已被mecha3d占)；数据=抖音TikHub自动+淘宝Excel手工上传(无API)；无定时任务先做页面(每页手动触发按钮)；分批：第一批①统筹8924/⑪选品8935/⑬库存8938/⑯财务8940，第二批②销售8928/③趋势8929/⑭供应链8937/⑮物流8939，第三批⑤招聘8925/④培训8927/⑦绩效8926/⑨合规8933/⑩舆情8934/⑧内容8932/⑥流程8930；费用：开发¥3-5一次性+运行¥1-2/月(无定时)
 §
 环境坑：Hub=python3 http.server 8895，serve ~/Desktop/hermes/hermes-hub/，同目录放子页免开防火墙；npm全局前缀已改~/.npm-global/bin(装全局包报EACCES先改prefix)；1688-cli v0.1.47已装此前缀下；nexscope eCommerce-Skills(nexscope-ai)的SKILL.md frontmatter是nexscope:命名空间，装Hermes必须补顶层name/description字段否则不识别；GitHub直连TLS不稳→jsDelivr/raw.githubusercontent拉文件，GitHub search API无认证60次/时限流
 §
 公司流程化Agent部署状态(2026-09-02)：16个全上线，~/Desktop/hermes/company-agents/（common共享层+每agent目录+公共venv），批量启动start_all.sh（脚本内&循环，terminal background=true；禁止前台&/nohup），日志/tmp/agent-*.log，静态页改动免重启。端口：8924统筹/8925招聘/8926绩效/8927培训/8928销售/8929趋势/8930流程/8932内容/8933合规/8934舆情/8935选品/8936数据/8937供应链/8938库存/8939物流/8940财务。Hub二级页=8895/agent-hub.html(16卡全在线)。设计：design-system.md v2（深蓝科技风统一视觉+每页布局各异+页头居中放大；极简炭黑被Yasin否决；批量页面禁止统一模板），详见server-service-deployment技能references/deep-blue-tech-design-system.md。TikHub端点实测详见china-ai-platforms技能references/tikhub-endpoints.md。
+§
+模型锁死铁律(2026-09-02更新)：只允许deepseek-v4-flash禁v4-pro/chat/reasoner；渠道已全切DeepSeek官方(api.deepseek.com/v1, provider=deepseek, key=${DEEPSEEK_API_KEY})：Hermes主模型+compression+session_search+cron 73d214f4英语/791dff1e记忆瘦身/e88a6c79三合一+16agents公共层llm.py；硅基仅剩auxiliary.vision(Qwen3-VL)。切因：硅基V4-Flash涨价=官方同价(高峰in3/out9、空闲in1.5/out4.5)但缓存0.15-0.30贵3倍、高峰18h/天(0-2/8-24)远宽于官方5h(工作日9-12/14-18)→官方省35-50%。官方余额2026-09-02=¥9.47需充值(platform.deepseek.com/user/balance查)。Qwen-Image $0.02/张 python直连报错须curl；火山方舟key在~/backend/.env。Dify待配模型用DeepSeek官方非硅基。

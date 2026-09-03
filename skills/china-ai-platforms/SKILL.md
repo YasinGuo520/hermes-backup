@@ -121,7 +121,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 | **硅基流动（当前主）** | ¥1.5 低价 / ¥3.0 高价 | ¥4.5 低价 / ¥9.0 高价 | ¥0.15 / ¥0.30（官方3倍） | 低价=每天凌晨2-8点；高价=0-2 & 8-24（每天18h） |
 | DeepSeek 官方（fallback） | ¥1.5 / 高峰¥3.0 | ¥4.5 / 高峰¥9.0 | ¥0.05 / ¥0.10 | 高峰=工作日9-12、14-18（5h/天） |
 
-**高峰时段坑（2026-09-02 实测）**：官方高峰只工作日5小时；硅基高价时段每天18小时（**8点整就涨价**）。「9点前跑完避高峰」策略在对官方**重新生效**（官方9点才起高峰，8:00英语/8:30晨间三合一现居空闲价；白天9-18两边同价；18点后+周末官方全天空闲价、硅基仍高价）。deepseek-v4-pro 是 flash 的 **3倍**；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
+**高峰时段坑（2026-09-02 实测）**：官方高峰只工作日5小时；硅基高价时段每天18小时（**8点整就涨价**）。「9点前跑完避高峰」策略在对官方**重新生效**（官方9点才起高峰；晨间 cron 已全挪 7:00-7:55 档——三合一7:10/英语7:30/看板同步7:50等，见下；白天9-18两边同价；18点后+周末官方全天空闲价、硅基仍高价）。deepseek-v4-pro 是 flash 的 **3倍**；**输出已含 thinking token**（别被本地 usage.jsonl 的 reasoningTokens 误导）。
 
 ### 账单/余额查询实证（2026-09-02 实测）
 
@@ -164,6 +164,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 - 标量用 `hermes config set model.provider/default/base_url/api_key`（安全）；数组（fallback_providers）只能 python yaml——`config set` 会把数组存成字符串被静默忽略
 - ⚠️ 改全局 provider 后，**有 provider_snapshot 的 cron job 下次运行会 fail closed**——config set 会打印警告，必须 `hermes cron edit <job_id> --model <model> --provider <provider>` 把 job pin 到新值
 - ⚠️ **当前会话保留启动时的 provider 快照**——改配置只对新会话/cron 生效，当前会话继续按旧 provider 计费；要全切就重启 gateway 或让用户新开会话
+- ⚠️ **`hermes cron list` 只列 active 任务**——jobs.json 里 `enabled=false` 的 job 是停用的（可能早就不跑了，用前先核对 usage_audit 有没有它的记录）；对停用 job 跑 `cron edit --schedule` 报 **"Cannot activate terminal cron job … through update_job"**——只想改其 schedule 保持停用时，`cp jobs.json jobs.json.bak` 后 python 直接改 `schedule.expr`，实测 scheduler 重读生效（`hermes cron status` 的 Next run 即更新）
 - 验证：`hermes chat -q "只回复两个字：正常"` 跑通即新 provider 生效；`python3 -c "import yaml; yaml.safe_load(open('~/.hermes/config.yaml'))"` 确认无语法错
 - config.yaml 受安全保护，patch/write_file 会被拒，只能 `hermes config set` 或 python yaml；改完落地页要 kill 旧进程重启（keepalive 只在端口挂了才拉起，不会因代码变更自动重启——`ps -o lstart -p PID` 验证）
 

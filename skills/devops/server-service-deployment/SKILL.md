@@ -221,6 +221,10 @@ company-agents/
 
 **健康检查时机**：启动脚本内 sleep+curl 可能全 000（uvicorn 还没 listen）——可靠做法：先启动，等日志出现 `Application startup complete`，再单独调用做端口检查。
 
+**Agent 页加「知识库批量文件上传」**（train/8927 实测 2026-09-02）：用户喊「要加整个文件上传/一条条录入很麻烦」→ multipart `/api/upload` + 按扩展名解析（txt/md/docx/pdf/xlsx/代码）+ 独立 kb_docs 表（**别借用 selection_pool 塞字段——原实现 sales 字段只存前2000字会截断丢内容**）+ 问答截断喂 LLM。完整代码/依赖/前端拖拽/重启验证见 `references/company-agent-kb-upload.md`。
+
+**用户嫌「不够自动化」→ 自动化改造评估**（2026-09-03）：16 agent 全是手动按钮 = 仪表盘不是流水线。物理瓶颈就两条：平台后台（淘宝/PDD/京东等）无开放 API 只能 Excel 手传；已有 HTTP 端点没人定时触发。快速摸底用正则扫 app.py 路由+数据源标记（tikhub.=可自动/excel.=卡死/llm.=烧token），选品8935 `/api/hot` 免费热榜+规则打分 0 token 最适合先自动化，趋势8929 search_accounts 付费按次勿高频。升级路线 A(定时端点,¥0)/B(每日早报,~¥0.1天)/C(触发预警)/D(RPA导后台,有封号风险需用户知情)。全套诊断+路线+实施要点见 `references/company-agents-automation.md`。
+
 **静态页面改动即时生效**：FastAPI StaticFiles 读盘，改 index.html 不用重启服务，浏览器强刷（Ctrl+Shift+R）即可。
 
 **生产持久化用 systemd**（服务器重启自动拉起，nohup 裸进程会丢）：
