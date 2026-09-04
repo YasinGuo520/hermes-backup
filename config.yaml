@@ -33,6 +33,86 @@ auxiliary:
     provider: deepseek
     base_url: https://api.deepseek.com/v1
     api_key: ${DEEPSEEK_API_KEY}
+  skills_hub:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  approval:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  review:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  mcp:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  title_generation:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  memory_query_rewrite:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  tts_audio_tags:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  triage_specifier:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  kanban_decomposer:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  profile_describer:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  goal_judge:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  curator:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  monitor:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  background_review:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  moa_reference:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
+  moa_aggregator:
+    model: deepseek-v4-flash
+    provider: deepseek
+    base_url: https://api.deepseek.com/v1
+    api_key: ${DEEPSEEK_API_KEY}
 display:
   language: zh
   platforms:
@@ -48,6 +128,10 @@ memory:
   provider: holographic
 delegation:
   max_iterations: 50
+  model: deepseek-v4-flash
+  provider: deepseek
+  base_url: https://api.deepseek.com/v1
+  api_key: ${DEEPSEEK_API_KEY}
 skills:
   external_dirs:
     - ~/.agents/skills

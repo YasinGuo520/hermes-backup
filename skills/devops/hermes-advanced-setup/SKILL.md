@@ -322,7 +322,7 @@ hermes memory status
 
 ## 模型 Fallback 配置（抗 Provider 过载）
 
-> **2026-08-27 主/备已反转**：当前主模型=硅基流动（custom provider，deepseek-ai/DeepSeek-V4-Flash），fallback=DeepSeek 官方。下方示例仍为「主官方→备硅基」写法，但**机制完全一致**，只需互换两端。当前锁定配置矩阵见 `china-ai-platforms` 技能的「模型锁死清单」。
+> **2026-09-04 状态（覆盖旧的 08-27 主/备反转注）**：渠道已全切 DeepSeek 官方（api.deepseek.com/v1，provider=deepseek），主模型=deepseek-v4-flash，硅基仅剩 auxiliary.vision。全链路显式钉死做法见下方「全链路模型锁死」。旧 fallback 示例与机制保留作参考。
 
 当用户看到 `⚠️ The model provider failed after retries` 报错：主模型 provider 高峰过载（典型：DeepSeek 官方 API 国内上午 10-11 点连续 503 "Service is too busy"），Hermes 重试 3 次全失败后显示该提示。不是 Hermes 挂了，解法是配 fallback 链，主模型失败自动切换。
 
@@ -369,6 +369,50 @@ curl -sS --max-time 60 https://api.siliconflow.cn/v1/chat/completions \
 - SiliconFlow（api.siliconflow.cn）国内可直连（~37ms），有 DeepSeek-V4-Flash/V4-Pro/V3.2/R1 全系镜像，是 DeepSeek 官方 API 的最佳 fallback 通道
 - fallback 用与主模型**同款模型**（deepseek-v4-flash ↔ deepseek-ai/DeepSeek-V4-Flash），切换用户无感
 - fallback 触发条件：rate-limit、5xx、连接错误（文档：hermes-agent.nousresearch.com/docs/user-guide/features/fallback-providers）
+
+## 全链路模型锁死（2026-09-04 实测）
+
+**触发**：用户要求「所有调用锁死 X 模型 / 禁 Y 模型」，或投诉「怎么调用的都是 pro」。核心教训：**主模型锁了 ≠ 全锁**。用户实际跑偏的洞：`delegation.*` 空配置 + 一大批 auxiliary 服务段 `provider: auto / model: ''`——auto 段不显式钉，就会跟随/自动解析，主配置一改就漂移。
+
+**排查顺序（证据链）**：
+1. 查现状：`hermes config get model`、`hermes config get delegation`、`hermes config get auxiliary`（注意 `auxiliary` 输出里 `provider: auto / model: ''` 的段全是风险点）
+2. 代码层：cron 任务 `grep '"model"' ~/.hermes/cron/jobs.json`；项目公共层（如 `~/Desktop/hermes/company-agents/common/llm.py` 的 `MODEL =`）；全盘 grep 硬编码模型名——**必须过滤 venv/site-packages/第三方库**（tencentcloud SDK、dify 插件自带的 `deepseek-v4-pro.yaml` 只是模型清单文件，不是调用配置，别误判）
+
+**自建服务侧审计**（用户问「导航页/自建服务里用到模型的是否全锁 flash」）：Hub 生态端口→进程→config.py 扫描、n8n 凭证 CLI 导入（import JSON 必须带 UUID id）、Dify 供应商内部表/RSA 登录死路 → 见 server-service-deployment 技能 `references/model-lock-server-audit.md`。
+
+**钉死命令**（`hermes config set` 支持嵌套键，逐段写）：
+```bash
+# delegation（子代理）
+hermes config set delegation.model deepseek-v4-flash
+hermes config set delegation.provider deepseek
+hermes config set delegation.base_url "https://api.deepseek.com/v1"
+hermes config set delegation.api_key '${DEEPSEEK_API_KEY}'
+# auxiliary 各段循环钉（除 vision）：
+# skills_hub approval review mcp title_generation memory_query_rewrite tts_audio_tags
+# triage_specifier kanban_decomposer profile_describer goal_judge curator monitor
+# background_review moa_reference moa_aggregator
+for sec in skills_hub approval review mcp title_generation memory_query_rewrite tts_audio_tags triage_specifier kanban_decomposer profile_describer goal_judge curator monitor background_review moa_reference moa_aggregator; do
+  hermes config set auxiliary.$sec.model deepseek-v4-flash
+  hermes config set auxiliary.$sec.provider deepseek
+  hermes config set auxiliary.$sec.base_url "https://api.deepseek.com/v1"
+  hermes config set auxiliary.$sec.api_key '${DEEPSEEK_API_KEY}'
+done
+```
+
+**铁律**：
+- ⚠️ **vision 段必须例外**：DeepSeek 官方无视觉模型，`auxiliary.vision` 保留硅基 Qwen3-VL（api.siliconflow.cn），否则看图功能全挂
+- api_key 用 `${VAR}` env 引用（与 compression/session_search 同款），config 里不写明文；`config get` 输出显示 `${DE...KEY}` 截断 = 正常
+- 钉完**必须 python yaml 读回验证**：列出每段 model/provider，确认零 `auto`/空值才算锁死
+
+**验证脚本**：
+```python
+import yaml
+cfg = yaml.safe_load(open('/home/ubuntu/.hermes/config.yaml'))
+for k, v in cfg.get('auxiliary', {}).items():
+    if isinstance(v, dict):
+        ok = v.get('model') == 'deepseek-v4-flash' or k == 'vision'
+        print(('✅' if ok else '❌'), k, v.get('model'), v.get('provider'))
+```
 
 ## 技术细节
 

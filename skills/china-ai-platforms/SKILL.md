@@ -145,7 +145,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 1. 控制台 → 用量 → 模型维度，看「输入未命中缓存」×高峰价 = 最大扣费项
 2. `grep "API call" ~/.hermes/logs/agent.log | grep 日期 | grep -oP 'model=\S+ provider=\S+' | sort | uniq -c`（cron 会话 ID 格式 `[cron_xxx_时间戳]`；交互会话 `[YYYYMMDD_HHMMSS_hash]`；`agent.log.1` 轮转旧档也要查 pro 调用）
 3. cron 审计：`cat ~/.hermes/cron/jobs.json`（`{"jobs":[...]}` 结构）遍历 model/provider 字段
-4. 全站模型扫描：落地页 server.py 的 MODEL 行、服小助 app/config.py（常共用同一 DeepSeek key——三处都要查）
+4. 全站模型扫描（**不只 Hermes——导航Hub全生态都要查**，2026-09-04 实测在中年人生backend抓出漏网的 `deepseek-chat`）：按服务类型定位 config 位置（落地页 server.py MODEL 行 / 服小助 app/config.py / 中年人生 `/var/www/midlife-test/backend/config.py` / company-agents 公共层 / 静态页 JS 直连 / n8n sqlite / Dify postgres），完整配方见 `references/full-fleet-model-audit.md`
 5. 跨机：Mac 查 `~/.hermes/logs/agent.log` + `gui.log`（桌面 GUI 走 `hermes serve` 写 gui.log 不写 agent.log）
 
 ### 模型锁死清单（只允许 deepseek-v4-flash；2026-09-02 已全切 DeepSeek 官方）
@@ -154,10 +154,12 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 | config.yaml 主模型 | `provider: deepseek` + `default: deepseek-v4-flash` + `base_url: https://api.deepseek.com/v1` + `api_key: ${DEEPSEEK_API_KEY}`（官方模型名**不带前缀**；带 `deepseek-ai/` 前缀的是硅基命名，两边不通用） |
 | config.yaml fallback | 已清空（官方即主渠道，无需兜底） |
 | 辅助模型 | `auxiliary.compression` + `auxiliary.session_search` 同切官方；⚠️ `config set` 对 `auxiliary.session_search.*` 打印 "not a recognized config key" 警告，但**值照样写入 yaml 且生效**（运行时读 yaml，不查 registry） |
+| delegation + 全部 auxiliary auto 段 | **2026-09-04 全钉死**：`delegation.*` + `auxiliary.{skills_hub,approval,review,mcp,title_generation,memory_query_rewrite,tts_audio_tags,triage_specifier,kanban_decomposer,profile_describer,goal_judge,curator,monitor,background_review,moa_reference,moa_aggregator}`（16 段）逐个 `hermes config set <段>.{model,provider,base_url,api_key}` → model=`deepseek-v4-flash`/provider=`deepseek`/官方 base_url/api_key=`${DEEPSEEK_API_KEY}`。**`provider: auto` 或空配置 = 静默漏跑 pro 的路径**（主模型一改 auto 全跟着跑偏），锁死必须显式钉不能靠继承 |
 | 辅助 vision | **留硅基** `Qwen/Qwen3-VL-8B-Instruct`（用量小；官方视觉模型仅 vision-exp 不稳定） |
 | cron jobs | 显式 pin：`hermes cron edit <完整12位ID> --model deepseek-v4-flash --provider deepseek`；⚠️ **8位短 ID 报 "Job not found"**，必须完整 12 位 hex（从 `hermes cron list` 或 jobs.json 复制） |
 | 16 公司 agents | `common/llm.py`：`BASE = "https://api.deepseek.com/v1"` + `MODEL = "deepseek-v4-flash"` + 读 `DEEPSEEK_API_KEY`（切完跑 `python3 common/llm.py` 验证连通） |
 | 落地页 server.py | **硬编码** `MODEL = "deepseek-v4-flash"`，不要 os.environ.get（可被覆盖成 pro） |
+| 中年人生 backend（8001/midage.icu） | `/var/www/midlife-test/backend/config.py` 的 `DEEPSEEK_MODEL`——**2026-09-04 抓出写的是 `deepseek-chat`（V3 非 flash）**，已改 flash；supervisord 管理（program `midlife-test`），改完 `sudo -n supervisorctl restart midlife-test`（非 root 直接 supervisorctl 报 PermissionError） |
 | 服小助 | `app/config.py` 硬编码 `DEEPSEEK_CHAT_MODEL`（本来就是官方 key，无需动） |
 
 **切换 provider 的坑（2026-08-27 实测）**：
@@ -179,10 +181,11 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 **官方 API 实测坑（2026-09-02）**：
 - 官方**默认开思考模式**：completion 返回 `completion_tokens_details.reasoning_tokens` 单独计费；`max_tokens` 设太小会被 thinking 全吃掉（实测 max_tokens=10 → 返回 10 个 reasoning token、`content` 为空）——测连通时 `max_tokens` ≥64，且 content 非空才算真通
 - 官方响应带 `prompt_cache_hit_tokens` 字段（缓存命中可观测，能用来对账）
+- **官方无 embedding 端点**：`POST /v1/embeddings` 返回 404，`deepseek-embedding` 模型不存在（2026-09-04 实测）。想挂官方 embedding 做 RAG 的（如服小助 knowledge.py `get_embedding`）会静默降级成关键词检索——要语义检索需换硅基 BGE 等 embedding 渠道
 - 切换后**当前会话仍走旧 provider 快照**——验证要新开会话或等 cron 跑（见上）
 
 ### 优化动作（按 ROI）
 少开新会话（缓存命中）> **cron 合并成单会话**（同类 LLM job 并成一个，实测省 40-50% 输入费，完整流程见 `references/cron-merge-token-savings.md`）> cron 挪空闲时段（单价减半）> cron 之间错开 > 压缩阈值调高/降频（历史重写=缓存全废）> 删不用 skills（只提速省钱微小）。
 
-**支持文件**：`scripts/deepseek_watch.sh`（balance API 基线观察，0 token，可 cron no_agent 部署）、`references/deepseek-billing-incidents.md`（8/11 pro 调用历史、8/22 ¥0.62 未查明、keepalive 端口顶替案例）。
+**支持文件**：`scripts/deepseek_watch.sh`（balance API 基线观察，0 token，可 cron no_agent 部署）、`references/deepseek-billing-incidents.md`（8/11 pro 调用历史、8/22 ¥0.62 未查明、keepalive 端口顶替案例）、`references/full-fleet-model-audit.md`（导航Hub全生态模型锁死审计配方：端口→代码目录定位 / 逐服务 grep 位置表 / n8n+Dify 库内查 / 误报过滤——2026-09-04 实测抓出中年人生 deepseek-chat 漏网）。
 

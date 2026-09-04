@@ -887,7 +887,9 @@ ps aux | grep "[h]ttp.server"                       # 是不是纯静态服务
 config.py 默认值可能被脱敏为 `«redacted:sk-…»`。运行时靠环境变量覆盖，**不要改默认值**。
 
 ### 6. DeepSeek模型名
-V4-Flash 模型名是 `deepseek-v4-flash`，不是 `deepseek-chat`。
+V4-Flash 模型名是 `deepseek-v4-flash`，不是 `deepseek-chat`（2026-09-04 中年人生 backend config.py 就写成了 `deepseek-chat` 被抓到——凡是服务里有 `deepseek-chat` 的都默认是雷，改成 v4-flash 后用 supervisorctl/systemd 重启生效）。
+
+**全站模型锁死审计**（用户问「导航页里用到模型的服务都查了吗 / 全部锁死 flash」）：导航 Hub 生态的服务级审计流程 + 本次结论表 + n8n 凭证 CLI 导入 + Dify 供应商内部/UI 路径见 `references/model-lock-server-audit.md`。Hermes 配置侧（delegation+auxiliary auto 段钉死）见 hermes-advanced-setup 技能。
 
 ### 7. Supervisor 服务绑了127.0.0.1导致外网打不开
 
