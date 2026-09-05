@@ -6,7 +6,7 @@
 §
 设计系统：背景网格≥0.08opacity/粒子≥1.5px；模板优先html5up.net(curl ZIP)部署8890-8899，先基础版；角色/贴纸用AI生成立绘(Qwen-Image→色键抠图→帧动画)不用CSS手绘。
 §
-端口: 8000=AI爆款主图, 8001=中年人生API, 8002=服小助, 8894=中年人生前端, 8895=Hub(用户称"导航仪"), 8900=工具箱, 8913=game-zeying, 8915=像素画展厅, 8920=红蓝, 8921=六分身, 8922=市场调研, 8923=行业调研, 8931=mecha3d, 5678=n8n(待放行)；8924+=电商运营Agent矩阵各Agent工作台页面(方案见OB entities/电商运营Agent矩阵.md)；midage.icu=portfolio走IP:8894
+8924-8940=公司流程化Agent(独立条目)
 §
 媒体工具：Manim ~/Desktop/hermes/manim-venv(CE v0.20.1，展示用manim-creative-scenes，数学用manim-video)；图生3D(8931)混元3D唯一可用(Tripo/Meshy被墙)，key~/Desktop/hermes/mecha3d/.env。
 §
@@ -20,7 +20,7 @@ cron铁律：须显式钉model/provider(hermes cron edit --model --provider，�
 §
 Yasin财务紧急：月支1万撑不过1个月，救急优先。已验证真实：U客直谈/快马日结(勿买98/198会员)；骗局：微赚、短剧出海'一次性费用'、游戏搬砖(时薪7-15)；避一品威客。剪辑接单：U客直谈/牛片网(需作品集)/圆领/淘宝代剪300-800/条，AI视频300-500/条。
 §
-环境坑：国内服务器页面禁用外网CDN(Tailwind等)——已本地化服小助static/tailwind.js(6页改引用)；pip/uv ProxyError先unset http_proxy https_proxy all_proxy
+环境坑：国内服务器页面禁用外网CDN(Tailwind等)——静态资源须本地化(服小助已本地化static/tailwind.js)
 §
 TikHub API已打通(key在~/Desktop/hermes/tikhub/.env)：抖音数据主源，api.tikhub.io Bearer认证，免费端点billboard/fetch_hot_account_search_list(搜账号)+热榜+get_user_info，付费handler_user_profile_v4(画像)+fetch_user_post_videos(视频)；402=欠额度。淘宝/拼多多/京东无公开API，蝉妈妈/飞瓜无API；抖音/百度/搜狗全反爬→先走TikHub别爬
 §
@@ -28,11 +28,9 @@ Yasin方向转向(2026-08-30)：AI项目变现难→直播达人带货+短视频
 §
 Coze：星刃bot免费额度耗尽会哑火(已发飞书,不在服务器)；PAT pat_开头1个月有效(2026-10-01须重生成)；POST api.coze.cn/v3/chat，4200=缺bot_id(bot页URL取)。Dify已部署：8850=nginx入口、8851=API、8852=web容器；模型未配，配时用DeepSeek官方非硅基(同Hermes key)。用户偏好：发招聘截图=分析岗位工作内容(职责拆解/死法活法/技能对照表)不查公司背景；说'别查了'=停止调研直接分析手头材料。
 §
-电商运营Agent矩阵项目(2026-09-02立项)：自用版16个agent，全挂Hub「⚙️公司流程化Agent」单入口→agent-hub.html二级页(走8895同目录免开端口)，端口8924-8940(8931已被mecha3d占)；数据=抖音TikHub自动+淘宝Excel手工上传(无API)；无定时任务先做页面(每页手动触发按钮)；分批：第一批①统筹8924/⑪选品8935/⑬库存8938/⑯财务8940，第二批②销售8928/③趋势8929/⑭供应链8937/⑮物流8939，第三批⑤招聘8925/④培训8927/⑦绩效8926/⑨合规8933/⑩舆情8934/⑧内容8932/⑥流程8930；费用：开发¥3-5一次性+运行¥1-2/月(无定时)
+公司流程化Agent=电商运营Agent矩阵(2026-09-02立项,同项目)：16个全上线，~/Desktop/hermes/company-agents/(common共享层+每agent目录+公共venv:fastapi/uvicorn/pandas)。批量启动start_all.sh(脚本内&循环，terminal background=true；禁止前台&/nohup)，日志/tmp/agent-*.log，静态页改动免重启；重启单agent：cd ~/Desktop/hermes/company-agents && venv/bin/python -m uvicorn <name>.app:app --port <port> --app-dir .。端口：8924统筹/8925招聘/8926绩效/8927培训/8928销售/8929趋势/8930流程/8932内容/8933合规/8934舆情/8935选品/8936数据/8937供应链/8938库存/8939物流/8940财务(8931被mecha3d占)。Hub单入口「⚙️公司流程化Agent」→二级页8895/agent-hub.html(16卡全在线；同目录免开端口)。数据=抖音TikHub自动+淘宝Excel手工上传(无API)，无定时先做页面(手动触发)；费用：开发¥3-5一次性+运行¥1-2/月。设计design-system.md v2(深蓝科技风统一+每页布局各异+页头居中放大；极简炭黑被否；批量页禁统一模板)→server-service-deployment技能references/deep-blue-tech-design-system.md；TikHub端点实测→china-ai-platforms技能references/tikhub-endpoints.md
 §
 环境坑：Hub=python3 http.server 8895，serve ~/Desktop/hermes/hermes-hub/，同目录放子页免开防火墙；npm全局前缀已改~/.npm-global/bin(装全局包报EACCES先改prefix)；1688-cli v0.1.47已装此前缀下；nexscope eCommerce-Skills(nexscope-ai)的SKILL.md frontmatter是nexscope:命名空间，装Hermes必须补顶层name/description字段否则不识别；GitHub直连TLS不稳→jsDelivr/raw.githubusercontent拉文件，GitHub search API无认证60次/时限流
-§
-公司流程化Agent部署状态(2026-09-02)：16个全上线，~/Desktop/hermes/company-agents/（common共享层+每agent目录+公共venv），批量启动start_all.sh（脚本内&循环，terminal background=true；禁止前台&/nohup），日志/tmp/agent-*.log，静态页改动免重启。端口：8924统筹/8925招聘/8926绩效/8927培训/8928销售/8929趋势/8930流程/8932内容/8933合规/8934舆情/8935选品/8936数据/8937供应链/8938库存/8939物流/8940财务。Hub二级页=8895/agent-hub.html(16卡全在线)。设计：design-system.md v2（深蓝科技风统一视觉+每页布局各异+页头居中放大；极简炭黑被Yasin否决；批量页面禁止统一模板），详见server-service-deployment技能references/deep-blue-tech-design-system.md。TikHub端点实测详见china-ai-platforms技能references/tikhub-endpoints.md。
 §
 模型锁死铁律(2026-09-04强化)：全链路显式钉deepseek-v4-flash/provider=deepseek/官方base_url(api.deepseek.com/v1,key=${DEEPSEEK_API_KEY})，禁v4-pro/chat/reasoner——含主模型+delegation+全部auxiliary(auto段已逐个显式钉:skills_hub/approval/review/mcp/title_generation/memory_query_rewrite/tts_audio_tags/triage_specifier/kanban_decomposer/profile_describer/goal_judge/curator/monitor/background_review/moa_reference/moa_aggregator)+compression+session_search+cron+16agents公共层llm.py；仅auxiliary.vision留硅基Qwen3-VL(DeepSeek无视觉模型)。
 §
