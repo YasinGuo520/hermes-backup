@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260830-173623",
-  "last_run_at": "2026-08-30T17:36:23.820520+00:00",
-  "last_run_duration_seconds": 2003.255924,
-  "last_run_summary": "auto: 11 marked stale, 1 reactivated; llm: Everything verified. The pass is complete — here is the summary.\n\n## Human summary\n\n**Clusters processed (4 rounds, 10 consolidations):**\n\n**1. Web-visual-design cluster → `ux-pro-max` (existing umbrella).** Prior passes had already merged …\narchived 10 skill(s):\n  • blocked-page-recovery → web-scraping\n  • claude-design → ux-pro-max\n  • humanizer → humanizer-zh\n  • obsidian → personal-knowledge-base\n  • popular-web-designs → ux-pro-max\n  • project-recommendation-workflow → project-four-persona-analysis\n  • quick-cash-gig-channels → monetization-case-daily-pipeline\n  • sketch → ux-pro-max\n  • document-to-action-items — pruned (stale)\n  • meeting-action-items — pruned (stale)\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin humanizer-zh",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260906-180418",
+  "last_run_at": "2026-09-06T18:04:18.887053+00:00",
+  "last_run_duration_seconds": 565.426329,
+  "last_run_summary": "auto: 2 reactivated; llm: ## Human-readable summary\n\n**Pass result: 1 consolidation executed (1 skill archived).** This library has already been through several aggressive umbrella-building passes — the `.archive/` holds 100+ entries (`ai-video-content-creation`, `a…\narchived 1 skill(s):\n  • llm-model-audit → agent-performance\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 11
+  "run_count": 12
 }

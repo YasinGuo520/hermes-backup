@@ -82,8 +82,32 @@ docker exec n8n n8n import:credentials --input=/tmp/n8n-cred.json   # "Successfu
 - `providers`：tenant_id/provider_name(形如 `langgenius/siliconflow/siliconflow`)/provider_type/is_valid/credential_id
 - `provider_models`：provider_name/model_name/model_type/is_valid（**为空 = Dify 没配任何可用模型**）
 - `app_model_configs`：app 的 provider/model_id/model 列（空 = app 没绑模型，不产生调用）
-- 已装插件代码在 `volumes/plugin_daemon/cwd/langgenius/<plugin>-<ver>@<hash>/`——deepseek 插件要另装（Dify 1.17 全插件化）
-- ⚠️ 旧参考写的 `provider_credentials` 表在本部署不存在/不可信——以 providers/provider_models 为准
+- 已装插件代码在 `volumes/plugin_daemon/cwd/langgenius/<plugin>-<ver>@<hash>/`——deepseek 插件要另装（Dify 1.17 全插件化）；装好后自带模型清单 `models/llm/deepseek-v4-flash.yaml` + `v4-pro.yaml`（预定义模型不需要 provider_models 行，provider_models 空 = 正常，别误判）
+- **`provider_credentials` 表存在且是凭证本体**（2026-09-06 实测修正早期"不存在"误判）：列 = id/tenant_id/provider_name/credential_name/encrypted_config/user_id/visibility；`providers.credential_id` → `provider_credentials.id`。`encrypted_config` 是 **JSON**（如 `{"api_key": "<加密值>"}`），加密值带 `SFlCUklE`=base64("HYBRID") 前缀 = **KMS RSA 加密**（key_provider_manager → rsa_key_provider，私钥缓存在 redis），不是 SystemEncrypter(AES/SECRET_KEY)。UI 填 key 后 `is_valid=t` 但**旧 key 已删/换新时 DB 里还是旧加密值**——轮换 key 必须更新此表。
+
+### Dify 凭证 DB 更新（key 轮换时，2026-09-06 实测成功）
+
+```bash
+docker exec full-api-1 sh -c 'cd /app/api && PYTHONPATH=/app/api python3 -c "
+import os, json
+os.environ.setdefault(\"MIGRATION_ENABLED\", \"false\")
+from app_factory import create_app
+socketio_app, flask_app = create_app()          # ⚠️ 返回 TUPLE！不是 flask app 本身
+with flask_app.app_context():                    #    用 [1]，[0] 是 socketio app 没有 app_context
+    from core.helper.encrypter import decrypt_token, encrypt_token
+    import psycopg2
+    conn = psycopg2.connect(host=\"full-db_postgres-1\", dbname=\"dify\", user=\"postgres\", password=\"difypostgres\")
+    cur = conn.cursor()
+    cur.execute(\"SELECT p.tenant_id, pc.id, pc.encrypted_config FROM providers p JOIN provider_credentials pc ON p.credential_id = pc.id WHERE p.provider_name LIKE %s\", (\"%deepseek%\",))
+    for tid, cid, cfg in cur.fetchall():
+        data = json.loads(cfg.strip())
+        old = decrypt_token(tid, data[\"api_key\"])     # 读旧 key
+        new_cfg = json.dumps({\"api_key\": encrypt_token(tid, \"sk-NEW-KEY\")})
+        cur.execute(\"UPDATE provider_credentials SET encrypted_config=%s WHERE id=%s\", (new_cfg, cid))
+    conn.commit()                                     # 回读 decrypt_token 验证新 key
+"'`
+```
+坑：① `PYTHONPATH=/app/api` **必须显式给**——`docker exec cd /app/api` 不够，python 脚本在 /tmp 时 `sys.path[0]=/tmp` import 不到 app；② `create_app()` 极慢（分钟级，连 redis/一堆初始化）——timeout 给 300-420s，别用 180s；③ SECRET_KEY/DB 密码在 `dify/full/.env`（`sk-xingren-...` / `difypostgres`），RSA 私钥走 redis 缓存所以必须 app_context 内跑（裸 python 连 DB 解密报 "Redis client is not initialized"）。
 
 ### ⚠️ 死路：console API 自动化要 RSA 加密密码，别走 DB 改密
 `POST /console/api/login` 要求 **RSA 加密后的密码**——只改 PG `accounts.password` 换临时 hash 再登录必失败（401 `Invalid encrypted data`），还白改用户密码。若已改**必须还原原 hash**（本次备份到 `/tmp` 后还原成功，密码零改动）。

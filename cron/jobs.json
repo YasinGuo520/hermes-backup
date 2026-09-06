@@ -22,17 +22,17 @@
       "schedule_display": "30 7 * * *",
       "repeat": {
         "times": null,
-        "completed": 54
+        "completed": 55
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-09-06T07:30:00+08:00",
-      "last_run_at": "2026-09-05T07:30:55.919211+08:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-07T07:30:00+08:00",
+      "last_run_at": "2026-09-06T07:30:50.143413+08:00",
+      "last_status": "error",
+      "last_error": "RuntimeError: HTTP 402: Insufficient Balance",
       "last_delivery_error": null,
       "deliver": "feishu:oc_61850e610adf5771e7ba779c955a061e",
       "origin": {
@@ -45,7 +45,7 @@
       "enabled_toolsets": null,
       "workdir": null,
       "fire_claim": null,
-      "failure_streak": 0
+      "failure_streak": 1
     },
     {
       "id": "99bf3a31759a",
@@ -213,7 +213,7 @@
       "schedule_display": "0 3 * * 7",
       "repeat": {
         "times": null,
-        "completed": 9
+        "completed": 10
       },
       "enabled": true,
       "state": "scheduled",
@@ -221,7 +221,7 @@
       "paused_reason": null,
       "created_at": "2026-07-15T10:00:25.685857+08:00",
       "next_run_at": "2026-09-13T03:00:00+08:00",
-      "last_run_at": "2026-08-30T03:00:40.205851+08:00",
+      "last_run_at": "2026-09-06T03:01:11.992816+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -235,10 +235,8 @@
       },
       "enabled_toolsets": null,
       "workdir": null,
-      "fire_claim": {
-        "at": "2026-09-06T03:00:41.784737+08:00",
-        "by": "VM-0-5-ubuntu:461260:3142b5c383e149b59c16ad87a51289aa"
-      }
+      "fire_claim": null,
+      "failure_streak": 0
     },
     {
       "id": "8e82bf8cd877",
@@ -360,15 +358,15 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 46
+        "completed": 47
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-09-06T04:00:00+08:00",
-      "last_run_at": "2026-09-05T04:01:48.432759+08:00",
+      "next_run_at": "2026-09-07T04:00:00+08:00",
+      "last_run_at": "2026-09-06T04:02:09.298324+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -456,15 +454,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 247
+        "completed": 253
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-09-06T04:00:00+08:00",
-      "last_run_at": "2026-09-06T00:00:38.867050+08:00",
+      "next_run_at": "2026-09-07T04:00:00+08:00",
+      "last_run_at": "2026-09-07T00:00:21.661694+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -503,15 +501,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 41
+        "completed": 42
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-09-07T03:00:00+08:00",
-      "last_run_at": "2026-09-05T03:00:33.987263+08:00",
+      "next_run_at": "2026-09-08T03:00:00+08:00",
+      "last_run_at": "2026-09-06T03:01:12.292833+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -520,8 +518,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "fire_claim": {
-        "at": "2026-09-06T03:00:41.803995+08:00",
-        "by": "VM-0-5-ubuntu:461260:8564059a95c5432394f9d769e33bbcc2"
+        "at": "2026-09-07T03:00:31.356125+08:00",
+        "by": "VM-0-5-ubuntu:4758:3940d5810a524eff93ef1775257fafcd"
       },
       "failure_streak": 0
     },
@@ -594,15 +592,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 10679
+        "completed": 10954
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-09-06T03:05:00+08:00",
-      "last_run_at": "2026-09-06T03:00:42.333942+08:00",
+      "next_run_at": "2026-09-07T03:05:00+08:00",
+      "last_run_at": "2026-09-07T03:00:31.769505+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -643,17 +641,17 @@
       "schedule_display": "10 7 * * *",
       "repeat": {
         "times": null,
-        "completed": 11
+        "completed": 12
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-08-27T00:38:38.134384+08:00",
-      "next_run_at": "2026-09-06T07:10:00+08:00",
-      "last_run_at": "2026-09-05T07:15:13.698117+08:00",
-      "last_status": "ok",
-      "last_error": null,
+      "next_run_at": "2026-09-07T07:10:00+08:00",
+      "last_run_at": "2026-09-06T07:10:52.072920+08:00",
+      "last_status": "error",
+      "last_error": "RuntimeError: HTTP 402: Insufficient Balance",
       "last_delivery_error": null,
       "deliver": "origin",
       "origin": {
@@ -670,8 +668,8 @@
       ],
       "workdir": null,
       "fire_claim": null,
-      "failure_streak": 0
+      "failure_streak": 1
     }
   ],
-  "updated_at": "2026-09-06T03:00:42.334594+08:00"
+  "updated_at": "2026-09-07T03:00:31.770323+08:00"
 }

@@ -1,7 +1,7 @@
 ---
 name: agent-performance
-description: "Agent性能诊断与维护——当Agent变傻/变慢时的系统化检查清单。覆盖context压缩、记忆瘦身（含claude-mem跨会话记忆）、搜索工具健康检查、配置优化。"
-tags: [hermes, maintenance, troubleshooting, diagnostics, performance]
+description: "Agent性能诊断与维护——当Agent变傻/变慢/模型跑错/扣费异常时的系统化检查清单。覆盖context压缩、记忆瘦身（含claude-mem跨会话记忆）、搜索工具健康检查、配置优化、全链路LLM调用审计（谁在调什么模型/锁死排查）。"
+tags: [hermes, maintenance, troubleshooting, diagnostics, performance, llm, audit, cost, model-lock]
 related_skills: [claude-mem, find-skills, server-service-deployment]
 ---
 
@@ -528,6 +528,19 @@ script-only 任务（no_agent=true）不调用 LLM，不受 provider drift 影�
 - **cron 合并省钱（降未命中量大头实操）**：多个 LLM cron 各是独立新会话、各自付一次全价首调（命中 19-26%），合并成一个「多部分 prompt 单任务」= 1 次首调 + 后续同会话高命中，输入费省 40-50%。完整操作步骤（jobs.json 提取 prompt、共享搜索、pause 回滚、体验考量）见 scheduled-content-pipeline 技能「Cron Job Consolidation」章节
 - **输出压缩类 skill 收益有限（实测）**：caveman 类（压缩回复风格，宣称/实测省输出 token 65%）对总账单影响仅 5-10%——费用大头在「输入·未命中缓存」端，输出只占小头。省 token 优先做输入端优化（cron 合并、同会话复用、错峰），别迷信输出压缩类 skill
 - 余额只剩几毛时给用户省钱建议：钉同一会话少 /new；cron 挪到空闲时段（价格减半）；Mac 与服务器 cron 去重
+
+## 全链路 LLM 调用审计（模型跑错/锁死/扣费异常，合并自 llm-model-audit）
+
+**触发**：「所有调用模型锁死 flash」「昨天怎么跑的 pro」「为什么扣 pro 的钱」「谁在调 X 模型」「导航页/XX 服务里用到模型的查过吗」——任何需要确认/强制「每个 LLM 调用方用哪个模型哪个渠道」的任务；也适用 key 泄漏嫌疑、切换模型供应商后验证无残留。
+
+**铁律（Yasin 环境 2026-09 实测）**：全链路只允许 deepseek-v4-flash via DeepSeek 官方（禁 v4-pro/chat/reasoner）；但**每次切换/锁死都必须重新审计全生态**——锁 Hermes config ≠ 锁了导航 Hub 链出去的每个服务（n8n/Dify/服小助/落地页/Mac 实例都可能漏跑）。
+
+1. **以实际出站调用为唯一铁证**，不凭配置印象下结论。Hermes 每次 LLM 调用都在 agent.log 留 `OpenAI client created ... provider=... base_url=... model=...` 行——逐日志轮转文件统计模型分布：`grep -hoE "model=deepseek-[a-z0-9-]+" ~/.hermes/logs/agent.log* | sort | uniq -c`。**先证据后结论**：报告给表（端|时段|调用数|flash|pro），区分「有日志支撑的结论」与「推断」（如本机全 clean → 控制台却扣 pro → 明说推断=key 泄漏，给用户自查动作）。用户说「不用查昨天」= 只关心未来锁死：先钉死配置面，别翻历史。
+2. **配置面钉死**：`delegation` 段 + `auxiliary` 全段（skills_hub approval review mcp title_generation memory_query_rewrite tts_audio_tags triage_specifier kanban_decomposer profile_describer goal_judge curator monitor background_review moa_reference moa_aggregator）逐个 `hermes config set` 钉 model/provider/base_url/api_key（auto 跟随主配置，主模型一改就跟着偏）；vision 保留硅基 Qwen3-VL（DeepSeek 无视觉）。⚠️ bash 里 `UID` 是 readonly，做 UUID 变量别用 UID 名。**模型变更先问用户再动**（见上文警告）。
+3. **端口→进程→代码定位**：`ss -tlnp | grep ":PORT "` 拿 pid → `readlink -f /proc/PID/cwd` → `docker ps --format '{{.Names}} {{.Ports}}'`（n8n/Dify）；http.server 读不到 cwd 就 `curl -s -m 3 http://127.0.0.1:PORT/ | grep -oiE '<title>[^<]*'` 反查身份。各服务配置位置实测表见 `references/audit-locations-2026-09.md`；n8n/Dify 内部表结构与操作配方见 `references/docker-platform-internals.md`。
+4. **噪音过滤（防误报带偏）**：`agent.message_sanitization` 日志会把**记忆文本**整个打进 WARNING（含「v4-pro」字样≠真调用）；只信 `OpenAI client created ... model=` 行。全盘 grep 模型名会命中第三方库（`tencentcloud/*/models.py`、dify 插件 `models/llm/*.yaml`、`site-packages|venv|node_modules`）——路径含这些直接排除。`request_dump_*.json` 以顶层 `request.body.model` 字段为准（pro 字样可能是错误体/正文噪音）。
+5. **cron 钉模型核对**：读 `~/.hermes/cron/jobs.json` 每个 job 的 model/provider（未钉=随全局漂移被 scheduler 静默跳过，见上文「Cron Provider Drift」）。
+6. **扣费来源排查（本机全 clean 时）**：DeepSeek 官方**无 usage 明细 API**（user/usage 等端点全 404），只有 `GET /user/balance` 查余额；控制台用量图是唯一明细源。排查流向：服务器 agent.log → Mac（SSH `mac@100.80.117.5`）agent.log + config + cron → 全盘 grep key 使用点（服务器 `~/Desktop/hermes`、Mac `~/Desktop ~/Library/Application Support ~/.config`）→ 若全 clean → **key 泄漏嫌疑**（key 曾明文贴聊天/硬编码在 server.py）→ 建议重置 key + 全端换新（Hermes .env/config、服小助 ai_cs_package/.env、落地页 server.py、Dify/n8n、Mac .env）。控制台图用 vision_analyze 精确读日期刻度和每日数值（常是 30 天窗，峰值日期≠昨天，别被总览误导）。费用估算/对账模板见上文「费用/扣费排查」与 `references/cost-billing-audit.md`。
 
 ## 快捷指令
 

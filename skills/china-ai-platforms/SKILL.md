@@ -187,5 +187,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 ### 优化动作（按 ROI）
 少开新会话（缓存命中）> **cron 合并成单会话**（同类 LLM job 并成一个，实测省 40-50% 输入费，完整流程见 `references/cron-merge-token-savings.md`）> cron 挪空闲时段（单价减半）> cron 之间错开 > 压缩阈值调高/降频（历史重写=缓存全废）> 删不用 skills（只提速省钱微小）。
 
-**支持文件**：`scripts/deepseek_watch.sh`（balance API 基线观察，0 token，可 cron no_agent 部署）、`references/deepseek-billing-incidents.md`（8/11 pro 调用历史、8/22 ¥0.62 未查明、keepalive 端口顶替案例）、`references/full-fleet-model-audit.md`（导航Hub全生态模型锁死审计配方：端口→代码目录定位 / 逐服务 grep 位置表 / n8n+Dify 库内查 / 误报过滤——2026-09-04 实测抓出中年人生 deepseek-chat 漏网）。
+**支持文件**：`scripts/deepseek_watch.sh`（balance API 基线观察，0 token，可 cron no_agent 部署）、`references/deepseek-billing-incidents.md`（8/11 pro 调用历史、8/22 ¥0.62 未查明、keepalive 端口顶替案例）、`references/full-fleet-model-audit.md`（导航Hub全生态模型锁死审计配方：端口→代码目录定位 / 逐服务 grep 位置表 / n8n+Dify 库内查 / 误报过滤——2026-09-04 实测抓出中年人生 deepseek-chat 漏网）、`references/deepseek-key-rotation.md`（key 泄漏轮换全生态 SOP：逐文件清单/模块级 vs 调用级读取的重启判断/supervisor `reread && update` 陷阱/n8n CLI 重导/Dify DB 直改 HYBRID 加密凭证——2026-09-06 实测）。
+
+**🔑 key 泄漏签名（2026-09-06 实测）**：DeepSeek 控制台出现 v4-pro 用量、但服务器+Mac 两端 Hermes `agent.log` 逐条 `OpenAI client created ... model=` 计数全是 flash（几千次零 pro）→ **key 泄漏/外部盗刷，不是本机配置问题**——别再查配置，直接让用户重置 key 走轮换 SOP（见 `references/deepseek-key-rotation.md`）。本地对账证据链：服务器/Mac 两端 `grep "OpenAI client created" agent.log* | grep -oE "model=[^ ]+" | sort | uniq -c`；cron 侧 `usage_audit.jsonl` 无 pro 也是佐证。
 
