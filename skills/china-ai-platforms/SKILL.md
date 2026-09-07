@@ -155,7 +155,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 | config.yaml fallback | 已清空（官方即主渠道，无需兜底） |
 | 辅助模型 | `auxiliary.compression` + `auxiliary.session_search` 同切官方；⚠️ `config set` 对 `auxiliary.session_search.*` 打印 "not a recognized config key" 警告，但**值照样写入 yaml 且生效**（运行时读 yaml，不查 registry） |
 | delegation + 全部 auxiliary auto 段 | **2026-09-04 全钉死**：`delegation.*` + `auxiliary.{skills_hub,approval,review,mcp,title_generation,memory_query_rewrite,tts_audio_tags,triage_specifier,kanban_decomposer,profile_describer,goal_judge,curator,monitor,background_review,moa_reference,moa_aggregator}`（16 段）逐个 `hermes config set <段>.{model,provider,base_url,api_key}` → model=`deepseek-v4-flash`/provider=`deepseek`/官方 base_url/api_key=`${DEEPSEEK_API_KEY}`。**`provider: auto` 或空配置 = 静默漏跑 pro 的路径**（主模型一改 auto 全跟着跑偏），锁死必须显式钉不能靠继承 |
-| 辅助 vision | **留硅基** `Qwen/Qwen3-VL-8B-Instruct`（用量小；官方视觉模型仅 vision-exp 不稳定） |
+| 辅助 vision | Hermes 内部辅助仍留硅基 `Qwen/Qwen3-VL-8B-Instruct`（用量小）；⚠️ 官方视觉 **`deepseek-v4-flash-vision-exp` 已实测可用（2026-09-07）**——但它是推理模型，有专门调用配方（见下「官方视觉模型实测」），独立工具可用官方+硅基做双链回退 |
 | cron jobs | 显式 pin：`hermes cron edit <完整12位ID> --model deepseek-v4-flash --provider deepseek`；⚠️ **8位短 ID 报 "Job not found"**，必须完整 12 位 hex（从 `hermes cron list` 或 jobs.json 复制） |
 | 16 公司 agents | `common/llm.py`：`BASE = "https://api.deepseek.com/v1"` + `MODEL = "deepseek-v4-flash"` + 读 `DEEPSEEK_API_KEY`（切完跑 `python3 common/llm.py` 验证连通） |
 | 落地页 server.py | **硬编码** `MODEL = "deepseek-v4-flash"`，不要 os.environ.get（可被覆盖成 pro） |
@@ -182,6 +182,7 @@ TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API
 - 官方**默认开思考模式**：completion 返回 `completion_tokens_details.reasoning_tokens` 单独计费；`max_tokens` 设太小会被 thinking 全吃掉（实测 max_tokens=10 → 返回 10 个 reasoning token、`content` 为空）——测连通时 `max_tokens` ≥64，且 content 非空才算真通
 - 官方响应带 `prompt_cache_hit_tokens` 字段（缓存命中可观测，能用来对账）
 - **官方无 embedding 端点**：`POST /v1/embeddings` 返回 404，`deepseek-embedding` 模型不存在（2026-09-04 实测）。想挂官方 embedding 做 RAG 的（如服小助 knowledge.py `get_embedding`）会静默降级成关键词检索——要语义检索需换硅基 BGE 等 embedding 渠道
+- **官方视觉模型实测（2026-09-07）**：`model=deepseek-v4-flash-vision-exp` 走官方 `/v1/chat/completions` 可识图。**它是推理模型**——思考过程放 `reasoning_content`，最终正文才在 `content`：`max_tokens` 设太小会被 thinking 吃光（实测 max_tokens=100 → `content:""`、`finish_reason:length`），**必须 ≥3000** 才有短正文；⚠️ 长解读（面相/报告类 600-1200 字）要 **≥6000**（实测 max_tokens=4000 时正文截断在结尾，6000 才完整收尾；prompt 里也强制「结尾模块必须收完」）；响应 200 但 content 空 = 额度不够/推理截断，别误判失败。消息格式：`content` 用数组 `[{"type":"text",...},{"type":"image_url","image_url":{"url":"data:image/jpeg;base64,..."}}]`（data URL 直传，服务端不透传 URL）。**可靠工具写法 = 模型链回退**：先官方 vision-exp，content 空/报错自动切硅基 `Qwen/Qwen3-VL-4B-Instruct`（或 8B），把失败原因带上返回给上层（参考实现：`~/Desktop/hermes/face/server.py` 的 `MODEL_CHAIN`）
 - 切换后**当前会话仍走旧 provider 快照**——验证要新开会话或等 cron 跑（见上）
 
 ### 优化动作（按 ROI）
