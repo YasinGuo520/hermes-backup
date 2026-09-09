@@ -13,7 +13,7 @@ created_by: agent
 - **云服务商**: 腾讯云（轻量应用服务器 Lighthouse）
 - **公网IP**: 43.138.221.174
 - **系统**: Ubuntu 24.04
-- **资源**: 2核 / 3.6G内存 / 69G磁盘（约56G空闲）
+- **资源**: 2核 / 3.6G内存 / 69G磁盘（2026-09-09: 已用41G、余25G——Docker镜像占17G，见「磁盘空间排查」节）
 - **已装**: Python 3.11, pip, git, nginx（可选），Docker
 
 ## 工作方式铁律（Yasin 明确要求）
@@ -22,6 +22,7 @@ created_by: agent
 - **诊断命令别绊自己**：`pgrep -f "xxx"` 会匹配到自己的命令行字符串 → 误判"进程复活"。用 `[x]xx` 中括号技巧或直接 `ss -tlnp` 看端口。
 - 服务器维护类任务用户信任你放手干（approvals off），但**不要为了"完美"加多余步骤**。
 - **开源平台（Dify等）别自作主张砍组件精简部署**（2026-09-01 用户明确纠正："你别精简啦。直接完整安装不行吗"）。精简版砍掉 plugin-daemon 等核心组件 → 连环故障（白屏转圈/SSR超时/权限/迁移/setup 500），最终完整版一次跑通。**知名开源软件一律官方完整 compose 起步，不做预裁剪**；端口沿用用户已建过的（"端口你还是用刚才创建的8850不就行啦"）。
+- **任务边界铁律（2026-09-09 用户打断纠正："我是让你对比下grok的分析，你跑去搞16个agent干嘛"）**：用户要的是**对比/评审/分析判断**时，交付判断本身。调查取证完全应该（先调查再结论），但调查中发现的服务挂了/缺备份/配置缺失等问题**只报告不顺手修**——列成发现项 + 给修复建议 + 问是否执行。擅自把"分析任务"扩大成"维修任务"= 跑题，用户会当场打断。只有用户给了维修绿灯（"修吧""放手干"或明确授权维护）才动手修。
 
 ## Server Capability Assessment（资源盘点）
 
@@ -261,6 +262,10 @@ sudo systemctl is-active <name>
 
 ### 腾讯云轻量服务器
 在 **腾讯云控制台 → 轻量应用服务器 → 防火墙** 添加入站规则。服务器内 `ufw`/`iptables` 默认 ACCEPT，不拦流量。
+
+**实测（2026-09-09）**：本机 iptables `ts-input` 链第 2 条即 `ACCEPT 0.0.0.0/0`（全放行）+ ufw inactive，`YJ-FIREWALL-INPUT` 只 REJECT 个别攻击 IP → **公网暴露面完全由腾讯云控制台防火墙决定，服务器内没有第二道闸**；控制台若"放行所有"则所有监听 0.0.0.0 的端口（含 LLM POST 端点）直接公网裸奔，可被当免费 LLM 刷烧钱。
+
+**⚠️ `curl http://公网IP:PORT` 返回 000 有两种含义**：服务没在监听（挂了）或防火墙没放行——先 `ss -tlnp | grep PORT` 区分：本地在听=防火墙拦；本地没听=服务挂。别把服务挂误判成防火墙问题（2026-09-09 误判实录：16 个 agent 端口全 000，先以为是防火墙，实际服务全没跑）。
 
 **不要在服务器内用 iptables 开端口** — 腾讯云安全组（防火墙）是独立于虚拟机之外的网络层，只能从控制台操作。
 
@@ -589,6 +594,24 @@ cronjob(action='run', job_id='<job_id>')
 
 ---
 
+## 磁盘空间排查（用户问"磁盘怎么用了X G/满了/空间去哪了"）
+
+**排查序列（2026-09-09 实测验证，先 sudo 后猜）：**
+
+```bash
+df -h /                                    # 1. 快照
+sudo du -xh --max-depth=1 / | sort -rh     # 2. 决定性一步：sudo 根一级明细
+# 3. 逐层往下追大头：/var → /var/lib → /var/lib/containerd
+```
+
+- **铁律：磁盘盘点一律 sudo。** 普通用户 `du` 静默漏算受限目录（本机实测漏 17G：/var/lib/containerd 属 root，普通 du 只见 /var 997M，sudo 见 18G）
+- `du -xsh /` 只给汇总一行；要明细必须 `--max-depth=1`
+- **本机磁盘最大占用是 Docker 镜像**（containerd 17G：Dify 全家桶 + n8n，full-* 容器已停 3 天但镜像未删）——`docker compose stop` 只停容器**不释放镜像空间**
+- sudo du 仍对不上 df → 查幽灵空间：`sudo lsof +L1`（已删仍被进程占用）、`sudo find / -xdev -type f -size +1G`、`sudo dumpe2fs /dev/vda2`（底层块权威）
+- 完整方法论 + 本机镜像清单 + 清理三档（prune≈1G / 停容器+双tag≈3G / 全删≈15G，Dify 恢复路径）→ `references/disk-space-diagnosis.md`
+
+---
+
 ## 将静态Mock页面转为实时数据看板
 
 **适用场景**：HTML页面用 `Math.random()` 生成模拟数据 → 需要对接真实服务器指标/API数据。
@@ -653,9 +676,16 @@ crontab:
 - 启动用 `nohup ... &`（crontab 环境没有 hermes background 管理）
 - 日志 `/var/log/keepalive.log`（`sudo touch && chmod 666`）
 
-**新服务上线必须同步加进 keepalive.sh 的 两处**（否则下轮网关重启又挂）：
-1. 对应类型数组（STATIC/FASTAPI/PYTHON_SERVICES）— 启动逻辑
-2. `check_all()` 的端口列表 — 否则状态表永远不显示它，挂了也看不出 ❌（8896 踩过：dashboard 挂了 nginx 8897 变 502，但 keepalive 状态表全 ✅，因为列表里没 8896）
+**新服务上线必须同步加进 keepalive.sh 的全部 5 处**（否则：下轮网关重启又挂 / 状态表漏报 / restart 杀不掉旧进程端口冲突）：
+1. 对应类型数组（STATIC_PROJECTS / FASTAPI_PROJECTS / PYTHON_SERVICES / **AGENT_SERVICES**）— 启动逻辑
+2. `check_all()` 端口列表 — 否则状态表永远不显示它，挂了也看不出 ❌（8896 踩过：dashboard 挂了 nginx 8897 变 502，但状态表全 ✅）
+3. start 分支的启动循环（`for item in ...`）
+4. restart 分支的启动循环 — start/restart 两段同构，patch 时用 replace_all 一次改两处
+5. restart 分支的 `fuser -k` kill 列表 — 漏了则 restart 时旧进程占端口、新进程起不来
+
+**公司 Agent 矩阵纳入保活实录（2026-09-09）**：16 个 agent（8924-8940）当初用 start_all.sh 手动起，**从未加进 keepalive** → 服务器/网关重启后全部静默下线，keepalive 状态表也看不出（列表里没它们）。已新增 `AGENT_SERVICES` 数组（条目格式同 PYTHON_SERVICES：`目录|端口|uvicorn 命令`，命令=`venv/bin/python -m uvicorn <name>.app:app --host 0.0.0.0 --port <port> --app-dir .`）。**铁律：任何"已上线"的服务没进 keepalive = 重启即丢，且状态表不报警。**
+
+**配套加固（同批完成）**：company.db 是 16 进程共享单 SQLite → common/db.py 开 `PRAGMA journal_mode=WAL` + `busy_timeout`；每日备份脚本 `~/Desktop/hermes/scripts/backup_company_db.sh`（crontab 03:20，保留14份）。⚠️ 改 db.py 等被 import 的共享代码后**必须重启服务才生效**（已起进程不会重新 import——WAL 改了但 journal_mode 仍是 delete，实测）。
 
 **隧道类已弃用（2026-08-26 实测推翻）**：Mac 代理隧道（17897→Mac Clash 7897，git 翻墙用）曾加 `start_tunnel()` 进 keepalive——**全部撤销**。原因：Mac 的 Clash Verge 实际走 **TUN 模式**（mihomo 不监听 7897），服务器 SSH 隧道借不到代理（隧道端口在听、SSH ESTABLISHED，但经隧道访问 Google 全 000）。服务器翻墙**终案**：不借 Mac 代理，git remote 整体切 gitcode 镜像（fetch+push 都改），装依赖走腾讯内网源。完整弃用结论与过渡方案见 `references/mac-proxy-tunnel.md`。
 
