@@ -134,7 +134,7 @@ delegation:
   api_key: ${DEEPSEEK_API_KEY}
 skills:
   external_dirs:
-  - ~/.agents/skills
+    - ~/.agents/skills
 curator:
   consolidate: true
 approvals:
@@ -172,9 +172,9 @@ platforms:
 plugins:
   disabled: []
   enabled:
-  - agency-agents-router
-  - web/ddgs
-  - lightclawbot
+    - agency-agents-router
+    - web/ddgs
+    - lightclawbot
 providers:
   deepseek:
     base_url: https://api.deepseek.com/v1
@@ -184,10 +184,21 @@ providers:
     model: deepseek-v4-flash
     model_display_name: DeepSeek V4 Flash
     available_models_json:
-    - id: deepseek-v4-flash
-      name: DeepSeek V4 Flash
-    - id: deepseek-v4-pro
-      name: DeepSeek V4 Pro
-    - id: deepseek-v4-flash-vision-exp
-      name: deepseek-v4-flash-vision-exp
+      - id: deepseek-v4-flash
+        name: DeepSeek V4 Flash
+      - id: deepseek-v4-pro
+        name: DeepSeek V4 Pro
+      - id: deepseek-v4-flash-vision-exp
+        name: deepseek-v4-flash-vision-exp
 custom_providers: []
+stt:
+  provider: openai
+  language: zh
+  openai:
+    model: Qwen/Qwen3-ASR-1.7B
+    base_url: https://api.siliconflow.cn/v1
+    api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
+    language: zh
+tts:
+  edge:
+    voice: zh-CN-XiaoyiNeural

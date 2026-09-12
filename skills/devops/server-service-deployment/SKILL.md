@@ -463,12 +463,96 @@ systemctl --user status hermes-gateway.service  # systemd服务状态
 
 **中国境内云服务商核心规则**：未备案域名禁止通过80/443端口访问，但可通过非标准端口（如8000）访问，直接访问公网IP不受限制。
 
+**子域名继承主域备案，无需单独备案**（备案按主域名走）——主域 80 能服务即可放心加子域。
+
 **排查域名不通的三步法**：
-1. `dig 域名 A +short` — 检查DNS解析
-2. `curl -sI http://域名` / `https://域名` — 检查80/443状态
+1. `dig NS 域名 +short` — **先看托管在哪家**（决定去哪操作）；`dig A 域名 +short` — 再看解析
+2. `curl -sI http://域名` / `https://域名` — 检查80/443状态；`sudo certbot certificates` — 证书覆盖哪些域名、到期日
 3. IP直连通但域名不通 → 大概率**备案拦截**
 
 详见 `references/域名管理ICP备案.md`
+
+### 给服务套上域名（子域接入，演示物/客户入口必做）
+
+**触发**：用户问「把地址换成我的域名」「IP:端口太难看了」。裸 `IP:端口` 发给客户 = 一眼看出是个人项目，专业度归零。
+
+**标准流程**：
+
+| 步 | 动作 | 谁做 |
+|:--|:--|:--|
+| 0 | 查四样：`dig NS/A`、`curl -sI https://主域`、`certbot certificates`、`grep -rl 主域 /etc/nginx/` | Agent |
+| 1 | 加 A 记录：`子域` → 服务器 IP | **用户**（DNS 后台，1分钟） |
+| 2 | `sudo certbot --nginx -d 子域`（80 通即自动 HTTP-01 验证） | Agent |
+| 3 | nginx server block（80→301 / 443 + 证书 + root）+ `X-Robots-Tag: noindex` | Agent |
+| 4 | 静态产物**由 nginx `root` 直出**——0 常驻进程、不用开安全组、不占内存 | Agent |
+
+通配符证书必须走 DNS-01（要 DNS API 权限），除非要挂十几个子域，否则逐个子域签更省事。
+
+⚠️ 静态导出后**依赖本地桥/后端的组件会失效** → 自用版（全功能）与演示版（静态、给客户看）**分开两个 build**，别混用。
+
+**同源双版本怎么落地（env 变量分流，本机 launchd/systemd 一个字不用改）**：
+```js
+// next.config.mjs
+const isStaticExport = process.env.APEX_STATIC === "1";
+const exportConfig = isStaticExport ? { output: "export", images: { unoptimized: true } } : {};
+export default { ...exportConfig, trailingSlash: true };
+```
+服务器 `APEX_STATIC=1 npm run build` → `out/` 给 nginx 直出；本机 `npm run build` → `.next/` 给 `npm start`。**必须分流**——静态导出会让 `next start` 直接报错，本机的 launchd 就起不来。运行时再用 `window.location.hostname === 'localhost'` 门控本机桥轮询与面板渲染（否则每个访客的浏览器都去敲自己的 `127.0.0.1:3210`）。
+
+**让本地事件（语音/日志/trace）驱动前端可视化**（点亮模块节点）的完整配方——桥日志轮询、注册表别名匹配、指纹去重、验收规则表、以及批量改前端源码的 `\1` 回填陷阱 → `references/event-driven-ui-and-dual-build.md`
+
+**演示数据怎么灌**（走真实 API 而非手写 SQL / 快照+一键还原 / 强制标注「演示环境」/ 故意埋异常值让预警有反应 / 逐个服务数条目做验收）→ `references/demo-data-seeding.md`
+
+⚠️ **建构前先把 `app/api/*` 路由移走** —— Next.js 静态导出**不允许存在 API Route**，只要有 `app/api/<name>/route.ts`，`next build` 直接失败（只需移到基线目录，前端改直连上游）。另有 terser 转义 `·`→`\xb7` 导致中文串校验假阴性、以及「验产物/验资源/验保活」三层验收法，见 `references/nextjs-static-export-deploy-verification.md`。
+
+### ⚠️ 路径前缀反代会被「fetch 绝对路径」打断（本机 16 个 Agent 页通用）
+
+**现象**：`https://主域/agent/8924/` 反代到 `127.0.0.1:8924` → 页面能打开，**数据全空**。
+
+**根因**：页面 JS 写的是 `fetch('/api/dashboard')`（前导斜杠=绝对路径）→ 前缀反代下打到 `主域/api/dashboard` 而非 `/agent/8924/api/dashboard` → 全 404。
+
+**动手前先查**（别猜）：
+```bash
+curl -s http://127.0.0.1:8924/ | grep -oE "fetch\([^)]{0,60}"    # '/api/' = 绝对路径有坑
+curl -s http://127.0.0.1:8924/ | grep -oE '(src|href)="[^"]*"'  # 空 = 无外部资源
+```
+**实测（2026-09-12）**：16 个 Agent 页全是**单文件自包含 HTML（CSS/JS 内联、无外部资源）+ `fetch('/api/...')` 绝对路径**。
+
+**三条路**：① ✅ 页面改相对路径 `fetch('api/...')`（去掉前导斜杠，配 nginx `return 301` 强制尾斜杠）——标准做法、永久有效；② ⚠️ `sub_filter` 文本重写——脆，易误伤；③ ✅ 每服务独立子域——最省脑、DNS/证书成本最高。
+
+**别做的事**：不改页面直接上前缀反代 —— 页面能开、数据全空，**演示当天才发现最惨**。
+
+### ⚠️ 自建语音/演示前端的三个坑（kiosk 回不去 / 流式被截断 / agent 乱查证）
+
+页面跑在 **Chrome kiosk** 里 + 自建 Python 桥 + 走 Hermes `:8642` 让 agent 干活，这个组合有三条必踩的雷：
+
+1. **kiosk 里 `target="_blank"` = 用户「回不去主页面」**（kiosk 没有标签栏，新页面盖上来就找不到返回入口）。
+   修法：入口一律改**就地全屏浮层**（不改跳转），顶部放醒目的「← 返回」；全仓搜 `target="_blank"` 删干净。
+   救急：**拍手/触发唤醒**会走桥的 AppleScript 遍历标签找目标页并切回前台 —— 主页面标签一直都在。
+2. **流式回答说一半就停**：客户端 socket 读取超时**等于**服务端 SSE 心跳间隔（`CHAT_COMPLETIONS_SSE_KEEPALIVE_SECONDS = 30.0`，`gateway/platforms/api_server.py`）
+   → 边界竞态，谁先到看运气；撞上就关连接、正在跑的工具吃 SIGINT（日志指纹 `[Command interrupted]` + `exit_code 130`）。
+   **铁律：自建客户端的读取超时必须 ≥2×（推荐 2.5×）服务端心跳间隔**，总时长上限另设兜底。
+3. **问「介绍一下这个页面」agent 却去抓网页读源码**（实测 47s 还被截断）：语音 system prompt 里写着「要动手查就直接动手」，
+   而 agent 不知道页面是什么 → 查证成了唯一出路。**修法是补上下文，不是加禁令** —— 把页面已知信息写进 system prompt 并注明
+   「这类问题直接照答、不要抓网页/读源码」，实测 **47s → 2.5s、工具调用 0 次**。
+
+另：判断「要不要自己造语音能力」前先盘官方 —— Voice / 唤醒词（hey hermes，本地检测）/ HUD 悬浮条 / 打断 / 防幻听 官方三端全有，
+**只有「光点式可视化总览」是自建独有的**；官方音频端点在 **dashboard web server**（`hermes_cli/web_server.py`）而非 API server `:8642`（后者没有任何 audio 路由）。
+
+全部实测配方（含 `curl -D -` 验 `X-Frame-Options`、iframe URL 自适应、system prompt 注入模板、验收清单）→ `references/apex-voice-frontend-reliability.md`
+
+### 需要用户去第三方后台操作时：三件套 + 零操作备选（用户铁律）
+
+用户不懂技术、会不耐烦（本次实录：给完步骤后追问「域名后台加记录是什么意思」，随后在我连续取证时打断「**你干啥呢**」）。
+
+1. **先自查托管位置再给步骤** —— `dig NS` 查出「你的域名簿子在 DNSPod」，不讲「去你的域名服务商」这种废话
+2. **用类比 + 逐格对照表，不抛术语** —— 域名=电话簿，加记录=簿子上加一行；然后「后台格子名 | 填什么」逐格列
+3. **永远附一个「你零操作」的备选** —— 如 `主域/子路径`（不动 DNS，Agent 全包）；用户很可能直接选它
+4. **取证要快** —— 用户问「怎么还没生效」时一条 `dig` 就够，别连做三四个调查
+
+**DNSPod 高频误操作（真实翻车）**：点「**添加域名**」新建了一个域名条目（应点主域那行右侧的「**解析**」→「添加记录」）；子域拼错（`apex.midade.icu`，`de`≠`ge`）；把「暂停」误读为配置没生效（实为该条目未通过所有权验证）。**判别：`dig A 子域` 空 + 状态「暂停」+ 0 记录 = 记录没建对 → 让他删掉重来，别在错的地方改。**
+
+> 完整配方（nginx 443 block / certbot / Next.js 静态导出 / 本机域名实况 DNSPod+证书归属 / 验收清单）→ `references/domain-subdomain-demo-hosting.md`
 
 ## Hermes外部插件安装
 
@@ -687,6 +771,10 @@ crontab:
 
 **配套加固（同批完成）**：company.db 是 16 进程共享单 SQLite → common/db.py 开 `PRAGMA journal_mode=WAL` + `busy_timeout`；每日备份脚本 `~/Desktop/hermes/scripts/backup_company_db.sh`（crontab 03:20，保留14份）。⚠️ 改 db.py 等被 import 的共享代码后**必须重启服务才生效**（已起进程不会重新 import——WAL 改了但 journal_mode 仍是 delete，实测）。
 
+⚠️ **读共享库要避开「服务重启窗口」——本机实测向用户误报过「数据全丢了」**：keepalive 刚重启服务时读 `company.db`，`sqlite_master` 只剩 1 张表、7 张表全消失，据此报了「数据丢失」；隔一会儿复读 7 张表全在，且与 `backups/` 快照内容完全一致 = **读到的是瞬态不一致快照，数据完好**，只能回头更正结论。
+纪律三条：① 读共享库一律用只读 URI `sqlite3.connect(f"file:{db}?mode=ro", uri=True)`；② **报「数据丢了/异常」这类坏消息前，隔几秒重读一次确认稳定**——一次读到的异常不能当结论（用户铁律：必须区分有数据支撑的结论和推断）；③ 判「丢失」前先比对 `backups/` 里的快照。
+（同一个坑还有个静音版：把 `SELECT type,name` 只取 `name` 再按类型打印，会把类型当名字输出、看着像「只剩一张表」——**查询结果先打印原始行，再解析**。）
+
 **隧道类已弃用（2026-08-26 实测推翻）**：Mac 代理隧道（17897→Mac Clash 7897，git 翻墙用）曾加 `start_tunnel()` 进 keepalive——**全部撤销**。原因：Mac 的 Clash Verge 实际走 **TUN 模式**（mihomo 不监听 7897），服务器 SSH 隧道借不到代理（隧道端口在听、SSH ESTABLISHED，但经隧道访问 Google 全 000）。服务器翻墙**终案**：不借 Mac 代理，git remote 整体切 gitcode 镜像（fetch+push 都改），装依赖走腾讯内网源。完整弃用结论与过渡方案见 `references/mac-proxy-tunnel.md`。
 
 ### ⚠️ 服务改由 nginx 托管后，必须从 keepalive.sh 移除该端口（否则回滚顶掉 nginx）
@@ -864,6 +952,33 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:PORT/static/tailwind.j
 **一次性扫全，别分步问。** 用户说"你自己弄清楚下" = 禁止逐个询问用户。
 
 详见 `references/port-audit-methodology.md`
+（**端口身份**判定用手册里的 `ss -tlnp | grep PORT` + 本 skill「1.1 端口身份盘点」的 title 大扫，两者一起看）
+
+### 1.1 端口身份盘点：取 `<title>` 一次看清每个端口是谁（2026-09-12 实测）
+
+多 agent/多服务全返回 200 时，状态码无法区分谁是谁。最快的身份判决 = 逐个取页面 title：
+
+```bash
+for p in 8924 8925 8926 8927 8928 8929 8930 8931 8932 8933 8934 8935 8936 8937 8938 8939 8940; do
+  t=$(curl -s -m 2 http://127.0.0.1:$p/ | grep -o "<title>[^<]*</title>" | head -1 | sed 's/<[^>]*>//g')
+  echo "$p | ${t:-（无title）}"
+done
+```
+
+输出直接就是「端口 | 页面名」对照表（如 `8935 | 🎯 选品`），比翻代码/问用户快得多。纯 API 服务无 title → 记「（无title）」，改用 `/docs` 或根路由 JSON 判断。`ss -tlnp` 只告诉你「在听」，title 才告诉你「是谁」，两者一起看才能一眼排掉「端口被别的服务占着」的误判。
+
+**跨机可达性必须从真实客户端测，别在服务器上自测**：服务器 curl 自己的公网 IP 可能只走本地回环/发夹，不能证明外部可达。从 Mac 经 SSH 测两条路：
+
+```bash
+timeout 40 ssh -o ConnectTimeout=6 mac@100.80.117.5 'for p in 8924 8935 8940 8895; do \
+  echo -n "$p 公网: "; curl -s -o /dev/null -w "%{http_code}\n" -m 4 http://43.138.221.174:$p/; done; \
+  for p in 8924 8935 8940; do echo -n "$p 内网: "; \
+  curl -s -o /dev/null -w "%{http_code}\n" -m 4 http://100.105.38.39:$p/; done'
+```
+
+2026-09-12 实测：公网与 Tailscale 内网对 8924/8935/8940/8895 全部 200 → **Mac 上托管的页面可以直接 `href` 打开服务器 Agent 页，无需中转**；优先给 Tailscale 内网地址（不暴露公网、防白嫖 LLM 端点）。
+
+> 配套：Mac 端 APEX 页面 18 个「光点」与服务器 16 个 Agent 的逐点对照表、以及「门脸留本地 / 业务接服务器」的分层理由 → `references/apex-agent-wiring.md`（用户问「这些英文光点对应什么项目」时先看这份）。
 
 ### 2. 项目导航中心（多服务管理页面）
 
@@ -905,6 +1020,45 @@ ps aux | grep "[s]erver.py" | awk '{print $2}' | xargs -r kill
 （`[s]erver.py` 中括号技巧避免 grep 匹配自身）
 
 **⚠️ 同一陷阱对 pgrep 有效且更隐蔽**：`pgrep -f "ssh -L 17897"` 会匹配到**诊断命令自己**（命令行里含同样字符串），导致误判"进程复活/杀不死"。用 `pgrep -f "[s]sh -L 17897"`（中括号正则只匹配真实 ssh），或 python 读 `/proc/PID/cmdline` 精确判断。诊断端口/隧道时优先 `ss -tlnp` 而不是 pgrep 进程名。
+
+#### 4.2.1 pgrep 匹配不到「活着」的进程（模式对不上真实命令行）
+
+**现象（2026-09-12 实测，代价 3 个来回）**：`pgrep -f "luopan-monitor/app.py"` 返回空，据此判断"进程已死、可以重启"——实际进程活得好好的。
+
+**根因**：启动命令是 `cd /path/luopan-monitor && ./venv/bin/python app.py`，进程的**真实命令行不含 `luopan-monitor/` 这段路径**（cd 之后参数是相对路径 `app.py`）。模式里的目录名永远匹配不上。
+
+**铁律：pgrep 的模式必须能在 `ps -eo pid,cmd` 的真实输出里命中。先看真实命令行，再写模式。**
+
+```bash
+ps -eo pid,lstart,cmd | grep -E "[a]pp\.py"     # 先看真实命令行长什么样
+ss -tlnp | grep <PORT>                           # 更可靠：直接问端口谁是主人
+```
+
+排查端口/服务时 **`ss -tlnp | grep PORT` 比 pgrep 可靠** —— 直接给出占用端口的真实 pid，不受命令行写法影响。
+
+#### 4.2.2 「我重启了」但跑的还是旧代码
+
+**两个连环坑**（同一次实测：改完代码行为没变）：
+
+1. **第二次 background 启动会因端口被占而静默退出** —— 旧进程没杀干净时，新进程起来后 bind 失败立即退出。日志里能看到「服务启动…」紧接着「服务退出」，**极易误读成"重启成功"**。
+2. **只看"服务在跑"不能证明跑的是新代码**。
+
+**验证铁律 —— 进程启动时间必须晚于文件修改时间**：
+
+```bash
+ss -tlnp | grep <PORT>                          # 1. 端口真正的主人是谁
+ps -eo pid,lstart,cmd | grep -E "[a]pp\.py"     # 2. 它的启动时间
+stat -c '%y  db.py' db.py                       # 3. 源文件修改时间
+# 若 启动时间 < 修改时间 → 跑的是旧代码
+```
+
+清理时用**真实 pid**（从 `ss -tlnp` 拿）`kill`，不要用 pgrep 模式猜；确认端口释放后再启动：
+
+```bash
+kill <pid>; sleep 2; ss -tlnp | grep <PORT> || echo "已释放"
+```
+
+> 改共享代码（如被 import 的 db.py）后必须重启，这一点本 skill 已在「公司 Agent 矩阵纳入保活」节记过；**上面补的是"怎么确认自己真的重启到了新代码"**。
 
 ### 4.3 交互式 LLM 页面模式（静态页 + LLM 后端）
 

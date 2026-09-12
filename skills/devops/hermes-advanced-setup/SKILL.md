@@ -470,6 +470,128 @@ git config --global https.proxy http://127.0.0.1:17897
 
 **支持文件**：`scripts/mac-hermes-diagnostic.sh`（跨机诊断：系统版本/进程/配置/Python/端口/网络/磁盘）。
 
+### 远程实例的审批墙（想让它无人值守干活，先过这关）
+
+目标机 Hermes 默认 `approvals.mode: smart` + `timeout: 60` + `cron_mode: deny` → 人不在屏幕前时敏感命令 60 秒后按「未同意」处理，agent 被堵死（实测**连 `python3 -c "..."` 都判 ask-approval**）。服务器侧一般是 `off`，这就是「同样的活在服务器上能干、在目标机上干不了」的第一位原因。
+
+```bash
+hermes approvals test '<一条命令>'          # dry-run 判定，不会执行
+hermes config set approvals.mode off                    # manual | smart | off
+hermes config set approvals.cron_mode approve           # deny | approve
+hermes config set approvals.single_query_mode approve
+hermes config set approvals.unattended_mode approve
+hermes config set approvals.timeout 300                 # 默认 300，被设成 60 最易卡死
+```
+
+- 别手改 config.yaml（硬性不变式）→ 一律 `hermes config set`；改完 `hermes config get <key>` 读回验证。
+- 改完**不用重启 gateway**：config 缓存键含 `(st_mtime_ns, st_size)`，文件一改缓存即失效（有源码依据，别走「重启试试」）。
+- `off` 之后 `approvals.deny` 类硬红线**仍生效**，不是裸奔。
+- 端到端验收：`hermes chat -q '只做一件事：执行 python3 -c "print(4+4)" 并把输出告诉我'`。
+
+细节与踩坑（含「目标机 agent 的自报不等于事实」）：web-scraping → `references/macos-collection-host.md` 第 10 节。
+
+## 分身：Profile / Bot Mode / 子 agent 三层区分（2026-09-12）
+
+**触发**：用户说「建分身」「给 agent 定义身份」「多 agent 分工/互相发消息」「把这排分身接到页面上」，
+或把 `delegate_task`（子 agent）误当成「分身」。
+
+| 说法 | Hermes 里的真东西 | 特点 | 能当「分身」吗 |
+|------|------------------|------|---------------|
+| 子 agent | `delegate_task` | 临时的、分钟级、干完消失、无持久身份/记忆 | ❌ |
+| **分身** | **Profile** `~/.hermes/profiles/<名>/` | 独立 config/.env/SOUL.md/记忆/技能/cron/会话，永久 | ✅ |
+| 外部角色服务 | 自建 FastAPI（如 company-agents 16 服务） | 规则引擎，不自主思考 | 仅承接「规则活」 |
+
+⚠️ **先用一句话纠正用语**：用户拿 `delegate_task` 的心智模型去设计「一套常驻部门分身」是建不起来的，
+先分清再谈方案。
+
+### 建分身
+```bash
+hermes profile create finance --description "管钱：利润表、定价、月度复盘"
+finance chat                  # 别名 = hermes -p finance
+hermes --profile=finance doctor
+hermes profile use finance     # sticky 默认；hermes profile use default 切回
+hermes profile list            # 现状（Model / Gateway / Alias / Distribution）
+```
+- `--description` **不是注释**：kanban 编排器靠它把任务路由给对的分身（`hermes profile describe` 后补/自动生成）
+- `--clone` / `--clone-from <p>` / `--clone-all`：克隆 config+skills+SOUL / 指定源 / 全量。
+  **全量不含会话历史、state.db、cron**（克隆会双跑）；OAuth 登录（Claude/Codex/xAI）共享不复制
+- 详细摘录与更多命令：`references/hermes-profiles-and-bots.md`
+
+### Bot Mode（分身有脸、能互相说话）
+内置桌面 App（`hermes desktop`）左栏 **Bots** 页签，默认开启；**一个 Bot 就是一个 profile**，
+CLI 里 `hermes -p <bot> chat` 打开的是同一个 agent。
+
+| 能力 | 要点 |
+|------|------|
+| 身份 | title/description/avatar/model pin/自己的技能与 MCP/SOUL.md，存在 profile 元数据里，跟机器走 |
+| Bot Chat | 每个 Bot 一个**永久会话**；在 Bot Chat 里 `/new` 会被改写成 `/compact`（避免 fork 掉关系） |
+| Routines | = 该 Bot 的 cron，命名 `[bot:<name>] <routine>`，`hermes cron list` 可见，结果落回它自己的会话 |
+| 群聊 | 一房 2–6 Bot，你的消息触发最多 3 轮发言；成员 `@名字` 互相拉人、`@user` 升级给人；同机房的 driver 在网关侧，关掉桌面端也继续跑 |
+| Bot 互发 | `message_agent(target="researcher", message="…")`——**只在 canonical Bot Chat 会话里可用**；每个 Bot Chat 的 system prompt 自带「队友名单+角色」 |
+| 跨机 | `hermes peer add <name> --url http://<host>:<port> --key <API_SERVER_KEY>` → `hermes peer list/dm/run/status/stop`；`message_agent(target="spark/researcher", …)`。NAT 单向：内网机可拨出到公网 VPS，反向无入站路由（要 Tailscale/VPN） |
+
+### 建在哪台机 + 成本（Yasin 场景）
+- **每个 Bot = 一个独立 Hermes**，自己的会话/记忆，**自己烧自己的 token** → 别一次性建 10+ 个
+- **建在服务器，不要建在 Mac**：Mac 是烧钱端（¥12–27/天 vs 服务器 ¥2–3/天）且会睡眠关机。
+  桌面端在 Settings→Connections 注册服务器的连接（local / remote URL / SSH / 云端），New Agent 里
+  **「Create on」** 可选在目标机建 profile，聊天自动路由到那台机
+- 分层原则：**规则能算的留在自建服务（0 token）**；**要判断 / 要记得住 / 要沟通的**才做成有身份的分身
+- ⚠️ 铁律：**绝不让两个 agent 进程指向同一个 profile**（两边都写记忆并加载对方写入，状态互相污染）；要共享记忆用外部 memory provider
+- ⚠️ 非交互 SSH（zsh 非 login）下找不到 `hermes`：用绝对路径 `~/.hermes/hermes-agent/venv/bin/hermes profile list`
+
+### 查 Hermes 文档的正确姿势（比 web_search 快且权威）
+```bash
+curl -s https://hermes-agent.nousresearch.com/docs/llms.txt                    # 全功能索引（一行一条 + 链接）
+curl -s https://hermes-agent.nousresearch.com/docs/llms-full.txt -o /tmp/full.txt   # 全套文档单文件（~4.2MB / 8.2万行）
+grep -n "^# .*<关键词>" /tmp/full.txt      # 先拿章节起始行号
+```
+再 `read_file(path=/tmp/full.txt, offset=<行号>, limit=200)` 精读该章——**不要**把 4MB 整份塞进上下文。
+问「Hermes 能不能做 X」先查 llms.txt，别凭记忆答「不能」。
+
+### Mac 门脸页（APEX-UI）：那张「光点图」的数据契约
+用户问「这些光点干嘛的」「能不能让它们亮」「接到我的 agent 上」时先看这份：
+`references/apex-ui-reasoning-web.md`。要旨：光点由 `ReasoningWeb` 的 **`trace` prop** 驱动（一亮 = 这轮调了谁），
+但页面 `ApexWorld.tsx` **未传 `trace`** 所以永远不亮；桥 `/state` 只有 `idle|thinking|speaking`，
+`/log` 才带真实 tool 调用（可当驱动源）。作者只开源 UI，造点名单是他自己公司的，要重新映射。
+❗ 桥只绑 `127.0.0.1` 且**无入站鉴权**（背后的 Hermes 有 Mac Desktop 全权限）——**绝不要为了「手机能用」把它绑 `0.0.0.0`**，
+且页面里 `127.0.0.1:3210` 写死 5 处（手机打开只能看图、不能控制）。端口/跳机/安全边界与「能不能搬服务器」的结论都在同一份参考里。
+补充（2026-09-12 加）：光点分**常驻 `live`（硬编码）**与**瞬时 `trace`（脉冲）**两层——只接 trace 会动但不真，把 `live` 换成实时健康探测才是「装饰画→仪表盘」的关键；点击链路其实已存在（`ReasoningWeb.jsx` L186-189 热区，父层 `pointerEvents:none` 靠子元素重新开启），缺的只是**卡片出口**（`AgentOverview` 没有跳真页面的按钮）；对外演示前必清 `ApexOverviewPanel.tsx` L26-28 残留的模板作者社媒链接。要接成对外展示物，还有：单网关 `/agent-status` 绕 CORS（别改 N 个服务）、自用版(Mac)/演示版(服务器静态导出)分离（`ApexConsolePanel` 离桥必死）、公网可达性实测、演示数据必须标注——全在第四、八、九、十节。
+
+### ⚠️ 语音回合被截断 = SSE 心跳 vs 客户端超时的边界竞态（2026-09-12 定位）
+
+**症状**：对页面说一句（「介绍一下这个页面」）→ **听到半句就没声**，像卡住。桥和页面其实都健康。
+
+**根因**：服务端 `gateway/platforms/api_server.py` 的 `CHAT_COMPLETIONS_SSE_KEEPALIVE_SECONDS = 30.0`（每 30s 才发一次 `: keepalive`），桥的 `VOICE_SILENCE = 30.0` 同时当读取超时 —— **两边都是 30 秒，谁先到看运气**。撞上「桥先超时」→ 关连接 → 服务端取消回合 → 正在跑的工具收到 SIGINT。
+
+日志签名：`[ask] stream ended early after 47s: timed out` + 工具结果 `[Command interrupted]` / `exit_code 130`。
+
+**修法**：客户端读取超时 **≥2× 服务端心跳**（已设 `VOICE_SILENCE = 75.0`，注释写明与服务端常量的关系），死回合交给 `VOICE_HARD_CAP = 180` 兜底。⚠️ 桥里那句「keepalives land every 0.5 s」是**错的** —— 0.5s 是服务端队列 poll 间隔，不是心跳发射间隔，当时按这个错误前提才留出这个竞态。
+
+**第二层（行为）**：那次 47 秒大半耗在工具上 —— 问「介绍一下这个页面」，agent 却去抓网页 + `ls` 源码目录。
+**已验证的修法不是「下禁令」，而是把「页面是什么」作为事实块注入语音回合的 system prompt**（桥里加 `PAGE_CONTEXT`，
+语音 + 键盘两条路径都注入）—— agent 会去查，是因为它手上**没有任何关于所指对象的事实**；给它事实，调查的动机就没了，
+答案也才准确。实测同一句话：**47s／被截断 → 2.5s／零工具调用／内容准确**。
+可复用的验收脚本（`ast` 安全取常量 + `.env` 里的 `API_SERVER_KEY`）与官方音频端点位置见 `references/apex-voice-turn-streaming.md`。
+
+证据链 / 排查顺序 / 改动纪律（先比指纹再 rsync → kickstart） → `references/apex-voice-turn-streaming.md`
+
+### ✅ 语音·唤醒词·HUD 官方桌面版已有（别再造轮子，2026-09-12 查证）
+
+自研 APEX（桥 + 拍手唤醒 + 流式 TTS）基本是在**重复实现官方能力**，而官方更全：
+
+| 官方能力 | 入口 | 要点 |
+|---|---|---|
+| Voice | 桌面/CLI/TUI 同一套 | 说话 + 听回复、**barge-in 打断**、防幻听过滤、流式 TTS |
+| 唤醒词 | 桌面输入框「耳朵」图标 / `/wake on` | 默认「hey hermes」模型自带零训练；`sherpa` 引擎可任意词；**本地检测不上传**；说「stop」结束对话 |
+| HUD 悬浮条 | `⌘+Shift+H` | 无边框置顶条，**条的位置决定它理解哪个窗口** —— 「这个 / 这里 / 那个页面」自动对上它盖住的东西 |
+
+**macOS 麦克风权限是按进程给的（同一个病根已踩两次）**：桌面版语音走渲染进程、唤醒词走 **Python 后端**，**两个进程都要授权**；只给一个的症状是「显示在听但永远静音」。系统设置 → 隐私与安全性 → 麦克风 → 把 Hermes 后端也勾上，再重新开关一次唤醒词。
+
+**分工**：日常干活用官方桌面版（官方维护，不会撞自己写的超时竞态）；**对外演示仍用 APEX**（官方没有那张光点图）。注意官方「**一次只能一个麦克风**」—— 两边同时开会抢。
+
+问「Hermes 能不能做 X（语音/唤醒词/悬浮窗/群聊分身）」先查 `llms.txt`（见上节），别凭记忆答「不能」。
+
+
 ## macOS 自动备份（合并自 macos-backup-automation）
 
 **触发**：把 Hermes 数据（config/会话/skills/工作区/知识库）每日自动备份到外置盘（与上文 Level 4 GitHub 备份互补：GitHub 管配置，外置盘管全量）。

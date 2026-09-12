@@ -110,6 +110,56 @@ python3 ~/.hermes/skills/media/voice-input/scripts/transcribe_linux.py <audio_fi
 4. If accuracy is poor on Chinese audio, retry with `--language zh` and/or a larger model (`base` or `small`)
 5. Use the transcribed text as input to respond to the user
 
+## Live mic capture in an app (voice UI / push-to-talk / wake word)
+
+This is a DIFFERENT problem class from "transcribe a file the user sent", and it has one rule
+that decides the whole design:
+
+> **On macOS, microphone access is granted per app, and the grant belongs to the process that
+> asks for it. A process WITHOUT the grant gets no error — it gets DIGITAL SILENCE.**
+
+So pick the capture layer by **which process already holds the grant**, not by which is easier
+to write. Validated 2026-09-12 on a macOS kiosk voice UI: Chrome had no mic grant while the
+Hermes venv python did (its clap detector heard the room perfectly) — every browser upload was
+byte-identical digital silence, and ASR invented text from it.
+
+### The signature of "capturing without a grant" (measure before touching code)
+
+| Evidence | How to get it |
+|---|---|
+| every upload is the **same byte size** (e.g. byte-identical `257252`-byte blobs) | service log, one line per upload |
+| ~0 dBFS peak **and** 0 s of speech | `ffmpeg -i x.webm -ac 1 -ar 16000 out.wav` then `ffmpeg -i out.wav -af silencedetect=noise=-40dB:d=0.15,volumedetect -f null -` |
+| the SAME mic works for another process at that moment | 2 s `sounddevice`/`sox` level meter, or that process's log (here: clap onsets at `flux 55-500`, `db -25..-33`) |
+| ASR answers with canned junk (`嗯。` `啊。`, subtitle lines, impossible chars/s) | provider response + guard log |
+
+⚠️ "ASR keeps hallucinating" and "she never hears me" are usually **one** bug: nothing was
+captured. Hallucination guards (blocklists, char-rate ceilings, TTS-echo checks) are worth
+having, but they can never fix a silent capture path — the audio was never there.
+
+### Fix pattern that worked (no OS permission dialog needed)
+
+1. **Move capture into the process that holds the grant** (e.g. `sounddevice` in the already
+   running service) and let the UI (browser/app) do nothing but POST start/stop and render state.
+2. **One speaker only.** If both the backend and the page can speak, every reply plays twice —
+   users say "双声音 / double voice" — and the second copy re-enters the mic.
+3. **One shared guard pipeline**, extracted into a function every audio entry point calls. A
+   guard fixed on one path silently leaves the other open (extract it as soon as there are two).
+4. **VAD thresholds relative to the measured noise floor** (min RMS over the opening frames),
+   never a fixed constant. End an utterance on ~1.1 s trailing silence; hard-cap it (~15 s).
+5. **Say who owns the mic.** Expose `listening`/`mic_owned` in the state endpoint so the
+   wake-word/clap detector stands down while the service records — otherwise speech re-triggers
+   the wake mid-turn and the assistant answers its own recording.
+6. **Verify with real audio, not intent**: play a known sentence through the speakers
+   (`say -v Tingting "..."` on macOS) and check the service log reports non-zero speech_ms and
+   the exact characters back. End-to-end proof you can run yourself.
+
+If a browser path must stay, the user has to grant it in System Settings → Privacy & Security →
+Microphone (a GUI step no shell can do). Note that `--use-fake-ui-for-media-stream` only
+auto-accepts the *Chrome* layer — it does nothing for TCC, which is exactly how a kiosk page ends
+up recording pure silence with no error.
+
+Diagnostic recipe and the full kiosk case in `references/macos-mic-permission-layers.md`.
+
 ## Chinese Network Notes
 
 - HuggingFace is blocked from mainland China. Always set `HF_ENDPOINT=https://hf-mirror.com` before downloading models.

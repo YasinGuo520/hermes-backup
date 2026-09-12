@@ -37,6 +37,7 @@ related:
 - `references/qq-bot.md` — QQ 官方 API + LightClawBot 双路径：注册、沙箱 vs 生产、intents、发布上线、常见坑
 - `references/weixin-ilink.md` — 微信 iLink：断连日志诊断、TCP 保活、watchdog、-2/-14 错误、凭证轮换、彻底清除
 - `references/feishu-lark.md` — 飞书：权限矩阵、工具集、错误码速查、Bitable API 工作流
+- `references/feishu-voice.md` — 飞书**语音**：入站转写 + 出站语音气泡，国内服务器 STT 配置（Qwen3-ASR）、`/voice on` 模式、无真人验收脚本
 - `references/telegram.md` — TG：Hermes 原生支持、国内服务器被墙实测、代理/双实例/放弃三方案、隐私分层、VPN 节点敏感度
 
 ## 通用运维（所有渠道）
@@ -61,6 +62,19 @@ systemd-run --user --on-active=5 bash -c "systemctl --user restart hermes-gatewa
 - 渠道配置在 `~/.hermes/config.yaml` 的 `gateway.platforms`（**必须是 dict 不是 list**，v0.20+；list 格式会导致该平台消息处理崩溃——见 `hermes-advanced-setup`）
 - 权限/配置变更后必须**重启网关**才生效
 - `approvals.mode off` 会被写成布尔 `false` 而非字符串，需 sed 修正（影响 cron 脚本执行）
+
+### 语音（入站转写 / 出站语音回话）
+飞书/微信/QQ 的语音能力由**网关 + STT/TTS 配置**决定，不是渠道本身不支持。用户报「不能语音」时按这个顺序查：
+
+1. **STT/TTS 配置**：`hermes config get stt` / `get tts`。两个国内默认值的坑：
+   - `stt.language` 默认 **`en`** → 中文短语音转成英文/乱码；中文必须设 `zh`。
+   - `stt.provider` 未设 → 回退 **local faster-whisper**，它要联网从 HuggingFace 拉权重，
+     国内服务器**拉不动 → 转写直接报 `LocalEntryNotFoundError`**（`faster_whisper` 包装着也一样）。
+   → 修法：`stt.provider=openai` + `stt.openai.base_url=https://api.siliconflow.cn/v1` +
+     `model=Qwen/Qwen3-ASR-1.7B` + 硅基 Key + `tts.edge.voice=zh-CN-XiaoyiNeural`。
+     **STT/TTS 改完不用重启网关**（每次调用都重读 config）。完整命令 + 验收脚本见 `references/feishu-voice.md`。
+2. **用户端入口**：手机 IM 才有「按住说话」，电脑端不一定放给机器人 → 先让用户用手机试。
+3. **回话要不要语音**：聊天框发 `/voice on`（= 发语音才回语音）；持久化，不需要改配置。
 
 ## 支持文件
 

@@ -22,15 +22,15 @@
       "schedule_display": "30 7 * * *",
       "repeat": {
         "times": null,
-        "completed": 60
+        "completed": 61
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-12T14:31:52.762436+08:00",
-      "next_run_at": "2026-09-12T07:30:00+08:00",
-      "last_run_at": "2026-09-11T07:30:58.635375+08:00",
+      "next_run_at": "2026-09-13T07:30:00+08:00",
+      "last_run_at": "2026-09-12T07:32:32.751064+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -213,15 +213,15 @@
       "schedule_display": "0 3 * * 7",
       "repeat": {
         "times": null,
-        "completed": 10
+        "completed": 11
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-15T10:00:25.685857+08:00",
-      "next_run_at": "2026-09-13T03:00:00+08:00",
-      "last_run_at": "2026-09-06T03:01:11.992816+08:00",
+      "next_run_at": "2026-09-20T03:00:00+08:00",
+      "last_run_at": "2026-09-13T03:01:01.250324+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -339,7 +339,7 @@
     {
       "id": "791dff1e6cc4",
       "name": "记忆瘦身",
-      "prompt": "执行记忆瘦身任务。\n\n1. 用 memory tool 检查当前 memory 使用率（action='add' 放一个占位符然后删掉，看 usage 百分比）\n2. 如果 usage > 60%（即超过 1320/2200 chars），执行清理：\n   - 识别过时、重复、session-specific 的条目（已完成的一次性操作记录、过时的工具状态等）\n   - 将重复/可合并的条目压缩合并\n   - 优先保留：用户身份偏好、项目配置、工作流规则、成本信息\n   - 优先删除：一次性操作记录（\"已配置XXX\"）、session-specific 的临时信息\n   - 用 batch operations（operations 数组）一次性完成清理\n3. 如果 usage <= 60%，什么也不用做\n4. 汇报结果：清理前后 usage 对比，删/合了多少条\n\n注意：只清理 memory（个人笔记），不动 user_profile（用户档案）。不要动技能文件。\n完成后不需要通知用户（deliver='local'）。",
+      "prompt": "执行记忆瘦身任务。\n\n1. 用 memory tool 检查当前 memory 使用率（action='add' 放一个占位符然后删掉，看 usage 百分比）。注意：现在上限是 5000 chars（不是旧的 2200）。\n2. 如果 usage > 80%（即超过 4000/5000 chars），执行清理：\n   - 识别过时、重复、session-specific 的条目（已完成的一次性操作记录、过时的工具状态等）\n   - 将重复/可合并的条目压缩合并（例如同一项目分散在两条里 → 合成一条）\n   - 优先保留：用户身份偏好、项目配置、工作流规则、成本信息\n   - 优先删除：一次性操作记录（\"已配置XXX\"）、session-specific 的临时信息、已被技能文件覆盖的细节（写成\"详见XX技能\"）\n   - 用 batch operations（operations 数组）一次性完成清理\n3. 如果 usage <= 80%，什么也不用做\n4. 汇报结果：清理前后 usage 对比，删/合了多少条\n\n注意：只清理 memory（个人笔记），不动 user_profile（用户档案）。不要动技能文件。\n完成后不需要通知用户（deliver='local'）。",
       "skills": [],
       "skill": null,
       "model": "deepseek-v4-flash",
@@ -358,15 +358,15 @@
       "schedule_display": "0 4 * * *",
       "repeat": {
         "times": null,
-        "completed": 52
+        "completed": 53
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-21T11:46:02.183468+08:00",
-      "next_run_at": "2026-09-12T04:00:00+08:00",
-      "last_run_at": "2026-09-11T04:01:07.579098+08:00",
+      "next_run_at": "2026-09-13T04:00:00+08:00",
+      "last_run_at": "2026-09-12T04:01:01.645129+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -454,15 +454,15 @@
       "schedule_display": "0 */4 * * *",
       "repeat": {
         "times": null,
-        "completed": 283
+        "completed": 289
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-26T22:17:05.754790+08:00",
-      "next_run_at": "2026-09-12T04:00:00+08:00",
-      "last_run_at": "2026-09-12T00:00:50.071837+08:00",
+      "next_run_at": "2026-09-13T04:00:00+08:00",
+      "last_run_at": "2026-09-13T00:00:46.264180+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -501,15 +501,15 @@
       "schedule_display": "0 3 * * *",
       "repeat": {
         "times": null,
-        "completed": 47
+        "completed": 48
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-29T12:14:15.679862+08:00",
-      "next_run_at": "2026-09-13T03:00:00+08:00",
-      "last_run_at": "2026-09-11T03:00:35.228328+08:00",
+      "next_run_at": "2026-09-14T03:00:00+08:00",
+      "last_run_at": "2026-09-12T03:01:21.156286+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -518,8 +518,8 @@
       "enabled_toolsets": null,
       "workdir": null,
       "fire_claim": {
-        "at": "2026-09-12T03:00:54.252770+08:00",
-        "by": "VM-0-5-ubuntu:584465:8d344f7de2ff462e845ce19bd52199d4"
+        "at": "2026-09-13T03:00:49.232985+08:00",
+        "by": "VM-0-5-ubuntu:584465:787927eded9c4370a9e02a9fe3c64eb5"
       },
       "failure_streak": 0
     },
@@ -592,15 +592,15 @@
       "schedule_display": "*/5 * * * *",
       "repeat": {
         "times": null,
-        "completed": 12394
+        "completed": 12682
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-07-31T01:05:07.181039+08:00",
-      "next_run_at": "2026-09-12T03:05:00+08:00",
-      "last_run_at": "2026-09-12T03:00:54.580926+08:00",
+      "next_run_at": "2026-09-13T03:05:00+08:00",
+      "last_run_at": "2026-09-13T03:00:49.625325+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -641,15 +641,15 @@
       "schedule_display": "10 7 * * *",
       "repeat": {
         "times": null,
-        "completed": 17
+        "completed": 18
       },
       "enabled": true,
       "state": "scheduled",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-08-27T00:38:38.134384+08:00",
-      "next_run_at": "2026-09-12T07:10:00+08:00",
-      "last_run_at": "2026-09-11T07:12:50.921556+08:00",
+      "next_run_at": "2026-09-13T07:10:00+08:00",
+      "last_run_at": "2026-09-12T07:13:49.534629+08:00",
       "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
@@ -671,5 +671,5 @@
       "failure_streak": 0
     }
   ],
-  "updated_at": "2026-09-12T03:00:54.581816+08:00"
+  "updated_at": "2026-09-13T03:01:01.250965+08:00"
 }
