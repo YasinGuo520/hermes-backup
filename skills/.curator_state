@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260906-180418",
-  "last_run_at": "2026-09-06T18:04:18.887053+00:00",
-  "last_run_duration_seconds": 565.426329,
-  "last_run_summary": "auto: 2 reactivated; llm: ## Human-readable summary\n\n**Pass result: 1 consolidation executed (1 skill archived).** This library has already been through several aggressive umbrella-building passes — the `.archive/` holds 100+ entries (`ai-video-content-creation`, `a…\narchived 1 skill(s):\n  • llm-model-audit → agent-performance\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260913-183057",
+  "last_run_at": "2026-09-13T18:30:57.198282+00:00",
+  "last_run_duration_seconds": 376.782526,
+  "last_run_summary": "auto: 3 marked stale; llm: Consolidation pass complete. Here's what happened.\n\n## Clusters processed\n\n**1. Divination / 玄学 (2 → 1)** — `xuanxue-ai-tools` was a near-duplicate of `divination-web-tools` (same FastAPI-per-tool architecture, same lunar-python integration…\narchived 4 skill(s):\n  • petdex → hermes-advanced-setup\n  • skill-creator → find-skills\n  • subagent-project-scaffolding → hermes-advanced-setup\n  • xuanxue-ai-tools → divination-web-tools\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin divination-web-tools",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 12
+  "run_count": 13
 }

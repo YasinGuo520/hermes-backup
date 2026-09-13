@@ -100,6 +100,50 @@ metadata:
    （`synthesised` 一连串先跑完），则后半段是无缝播放，停顿只能来自文本本身的语气。
    注意：修 (b) 时别把静音削到 0，要留 200-300ms——否则句子会黏成一串，听起来更嗧。
 
+## 媒体声 = 幻影唤醒：用 CoreAudio「设备正在放声音」让位（2026-09-13 修）
+
+症状：放音乐/视频时她自动弹窗，并把内容当提问回答（bridge 日志里 `[stt] listen raw` 抓到的是
+视频台词，实测一次回了 407 字）。根因：双击拍手判据是「带通后 flux 成对隆起」，**媒体瞬态在这一
+层跟拍手无法区分**——外放一段合成 burst 就能让旧代码 `WAKE (double-clap)`。**调阈值没用**，要加情境判据。
+
+| 判据 | 可用性 |
+|---|---|
+| CoreAudio `kAudioDevicePropertyDeviceIsRunningSomewhere`（默认输出 `dOut` 上查 `gone`） | ✅ 静默 0 / 播放中 1 / 停后 0，`say` 与 `afplay` 都认 |
+| `pmset -g assertions` 找 coreaudiod | ❌ 常驻那条是**麦克风输入**的 assertion，永远为 1 |
+
+实现（`clap-wake.py`）：`ctypes.CDLL("/System/Library/Frameworks/CoreAudio.framework/CoreAudio")`
++ `AudioObjectGetPropertyData`（**必须设 `argtypes`**，否则 64 位下参数被截断）；判定顺序
+`bridge_busy()` → `media_playing()` → 才 `wake()`；拦截时**不响提示音、不抬窗、不开麦**，并把
+`last_onset` 清 0 防止跨媒体间隙配对；日志 30s 节流成一行 `ignored N double-onset(s)`。开关走环境
+变量（`APEX_CLAP_IGNORE_MEDIA=0` 关闭），阈值一律不动 → 真拍手行为不变。
+
+代价要提前说清：**正在放声音时拍手叫不动她**（暂停再拍）。手机/蓝牙音箱外放检测不到，只能靠转写守卫。
+
+## ⚠️ ssh 起的进程收不到麦克风 —— 语音验收必须走 launchd
+
+2026-09-13 实测：`ssh mac … python clap-wake.py --verbose` 能正常打开 `sd.InputStream`、日志打印
+"listening…"，但**外放任何声音都不产生 onset**（拿到的是静音且不报错）；同一份脚本用 launchd 起就正常。
+macOS 把麦克风授权发给「Aqua 会话里那个 python 二进制」，ssh 会话的副本不在其列。
+
+两条推论：
+1. `apex-up.sh` 这类启停脚本必须 `launchctl bootstrap`，**不能直接 `python … &`**；
+2. 注入式验收要造临时 launchd job：克隆线上 plist（`plistlib` 改 Label / 加 `--verbose` / 把
+   `APEX_BRIDGE_WAKE` 指到死端口 `http://127.0.0.1:9/wake` 以免抬真窗）→ `bootstrap` → 播音频 →
+   读 `/tmp` 日志 → `bootout` + 删 plist。**同一段音频跑两遍**（守卫 ON vs `APEX_CLAP_IGNORE_MEDIA=0`）
+   就是一组干净对照。注：`plistlib.dump(value, fp)` 参数顺序写反会得到 `'dict' object has no attribute 'write'`。
+
+## 常驻开关：一键启停 + 别让「退出」在重启后失效
+
+用户会问「我怎么退出她的驻听」。三件套放 `~/apex-src/`：`apex-up.sh`（bootstrap + kickstart 三个 job，
+顺序 = 页面 → 桥 → 耳朵）、`apex-down.sh`（bootout + `pkill -f "user-data-dir=$HOME/.apex-kiosk"`；
+**只认自己的 profile，绝不能用宽泛的 `user-data-dir`**——抖音等 Electron 应用也带这个参数）、
+`apex-mute.sh`（只停耳朵）。双击图标用 `osacompile -o "$HOME/Applications/APEX 开.app" -e 'do shell
+script …'`（**别写 `~/Desktop`**，ssh 上下文被 TCC 挡；`~/Applications` 还能直接拖进 Dock）。
+
+关键一步：三个 plist 的 `RunAtLoad` 改 `false`。否则 `bootout` 后**下次登录 launchd 又把它拉起来**，
+用户「我不想常驻」的意图会在重启后失效。改 plist 后必须 `bootout` + `bootstrap`（`kickstart -k` 不重读）；
+因为 `RunAtLoad=false`，bootstrap 后进程不会自己起——脚本里要补 `launchctl kickstart gui/$U/<label>`。
+
 ## macOS TCC 挡住源码（`~/Desktop`）：怎么远程拿到代码
 
 shell/sshd 起的进程读 `~/Desktop` 是 `Operation not permitted`。**GUI 起的 Hermes 后端有权限**
