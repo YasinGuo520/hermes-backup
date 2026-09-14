@@ -47,6 +47,21 @@ related:
 tail -f ~/.hermes/logs/gateway.log | grep -i "qq\|weixin\|feishu\|lightclaw\|session expired\|errcode"
 ```
 
+### 渠道突然「发不出信息」：先确认宿主没睡（30 秒）
+
+**别一上来就查 token / iLink 重连 / 保活脚本**。当 Hermes 网关跑在 Mac 上时，它是 launchd job
+`ai.hermes.gateway`（同一个进程还供着 127.0.0.1:8642）；**合盖睡眠会把整个网关带走**，
+表现就是「微信端发了没反应、也不报错」。
+
+```bash
+pmset -g log | egrep "Entering Sleep|Wake from" | tail -6   # Maintenance Sleep = 合盖睡了
+uptime; launchctl list | egrep -i hermes                    # 服务还在不在
+```
+
+2026-09-14 实测：用户报「微信端好像没发信息」，真因是 Mac 从 09:27 起合盖睡眠（`sleep 0` 拦不住，
+合盖睡眠是独立机制），10:14 按电源键唤醒后渠道自己就恢复了。要「随时能收发」只有三条路：
+接电源 + 外接屏（clamshell）、`caffeinate`、`sudo pmset -c disablesleep 1`——**先问用户要哪种，别自己改电源设置**。
+
 ### ⚠️ 重启网关（不能从 gateway 会话内执行）
 `hermes gateway restart` 在网关会话（飞书/微信/QQ）内执行会被拦截（SIGTERM 传播，防自杀检测）。含 `restart`/`stop`/`kill` 的命令都会被拦。可靠变通：
 

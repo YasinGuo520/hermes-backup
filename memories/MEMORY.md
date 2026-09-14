@@ -40,7 +40,7 @@ Hermes检索降级：web_search超时/web_extract无backend→anysearch MCP(mcp_
 §
 跨机采集(详见web-scraping技能第八章)：持续采集跑用户本机(真IP+真人profile)，机房IP+headless=封号。服务器TS100.105.38.39：8920-8940被Agent矩阵占、8941+空闲、内存剩1.5G→采集器别放服务器。抖音后台(罗盘+达人广场)共用底座=本机采集器(Tailscale+SSH)+上报8941+诊断+飞书；达人广场无导出→拦search_feed_author，内部滚动(.auxo-table-body，mouse.move+wheel1500=1页20条)，Mac端~/luopan-collector(chrome)。luopan-monitor(8941，FastAPI+SQLite WAL，X-Token，已入keepalive)：表creator_list/luopan_snapshot/ingest_log；采集器collectors/*.py跑Mac、上报100.105.38.39:8941(公网未放行)，daren_watch.py=30s增量上报
 §
-APEX语音UI(自研，~/apex-src，原~/Desktop被TCC挡)：启停(09-13)=~/Applications/APEX 开/关.app→apex-up/down.sh(launchctl bootstrap，非直接跑python)，RunAtLoad=false(退出后重启也不自启)；clap-wake加media guard(CoreAudio IsRunningSomewhere，放声音时拍手让位；pmset不可用)；ssh起python收不到麦克风，语音验收必须走launchd。Mac=桥3210
+Mac上Hermes=launchd服务ai.hermes.gateway(PPID1，同进程供8642+微信端)不需开桌面端；合盖睡眠停掉gateway+apex+微信渠道(sleep 0拦不住，pmset -g log查)，唤醒后RunAtLoad=false的服务不自己回。APEX语音UI(自研，~/apex-src，原~/Desktop被TCC挡)：启停(09-13)
 §
 语音输入(09-12)：手机飞书按住说话(电脑端不支持)→STT硅基Qwen3-ASR(stt.language显式zh)→文字进agent已验证。TTS=edge zh-CN-XiaoyiNeural。改stt/tts免重启网关。/voice on=回语音
 §
