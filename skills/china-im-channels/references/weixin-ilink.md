@@ -244,7 +244,66 @@ grep "errcode=-2" ~/.hermes/logs/gateway.log
 - 原理上：定时调用 iLink API → 保持 session 活跃 → 降低 -2 概率 ✅ 逻辑通
 - 实际上：iLink 的限频规则未公开，不保证完全消除 -2
 - 替代方案：如果 getconfig 无效，改为每25分钟**发一条给自己**的空消息（用 `weixin_bot` 内部ID），但会污染聊天记录
-- 最坏情况：-2 出现后 gateway 会自动重试，不会永久丢失消息，只是延迟
+### 最坏情况：-2 出现后 gateway 会自动重试，不会永久丢失消息，只是延迟
+
+---
+
+## 主动推送投递失败：`ret=-2 errmsg='prepare failed'`（≠ 上面的空闲断连）
+
+### 现象与日志原文
+
+```
+[Weixin] iLink rejected send: ret=-2 errcode=None errmsg='prepare failed'
+[Weixin] session expired for <user>; retrying without context_token
+[Weixin] iLink rejected send: ret=-2 errmsg='prepare failed'      ← 去掉 token 也一样
+[Weixin] send failed: iLink sendmessage rate limited; cooldown active for 30.0s
+```
+
+`rate limited` 是 Hermes 自编的熔断文案，**不是真的限流**——别拿它去调发送频率。
+
+### 与 -2 空闲断连的区别（上文那张表要按这条修正）
+
+| 场景 | 触发点 | 真因 | getconfig 保活有用吗 |
+|------|--------|------|---------------------|
+| `-2` 空闲断连 | 无用户交互约 2h 后**入站**收不到 | 微信桥接长连接被掐 | 有用 |
+| `ret=-2 prepare failed` | **主动 send**（cron 投递 / `hermes send`） | 投递用的 context_token 已失效 | **没用** |
+
+### 判据（2026-09-15 实测）
+
+- context_token **只源自用户最近一条入站消息**，窗口约 4-5h；用户不说话，token 就是死的。
+- 故**成功记录全部聚集在「用户当天聊过天」的时段**；**隔夜首推、深夜推必挂**。
+- 时间线佐证：用户 09-14 10:30 最后一条微信 → 09-14 19:02 / 09-15 06:41 / 07:33 / 08:31 四次投递全挂（间隔 8.5h / 20h / 21h / 22h）。
+- 用户 12:19 在微信说话后，同一条通道立刻推成功（`success` + `context_token_used: true`）→ **通道没坏，坏的是 token 时效**。
+
+### 已被实测推翻的假解（别再照抄）
+
+| 假解 | 为什么不行 |
+|------|-----------|
+| 「去掉 token 重试」 | adapter 的降级路径确实会走（日志有 `retrying without context_token`），但去 token 后 iLink 照样 `ret=-2 prepare failed` |
+| 上游补丁 `_STALE_SESSION_ERRMSGS`（并入 `_is_session_expired`） | 只修好了**错误分类**（不再把 token 问题说成限流），救不回隔夜推送。值得留着让报错准确；`hermes update` 会覆盖，症状回归就重打 |
+| 调 cron 时间 / 加保活 | 不解决。7:30 推不动，改 8:30 一样推不动——用户还在睡，token 依然死 |
+| 改成「用户当天首次互动后补投」 | Hermes 无现成机制，要自己写投递重试逻辑，成本最高最不稳；而且 7:30 的简报 11 点才到，时效价值基本没了 |
+
+### 5 秒判定通道此刻通不通（下结论前必跑）
+
+```bash
+hermes send --list                       # 全部可用目标；bare 平台名需有 home channel，否则显式 platform:<目标>
+hermes send --to weixin --json "自检"     # 成功 → {"success":true,...,"context_token_used":true}；失败 = token 已死
+```
+
+**没实测别说「通道坏了」，也别在没实测的情况下宣布「修好了」。**
+
+### 可行解（按推荐排序）
+
+| 方案 | 做法 | 说明 |
+|------|------|------|
+| **A 双通道（推荐）** | 任务的 `deliver` 从 `weixin` 改成 `weixin,telegram`（逗号组合） | 改一个字段即可；微信能到就是双份，到不了 TG（bot-token 制、**无时效窗口**）必兜住；不是放弃微信 |
+| B 全切 TG | `deliver: telegram` | 稳，但丢掉微信这条——用户日常在微信时本来收得到 |
+| C 保持微信 + 补投 | 自写投递重试 | 见上表，成本最高最不稳，非必要不选 |
+
+配套：`deliver` 为 `origin` 的 `no_agent` 备份类任务（无 origin 会话时 fallback 到 home channel，同样卡在微信）→ 改 `local` 更合理，备份结果本来不必推 IM。
+
+**上线前提（否则双通道也白搭）**：Mac 合盖睡眠会把**任务带网关一起停掉**（见 SKILL.md「先确认宿主没睡」），任何投递方案都失效。要「随时能收」只有接电源+外接屏 / `caffeinate` / `sudo pmset -c disablesleep 1` 三条路，**先问用户要哪种**。
 
 ---
 

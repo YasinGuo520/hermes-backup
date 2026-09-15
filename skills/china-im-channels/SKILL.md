@@ -29,7 +29,7 @@ related:
 |------|---------|---------|---------|
 | **飞书** | 主力工作台（高稳定） | open.feishu.cn 建应用 + WebSocket 长连接 | 权限申请→重发布应用→重启网关；Bitable 写表 |
 | **QQ** | 24h 值守、机器人客服 | 官方 QQ Bot API（q.qq.com）或腾讯云 LightClawBot | 沙箱→审核→上线；intents；IP 白名单 |
-| **微信** | 个人微信桥接（日常聊天） | iLink（ilinkai.weixin.qq.com）第三方桥接 | 4-5h token 过期/2h 空闲断连；扫码重登；保活脚本 |
+| **微信** | 个人微信桥接（日常聊天） | iLink（ilinkai.weixin.qq.com）第三方桥接 | 4-5h token 过期/2h 空闲断连；扫码重登；保活脚本；**主动推送受会话 token 时效限制→隔夜首推必挂，别拿它做早间 cron 的投递目标** |
 | **Telegram** | 海外渠道、私密传输（仅解决传输层） | `hermes setup` 选 Telegram / BotFather token | **国内服务器连不上 api.telegram.org**，须先解决代理（见 references/telegram.md） |
 
 ## 渠道文档
@@ -61,6 +61,27 @@ uptime; launchctl list | egrep -i hermes                    # 服务还在不在
 2026-09-14 实测：用户报「微信端好像没发信息」，真因是 Mac 从 09:27 起合盖睡眠（`sleep 0` 拦不住，
 合盖睡眠是独立机制），10:14 按电源键唤醒后渠道自己就恢复了。要「随时能收发」只有三条路：
 接电源 + 外接屏（clamshell）、`caffeinate`、`sudo pmset -c disablesleep 1`——**先问用户要哪种，别自己改电源设置**。
+
+### 渠道「发不出去」的另一类原因：任务跑了，但投递没到（cron/主动推送必看）
+
+宿主没睡、进程在跑、`status=completed`，用户就是没收到 → **别继续查 token/重连/保活**，先分清「内容有没有生成」和「投递有没有送到」：
+
+```bash
+# status=completed + 投递失败 = 内容已落盘、只是没送出去，output 文件可直接补发
+ls -lt ~/.hermes/cron/output/<job_id>/ | head    # 内容一直在磁盘上，不会丢
+bash ~/.hermes/scripts/channel_delivery_probe.sh # 一键体检（只读）
+```
+
+投递成功在日志里的权威依据是 `cron.scheduler: Job '<id>': delivered to <platform>:<chat> via live adapter`。
+（老版本 `executions.db` 没有 `delivery_outcome` 列，服务器上也可能没装 `sqlite3` 二进制 → 用 `python3 -c "import sqlite3..."`，探针脚本已封装。）
+
+**核心判据：决定成败的是投递目标，不是任务本身。** bot-token 制平台（飞书/TG）任何时间都能主动推；**微信 iLink 是会话 token 制，token 只源自用户最近一条入站消息（窗口约 4-5h）→ 隔夜首推、深夜推必挂**，调时间/打补丁/保活全都救不回来。完整证据、四个被实测推翻的假解、5 秒判定通道通不通的方法，见 `references/weixin-ilink.md`「主动推送投递失败」节。
+
+### 给用户出方案时：只在既定选项内选，别扩展新架构
+
+2026-09-15：用户问「Mac 上的定时任务，你觉得应该如何解决」（已列 A 双通道 / B 全切 TG / C 补投三选项），我转而去查「把 Mac 产物跨机转发到服务器→飞书」，被打断：**「我是让你看解决方案，没让你弄到飞书上，别绕」**。
+
+**用户问「选哪个/怎么解决」= 在给定选项内给推荐 + 理由 + 代价对比，不是让你发明第四条路，也不是顺手执行他没批的改动。** 真有更好的第四方案，一句话附带即可，别去实施；要动手先拿到明确许可。
 
 ### ⚠️ 重启网关（不能从 gateway 会话内执行）
 `hermes gateway restart` 在网关会话（飞书/微信/QQ）内执行会被拦截（SIGTERM 传播，防自杀检测）。含 `restart`/`stop`/`kill` 的命令都会被拦。可靠变通：
@@ -95,6 +116,7 @@ systemd-run --user --on-active=5 bash -c "systemctl --user restart hermes-gatewa
 
 | 文件 | 用途 |
 |------|------|
+| `scripts/channel_delivery_probe.sh` | 渠道投递体检（只读）：可用目标 + 近 3 天 cron 执行/投递结果 + 投递成功/失败日志 + 每条任务最新产出文件 |
 | `scripts/wechat_watchdog.sh` | 微信断线监测：检测 Session expired → 生成新二维码 → 飞书通知 |
 | `scripts/wechat_keepalive.sh` | 微信保活：每25分钟调 getconfig 防 -2 空闲断连 + gateway 进程守护 |
 

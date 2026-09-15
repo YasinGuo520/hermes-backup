@@ -45,3 +45,5 @@ Mac上Hermes=launchd服务ai.hermes.gateway(PPID1，同进程供8642+微信端)�
 语音输入(09-12)：手机飞书按住说话(电脑端不支持)→STT硅基Qwen3-ASR(stt.language显式zh)→文字进agent已验证。TTS=edge zh-CN-XiaoyiNeural。改stt/tts免重启网关。/voice on=回语音
 §
 维修纪律：已固化进Mac端SOUL.md(8.5-8.9)——证据先行+改代码前立基线、两轮未定位根因即停汇报、长任务离开主会话+超60条/new、验收量化。服务器侧：改他人代码先立基线；我不能自己/new→会话堆大请Yasin开新会话、结论先落盘；分析中发现的故障只报告别顺手修(09-09)。memory replace 的old_text只定位、替换整条→须给完整新内容
+§
+用户问「选哪个方案/怎么解决」（已给A/B/C）=只在给定选项内给推荐+理由+代价对比，禁发明第四条路、禁顺手执行未批改动（09-15"别绕"）
