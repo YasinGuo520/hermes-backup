@@ -1770,14 +1770,14 @@
     "created_by": null,
     "last_patched_at": "2026-09-13T01:36:38.537513+00:00",
     "last_reused_patch_generation": 6,
-    "last_used_at": "2026-09-14T02:16:24.597975+00:00",
-    "last_viewed_at": "2026-09-14T02:16:24.561797+00:00",
+    "last_used_at": "2026-09-16T00:21:48.892469+00:00",
+    "last_viewed_at": "2026-09-16T00:21:48.883210+00:00",
     "patch_count": 6,
     "patch_generation": 6,
     "pinned": false,
     "state": "active",
-    "use_count": 12,
-    "view_count": 12
+    "use_count": 14,
+    "view_count": 14
   },
   "macos-backup-automation": {
     "archived_at": "2026-08-23T17:28:40.280558+00:00",
@@ -1925,13 +1925,13 @@
     "created_by": "agent",
     "last_patched_at": "2026-09-12T08:23:23.124631+00:00",
     "last_reused_patch_generation": 1,
-    "last_used_at": "2026-09-14T23:10:24.243696+00:00",
+    "last_used_at": "2026-09-15T23:10:06.755820+00:00",
     "last_viewed_at": "2026-09-12T09:19:32.151747+00:00",
     "patch_count": 2,
     "patch_generation": 1,
     "pinned": false,
     "state": "active",
-    "use_count": 65,
+    "use_count": 66,
     "view_count": 7
   },
   "nano-pdf": {
