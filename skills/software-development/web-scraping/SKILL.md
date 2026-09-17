@@ -209,9 +209,14 @@ data = [r.json() for r in captured]   # 结构化字段，不依赖任何 CSS �
 3. **同一个指标往往有好几组同名口径，不交叉核对就会选错** —— 实测达人接口里"销售额"至少三组：`sale_info.*_total_sales`（销售额）／`sale_info.*_total_sales_settle`（结算额，＝页面显示那一列）／`author_live.sale_low/high`（另一套，近似场均），同一达人三组能差 10 倍。选错口径＝整张表数字错，而且看着很合理不会报错。
    验证方法：把接口值跟你自己可从页面脚注/表格看到的那一列**逐列对一遍**；数值型的区间字段还常带 `status=2` 表示"该渠道无数据"，**不要当 0**（0 和「无」语义不同）。
 
-### 无头服务器模式（browser-harness 不可用时的替代）⚠️
+### 无头服务器模式（先修 harness，再考虑绕开）⚠️
 
-服务器（无显示器、无 Chrome）上 browser-exec/harness 报 `chrome-not-running` 时，**绕开 harness 直接用 playwright Python**：
+服务器（无显示器、无 Chrome）上 browser-exec/harness 报 `chrome-not-running` 时，**首选是把它修好，不是绕开**：正解 = 起一个常驻 headless Chrome（`--remote-debugging-port=9333`）+ `hermes config set browser.cdp_url http://127.0.0.1:9333`，修完 `browser_exec` 直接可用。全套取证/命令/保活/回退见 server-service-deployment 技能 → `references/headless-browser-cdp-harness.md`。
+
+> ⚠️ Chrome 151 下 `--headless=new` **不监听调试端口**（进程活着但无 `DevToolsActivePort`、`ss` 里没口），必须用 `--headless`。
+> ⚠️ 别急着下“这台机器不能用浏览器”的结论——`browser_exec` 静默超时的真因通常就是“没有 Chrome 在跑”，属于可修项，不是工具不可用。
+
+若只是**一次性抓取**、不想动 Hermes 配置（或需要绝不动 harness 的隔离环境），再走下面的裸 playwright 方案，**绕开 harness 直接用 playwright Python**：
 
 ```bash
 # 1. 已有 venv 时装 playwright（用国内源/已缓存 chromium）
@@ -298,7 +303,8 @@ browser = p.chromium.launch(
 - GitHub：https://github.com/D4Vinci/Scrapling（70k+ stars）
 - 浏览器自动化（需登录/交互的场景）：见上文「Playwright 浏览器自动化」章节
 - 抖音精选联盟选品脚本（Playwright + openpyxl 输出 Excel，可作模板）：`references/douyin-scraper.md`
-- 抖音视频页内容提取（无需登录，拆解/分析视频用）：`references/douyin-page-extraction.md`
+- 抖音视频页内容提取（无需登录，拆解/分析视频用；含短链解析 + 真机渲染路径 + 死路清单 + 「我能不能干」回答骨架）：`references/douyin-page-extraction.md`，一键脚本 `scripts/douyin-video-content.py`
+  - 速记：`curl -sL` 解析短链拿 aweme_id（服务器可做）→ **渲染必须换真实桌面机**（Mac 系统 Chrome + `headless=False`）打开 `www.douyin.com/video/<id>` → 读 `document.body.innerText`，平台自带的「章节要点」AI 摘要就是视频内容。分享页 HTML / `aweme/v1/web/aweme/detail/` 一律被 `ArgusSecurityPlugin` 拦，别在那上面耗调用。
 - 国内平台后台持续采集架构（本机vs云服务器/风控判定/官方API门槛/跨机操控路径/百应域名与路径复盘）：`references/china-platform-backend-monitoring.md`
 - 本机采集器骨架（持久 profile + 拦 XHR + 上报，可拷贝修改）：`templates/xhr-collector.py`
 - 跨机作业的 shell 传输与超时（zsh 坑 / 别用 inline 引号 → scp 脚本过去跑 / macOS 无 timeout / 后台化三件套 / 精确取 pid）：`references/cross-machine-shell-ops.md`

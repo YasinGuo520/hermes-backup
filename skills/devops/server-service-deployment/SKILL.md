@@ -21,6 +21,7 @@ created_by: agent
 - **给最直接的方案，不要层层递进**。用户说"搞复杂了/弄个最直接的"时，立刻收敛到最小可运行路径（例：翻墙需求→直接配置隧道+git代理+保活，不要先分析再给函数再测试再解释）。
 - **诊断命令别绊自己**：`pgrep -f "xxx"` 会匹配到自己的命令行字符串 → 误判"进程复活"。用 `[x]xx` 中括号技巧或直接 `ss -tlnp` 看端口。
 - 服务器维护类任务用户信任你放手干（approvals off），但**不要为了"完美"加多余步骤**。
+- **长维修过程里要报进度，别长时间静默**（2026-09-17 实录：我连续跑了十来个诊断/安装调用没出声，用户直接打断问「**你干嘛呢**」）。规矩：每完成一个阶段（装好/配好/待验证）丢**一行**进度，不许把 N 个工具调用做成黑箱；用户问「你干嘛呢」= 立刻一句话交代现在在哪一步，然后继续干，不要停下来解释一大段。
 - **开源平台（Dify等）别自作主张砍组件精简部署**（2026-09-01 用户明确纠正："你别精简啦。直接完整安装不行吗"）。精简版砍掉 plugin-daemon 等核心组件 → 连环故障（白屏转圈/SSR超时/权限/迁移/setup 500），最终完整版一次跑通。**知名开源软件一律官方完整 compose 起步，不做预裁剪**；端口沿用用户已建过的（"端口你还是用刚才创建的8850不就行啦"）。
 - **任务边界铁律（2026-09-09 用户打断纠正："我是让你对比下grok的分析，你跑去搞16个agent干嘛"）**：用户要的是**对比/评审/分析判断**时，交付判断本身。调查取证完全应该（先调查再结论），但调查中发现的服务挂了/缺备份/配置缺失等问题**只报告不顺手修**——列成发现项 + 给修复建议 + 问是否执行。擅自把"分析任务"扩大成"维修任务"= 跑题，用户会当场打断。只有用户给了维修绿灯（"修吧""放手干"或明确授权维护）才动手修。
 
@@ -458,6 +459,20 @@ hermes doctor           # 检查依赖和配置
 hermes gateway status   # 网关运行状态
 systemctl --user status hermes-gateway.service  # systemd服务状态
 ```
+
+### ⚠️ browser_exec / browser 工具链在无头服务器上静默超时 → 是「没有 Chrome」不是工具坏了
+
+**症状**：`browser_exec` 每次调用静默超时（120/180s、无输出）——极容易被误判成「工具坏了/这台机器不能用浏览器」。
+
+**两层根因**（都要修，缺一不可）：
+1. **CLI 拉不起来**：服务器直连 `pypi.org` 不通（curl rc=124）→ `uvx browser-use` 每次冷启动都卡在下载 → 配 `~/.config/uv/uv.toml` 走腾讯云 pypi 镜像 + `uv tool install browser-use` + 软链进 `~/.hermes/bin/`（`_find_cli()` 是 managed-first 解析）。
+2. **没有浏览器**：browser-harness 只 **attach** 已运行的 Chromium（报 `chrome-not-running`）→ 常驻 headless Chrome 带 `--remote-debugging-port=9333` + `hermes config set browser.cdp_url http://127.0.0.1:9333`。
+   ⚠️ **Chrome 151 下 `--headless=new` 不监听调试端口，必须用 `--headless`**（判定：profile 目录无 `DevToolsActivePort` + `ss -tlnp | grep 9333` 空）。
+3. 保活用 systemd `--user` 单元（`templates/hermes-browser.service`，`Restart=always`；需 `Linger=yes`）。
+
+> 完整症状链（含 `~/.config/browser-harness/tmp/bu-default.log` 读法）、逐条命令、验收与回退 → `references/headless-browser-cdp-harness.md`
+
+**边界（别夸大）**：修好后 headless + 机房 IP 仍有风控痕迹（搜百度当场弹「百度安全验证」）→ 公开页面检索够用，**要登录态的电商后台/抖音仍走用户本机真人环境**（见 `web-scraping` 技能红线）。
 
 ## 域名管理与ICP备案
 

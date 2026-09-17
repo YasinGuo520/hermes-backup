@@ -1,0 +1,20 @@
+[Unit]
+Description=Headless Chrome for Hermes browser (CDP) tools
+After=network-online.target
+
+[Service]
+Type=simple
+# 无 GUI 服务器：headless Chrome 常驻，Hermes 的 browser 工具链经 CDP 连它
+# 需配合：hermes config set browser.cdp_url http://127.0.0.1:9333
+# ⚠️ Chrome 151 必须用 --headless；--headless=new 不监听调试端口
+ExecStart=/home/ubuntu/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome \
+  --headless --no-sandbox --disable-gpu --disable-dev-shm-usage \
+  --remote-debugging-port=9333 --remote-allow-origins=* \
+  --user-data-dir=/home/ubuntu/.hermes/cache/browser-use/chrome-profile \
+  --window-size=1440,900 about:blank
+Restart=always
+RestartSec=5
+KillMode=control-group
+
+[Install]
+WantedBy=default.target

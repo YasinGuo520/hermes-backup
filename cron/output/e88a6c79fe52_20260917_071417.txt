@@ -1,0 +1,257 @@
+Cronjob Response: 晨间AI情报三合一
+(job_id: e88a6c79fe52)
+-------------
+
+📅 全球变现案例日报 / 今日AI资讯 / GitHub热门 — 2026-09-17（周四）
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 第1部分：今日AI资讯
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 🌍 海外动态（8条）
+
+**1. Google 发布 Gemini 3.8 Live + Live Extended Thinking**
+主打实时对话、低延迟语音，官方口径"成本只有 OpenAI GPT Live 1 的零头"。同日冲上 Product Hunt 日榜第3（177分）。
+📎 https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-8-live-gemini-3-8-live-extended-thinking/ ｜ https://www.producthunt.com/leaderboard/daily/2026/9/16 （双源验证）
+
+**2. Mistral × Mozilla：隐私优先的多语言 AI 浏览器**
+欧洲阵营正面反击，本地化推理 + 多语言。HN 当日置顶。
+📎 https://mistral.ai/news/mistral-x-mozilla/
+
+**3. OpenAI 估值瞄准 1.2 万亿美元**
+TLDR AI 9/16 头条。同时 OpenAI 联合 Product Hunt 办 GPT-6 Astra Challenge，**9/18 截止提交**。
+📎 https://tldr.tech/tech/2026-09-16
+
+**4. Google Home 开放 MCP：任何 AI Agent 都能控制智能家居**
+The Verge / TechCrunch 同步报道 —— Agent 第一次拿到"物理世界入口"。
+📎 https://www.theverge.com/tech/996310/google-home-mcp-integration-agentic-ai-smart-home-price-release-date
+
+**5. Anthropic 把 Claude Chat / Cowork 等合并为单一产品**
+同日 r/Anthropic 炸锅：Fable 5.1 限量、Opus 5 被批"不可用"，用户公开找替代品。
+📎 https://the-decoder.com/anthropic-merges-claude-chat-cowork-and-more-into-a-single-product/
+
+**6. 黄仁勋：AI 不需要外部监管，安全由企业自负**
+同日欧盟主席警告"AI Agent 逃出沙箱只是开始"—— 监管路线之争公开化。
+📎 https://www.reddit.com/r/Anthropic/comments/1whjvj7/we_dont_need_ai_regulation_leave_safety_to_us/
+
+**7. Google DeepMind 成立 AGI 跨学科研究所**
+📎 https://the-decoder.com/google-deepmind-launches-interdisciplinary-institute-to-tackle-the-big-questions-around-agi/
+
+**8. PH 9/16 日榜**：#1 Weave Router 2.0（294分，YC W25，token 分配路由）、#2 Appwrite 2.0（213分）、#3 Gemini 3.8 Live、#4 Toki（免费AI行政助理）、#5 CAT ME（照片变猫）、#10 Jottoo（会议→任务，$13.99/月一口价）
+
+## 🇨🇳 国内动态（7条）
+
+**1. B站"AI无限竞技场"9月16日上线** — 全球百大模型同场竞技，首期榜 GPT-6 居首（量子位）
+📎 https://www.qbitai.com/
+
+**2. 菲尔兹奖得主集体警告 AI 冲击数学；OpenAI 筹建全球安全标准**
+📎 https://k.sina.com.cn/article_5953189932_162d6782c06704y5o6.html
+
+**3. 中国 AI 大模型调用量连续 20 周全球第一**；中国生成式AI用户 **6.02 亿**，普及率 42%
+
+**4. 银行业 AI 落地首次量化：上半年 AI 提效贡献 1,388 万小时等效人工工时 ≈ 近 7,000 人年工作量**
+📎 https://www.21jingji.com/article/20260916/herald/9c507ce1fd4b000cc9a35f30247b6d39.html
+
+**5. 字节对开发者下"30天最后通牒"（豆包手机）** 2026 资本开支上调至 2,000 亿+，其中约 **850 亿专用于 AI 芯片**
+📎 https://www.163.com/dy/article/L6VJHIVT0556NI4X.html
+
+**6. 荣耀 YOYO 月活 1.6 亿**，可执行 100 步复杂任务、130 个执行动作
+
+**7. 量子位 2026 年度榜单启动**；IDC 预测 2026 全球 AI 手机出货 7.22 亿台（渗透率 66.4%）
+
+## 🔬 论文/工具/新发布
+- **arXiv 2609.13009** — 前沿模型物理能力评测（HN 当日热帖）
+- **arXiv 2511.07885** — "intelligence per watt"，用每瓦智能衡量本地 AI 效率
+- **datamimic**（rapiddweller）— 防止编程 Agent 自己编造测试环境
+📎 https://github.com/rapiddweller/datamimic
+
+## 🎯 今日信号
+**模型层**：语音/实时交互成为新战场（Gemini 3.8 Live、Voiskey、Sierra 多模态），纯文本模型迭代权重下降。
+**风险面**：Agent 权限外溢被监管点名（EU + Google Home MCP 同天上桌），Agent 类产品要提前把合规成本算进去。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 第2部分：全球变现案例日报
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+## 🌍 国外案例（5个）
+
+### 1. Erly — "做俯卧撑才能关掉的闹钟"
+- 💰 **$50,000/月**（约 ¥36万）；2026 年下载量 20 万+
+- 🆕 本周（Starter Story 9/16 访谈，6小时前）
+- 产品形态：iOS 订阅制 App｜定价 **$29.99/年 或 $9.99/月**｜创始人 24 岁会计专业、自学编程，2025 年底上线，**4 个月做到 $50K/月**｜增长：第一天就开始做内容营销
+- 🧠 原理：卖的不是工具，是**"被自己身体逼着起床"的反人性钩子** —— 视频 3 秒就能讲清，传播成本几乎为零
+- 🧱 壁垒：低（功能可抄）；真壁垒是**先发的传播势能**
+- ✅ 0成本 ✅ / 单人 ✅ / 30天见钱 ⚠️ / 不需海外能力 ❌ ｜ ⭐★★☆☆☆ ｜ ⏱ 30-60天
+- 📋 **别做App，抄它的"反人性钩子"逻辑用在你的实物电商文案上**（例：雨刮器"装反了等于白装"的强制自检钩子）
+- 📎 Starter Story X/IG 9/16、biggo 7/6
+
+### 2. OpenClaw 一键部署封装潮 — SimpleClaw 一周 $18K MRR 后立刻挂牌出售
+- 💰 SimpleClaw **$18,000 MRR（上线数天达成）**，随即挂出卖；同期 **10+ 个同类封装平台做到 $20K+ MRR（不到一周）**
+- 🆕 2026 Q1 爆发，本月国内教程密集出现仍在消化
+- 产品形态：给开源 Agent 框架 OpenClaw 包一层"一键部署"｜成本：云服务器+API｜增长：PH 首发 + Build in Public｜**作者拿到 MRR 就卖，说明他自己判断窗口很短**
+- 🧠 原理：赚**"技术可用性落差"**的钱 —— 开源项目能跑，普通人装不上。你卖的是"装好+配好+能跑"
+- 🧱 壁垒：**极低**（已被证实快速饱和）；真壁垒=先发渠道 + 售后信任
+- ✅ 0成本 ✅ / 单人 ✅ / 30天见钱 ✅ / 不需海外能力 ✅ ｜ ⭐★★★★☆ ｜ ⏱ **当天出单**｜💰 ¥3,000-30,000/月（窗口 3-6 个月，推断）
+- 📋 **今天下午就挂单**：闲鱼/小红书"AI Agent 代部署（含安全加固）"——远程基础 ¥30-100 / 含配置 ¥100-300 / 全家桶 ¥300-500 / 企业批量 ¥1,000-7,000。**别卖安装包（上游免费），卖"装好+配好+教会用"**。进门先谈录屏 + 客户自己输 Key
+- 📎 https://andrew.ooo/posts/simpleclaw-18k-mrr-one-week-flip/ ｜ thetoolnerd.com
+
+### 3. HabitKit / Sebastian Röhl — 一个人，2025 年 App 收入 $602K
+- 💰 HabitKit **$28,000 MRR**；个人 App 组合 **2025 全年 $602,000**
+- 形态：极简习惯打卡 App（GitHub 格子风）｜Freemium｜Swift + SwiftUI + RevenueCat｜29 岁德国工程师辞职单干
+- 🧠 原理：**极窄切口吃全球订阅**，App Store 自然流量滚雪球
+- 🧱 壁垒：中（**时间壁垒**——熬 2 年才到 $10K MRR；$6K→$7K 花 2 个月，$7K→$8K 花 5 个月）
+- ✅ 0成本 ⚠️（需 $99/年开发者账号）/ 单人 ✅ / 30天见钱 ❌（真实周期 12-24 个月）｜ ⭐★★☆☆☆ ｜ ⏱ 180-720天
+- 📋 **当"长期资产"参考，别当救急路径**。它证明一件事：靠订阅躺赚的时间成本是 1-2 年
+- 📎 startupfounderstories.com ｜ buildmvpfast.com（$602K 拆解）
+
+### 4. Chrome 扩展赛道 — 头部 $13万/月，但 57% 的人一分钱没赚到
+- 💰 Gmass **$130,000/月**、Closet Tools **$42,000/月**（头部）｜**2026 全赛道均值 ≈ $295/月**
+- 🆕 数据 4 天前更新（bigideasdb 9/13）
+- 形态：浏览器扩展 + 订阅（$8-20/月）｜成本≈0｜增长：Chrome 商店自然流量 + SEO
+- 🧠 原理：**寄生在别人流量池里的生意** —— Chrome 商店本身就是分发渠道
+- 📊 **冷水数据**：**57.1% 的扩展收入 $0，只有 6.3% 月入过 $1,000**（创业项目整体是 10.3%）。低门槛赛道的真相分布
+- ✅ 0成本 ✅ / 单人 ⚠️（要会前端）/ 30天见钱 ⚠️ ｜ ⭐★★☆☆☆
+- 📋 要做只做**"电商运营每天必开"**的扩展（比价/跟卖监控/抖店数据导出）——18 年电商经验是你唯一的护城河。别做通用工具
+- 📎 extensionpay.com ｜ bigideasdb.com
+
+### 5. 付费 Newsletter 经济体 — 1000 订阅的天花板与地板
+- 💰 1000 订阅的**投资类 ≈ $2,700+/年**；同规模的**旅游类 ≈ $252/年**（差 10 倍）；年订阅收入 ≥$50 万的 Substack 号两年内**数量翻倍**
+- 🆕 本周仍在讨论（r/beehiiv 状态报告 + Tyler Denk 9/16）
+- 抽成对比：**Substack 抽 10% vs beehiiv 0%**（只走 Stripe 手续费）
+- 🧠 原理：**同类产品，赛道决定天花板** —— 离钱近的主题（投资/商业/B2B）RPM 高，生活方式类只能吃流量
+- ✅ 0成本 ✅ / 单人 ✅ / 30天见钱 ❌ ｜ ⭐★★★☆☆ ｜ ⏱ 90-270天
+- 📋 这是你小红书方法论博主的海外对照样本：**只写"离钱近"的主题（创业避坑/变现拆解）**，平台选不抽成的（国内对应知识星球）
+- 📎 r/beehiiv 状态报告、beehiiv 官方对比页
+
+## 🇨🇳 国内案例（5个）
+
+### 1. GEO 生成式引擎优化代运营 — 2026 起量最快的 B2B 服务
+- 💰 轻量服务**月费<1万起步**；全链路**每月数万**；项目制 **8-25万/项目**（移山科技）；单人精细化交付**底成本 ≈¥5,000/月**
+- 🆕 本月最热（IT之家 9/16、凤凰财经 9/3、腾讯新闻 8/3 连续测评）
+- 形态：服务（诊断→优化→监测→复盘）｜**效果数据：3-5天见效，核心场景优先呈现率≥80%、AI首答率≥90%；某案例月均转化 60单→250+单（+316%），续费客单价 +70%**
+- 🧠 原理：企业发现"客户在问 AI，AI 却不推荐我"。赚的是**"AI 答案里的货架位"** —— 十年前的 SEO 逻辑，但供给方还很少
+- 🧱 壁垒：中（壁垒在**能拿出可复核的可见度数据**）⚠️ **红方**：行业极乱，"千元全年套餐"远低于成本线（¥5,000/月），只能模板化+转包，是坑；>80% 企业首次选服务商因忽视语义干预深度导致 ROI < 1:1
+- ✅ 全绿 ｜ ⭐★★★★★ ｜ ⏱ 7-21天出单 ｜ 💰 ¥10,000-50,000/月
+- 📋 ①今天用你的业务做一次"AI 可见度体检"（品牌名丢给 DeepSeek/豆包/Kimi/文心，各问 10 个购买场景，记录提及率）②做成 1 页体检报告模板 ③拿报告谈你认识的 5 个本地商家，**先免费做 1 家**
+- 📎 IT之家 9/16、凤凰财经 9/3、腾讯新闻《五家GEO优化服务商报价全公开》
+
+### 2. AI 短剧承制 — 单价从 5,000 元/分钟砸到 500 元，但定制单还能报 1-2 万
+- 💰 常态 **报价 1,000-2,000元/分钟**（成本仅 500-600元）｜**定制仍能报 1-2万元/分钟**｜TikTok 海外承制**保底 500元/分钟**｜AI 广告 **30秒约 10万元**｜单部爆剧分成可达千万级
+- 🆕 本月（36氪 9/7、腾讯新闻 9/8、新浪财经 9/9）
+- 🧠 原理：赚**产能差**的钱 —— 平台需要海量内容，传统剧组做不起
+- 🧱 壁垒：**极低**。⚠️ **红方（必须看）**：**"400亿AI短剧市场，90%的公司已经死了"**（36氪 9/7）；单价从 5,000 元/分钟跌到几百；TikTok 承制订单出现**回款难**；返工+算力超支直接吃掉利润（CSDN 9/12 专门写"做完发现不如去打工"）
+- ✅ 0成本 ⚠️ / 单人 ⚠️ / 30天见钱 ⚠️ ｜ ⭐★★☆☆☆ ｜ ⏱ 30-90天
+- 📋 **做"接单方"不做"承制方"**：你接单→AI 交付→赚差价。**只接定制单（1-2万/分钟档）**，不碰低价流水线单
+- 📎 https://m.36kr.com/p/3973285667467522 ｜ CSDN《AI短剧接单怎么报价》
+
+### 3. AI 营销素材代运营 — 按条 500-3,000，按月包干 1.5-5 万
+- 💰 **按条 500-3,000元/条**；**按月包干 1.5万-5万/月**；CPS 效果分成
+- 🆕 昨天发布（新浪 9/16）
+- 形态：图文+短视频素材批量生产；成本=AI 订阅+你的时间（≈0）；增长=同城商家/电商客户转介绍
+- 🧠 原理：AI 把生产成本打到地板价，但**商家仍然不会用、没时间用**。你赚"把工具翻译成结果"的钱
+- ✅ 全绿 ｜ ⭐★★★★☆ ｜ ⏱ 7-30天 ｜ 💰 ¥8,000-40,000/月
+- 📋 **这是你 18 年电商经验能直接变现的路径**。先按条（¥500/条起），跑通 3 个客户后转月包干。用你自己的店做第一个案例
+- 📎 https://k.sina.com.cn/article_7682385346_1c9e7e5c2001018t4o.html
+
+### 4. AI 编程/Agent 代搭接单服务 — 供给端刚爆发
+- 💰 帮写代码/搭网站 **¥200-2,000/单**；Agent 工作流定制 **¥2,000-5,000/单**；企业项目 ¥3,000-8,500/单
+- 🆕 **昨天搜狐报道（9/17）**："网络平台出现大量帮人用 AI 写代码、搭网站的接单服务，不少此前从未接触编程的用户开始借助 AI 工具接活"
+- 🧠 原理：技术平权产生的**"最后一公里"生意** —— 工具人人有，落地能力稀缺
+- 🧱 壁垒：低，且**正在快速商品化**（对照国外 OpenClaw 封装潮：一周 $20K MRR 随即饱和）
+- ✅ 全绿 ｜ ⭐★★★★☆ ｜ ⏱ **当天-7天出单**
+- 📋 和【国外案例2】是同一件事的两端。**今天挂单**。描述要具体到交付物："给电商店做自动回复客服+订单数据自动汇总表，¥2,000，7天交付"，不要写"AI Agent 定制"
+- 📎 https://www.sohu.com/a/1077101089_120702
+
+### 5. 小红书虚拟商品店 — 能赚，但 2026 新规卡死了门槛
+- 💰 开店门槛 **近1年任一自然月流水 ≥¥6,000**（或第三方平台近12个月流水≥¥6,000）；有商家 2023-2025 开 **30 个店铺累计赚 ¥300万**
+- 形态：数字商品（PPT模板/简历/头像壁纸/资料包/AI工具集）；成本≈0
+- 🧠 原理：**零边际成本 + 平台流量**，一次制作长期卖
+- ⚠️ **红方（你必须知道）**：**教育类目必须企业店+定向邀约+ICP**（个人店禁止）；虚拟店有流水门槛；AI 批量内容不勾选"AI辅助"会限流
+- ✅ 0成本 ⚠️（有门槛）/ 单人 ✅ / 30天见钱 ⚠️ ｜ ⭐★★★☆☆ ｜ ⏱ 30-60天
+- 📋 你有个体户执照，可做**非教育类**虚拟品（电商运营表格/选品清单/客服话术包）绕开红线。第一个产品：把你 18 年电商经验做成 SOP 模板包
+- 📎 小红书虚拟行业经营一本通、2026 新规解读
+
+## 🎯 今日最值得抄的一个
+**GEO 生成式引擎优化代运营**（国内案例1）—— 唯一同时满足 0成本 + 单人 + 30天见钱 + 不需海外能力 + 供给端还很少，且**复用你已有的电商客户资源**，边际成本≈0。
+
+**今天第一步（30 分钟内）**：把"潮客服装摄影""雨刮器"两个名字丢给 DeepSeek/豆包/Kimi，各问 5 个真实购买场景问题（如"深圳服装摄影哪家好"），截图记录 AI 有没有提到你。**这份截图就是你的第一份销售物料。**
+
+⚠️ **窗口预警**：GitHub 上 `Albert-Weasker/niubigeo`（AI 品牌可见度报告工具，9月新建，2,488 星）已开源同类思路 —— 工具会商品化，你的壁垒只能是**客户关系 + 数据积累**，动作要快。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# 第3部分：GitHub 每日热门资讯
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 GitHub 每日热门 ⋅ 2026-09-17
+
+## A. 今日 Trending 榜（官方页，21 项）
+
+1. **affaan-m/ECC** — Agent harness 性能优化系统（技能/记忆/安全）
+   ⭐ 260,221 | 🔤 JavaScript | 💡 星数最高的 Agent 工具链，skills+memory+security 全栈
+2. **anthropics/claude-code** — 终端里的 Agentic 编程工具
+   ⭐ 145,473 | 🔤 TypeScript | 💡 Agent 编程赛道的锚点
+3. **addyosmani/agent-skills** — 面向 AI 编程 Agent 的生产级工程技能库
+   ⭐ 95,413 | 🔤 JavaScript | 💡 Agent Skills 生态已成型，可直接抄结构
+4. **NationalSecurityAgency/ghidra** — 逆向工程框架
+   ⭐ 77,740 | 🔤 Java | 💡 老牌工具回榜，安全/逆向需求回升
+5. **cline/cline** — 自主编程 Agent（SDK/IDE 插件/CLI）
+   ⭐ 68,347 | 🔤 TypeScript
+6. **jamiepine/voicebox** — 开源 AI 语音工作室（克隆/听写/创作）
+   ⭐ 54,345 | 🔤 TypeScript | 💡 与今日 Gemini 3.8 Live 呼应，语音赛道开源侧同步起量
+7. **roboflow/supervision** — 可复用计算机视觉工具库
+   ⭐ 50,577 | 🔤 Python
+8. **JustVugg/colibri** — 自有硬件上跑前沿 MoE，纯 C、零依赖、专家流式从磁盘读
+   ⭐ 34,994 | 🔤 C | 💡 "本地大模型"路线的极致实现
+9. **alibaba/open-code-review** — 阿里规模化验证的混合架构代码审查（规则管线+LLM Agent）
+   ⭐ 31,700 | 🔤 Go | 💡 中国企业级开源少见的硬项目
+10. **ankitects/anki** — 间隔重复记忆卡片
+    ⭐ 30,834 | 🔤 Rust
+11. **Tencent/WeKnora** — 开源 LLM 知识平台（文档→RAG→自主推理 Agent→自维护 Wiki）
+    ⭐ 25,235 | 🔤 Go | 💡 国内大厂 RAG 落地最完整的一个
+12. **anthropics/knowledge-work-plugins** — Claude Cowork 知识工作者插件集
+    ⭐ 24,270 | 🔤 Python
+13. **Lakr233/vphone-cli** ⭐ 13,321 | 🔤 Swift
+14. **multimodal-art-projection/YuE** — 前沿音乐生成（符号规划+零样本翻唱+Agent 编曲）
+    ⭐ 9,350 | 🔤 Python
+15. **cloudflare/security-audit-skill** — 多阶段安全审计 Agent 技能（可验证、机器可读结论）
+    ⭐ 7,054 | 🔤 JavaScript | 💡 安全审计"技能化"，是 Agent 商业化最清晰的付费点之一
+16. **ever-co/ever-gauzy** — 开源商业管理平台（ERP/CRM/HRM）
+    ⭐ 7,284 | 🔤 TypeScript
+17. **SnailSploit/Claude-Red** — 面向 Claude skills 的攻防安全技能库
+    ⭐ 5,752 | 🔤 Python
+18. **abue-ammar/tinycast** — 极简原生 macOS 启动器/热键/剪贴板历史
+    ⭐ 5,555 | 🔤 Swift
+19. **alphaXiv/OpenResearch** — 把编程 Agent 变成研究 Agent
+    ⭐ 4,370 | 🔤 Rust
+20. **rlaope/oh-my-hermes** — **Hermes Agent 一体化插件**（编码智能+长期记忆+模型优化工作流包）
+    ⭐ 2,533 | 🔤 Python | 💡 **跟你直接相关** —— 有人给 Hermes 写了全套插件包，值得扒下来看有没有能直接用的记忆/工作流模块
+21. **supabase/supabase** — Postgres 开发平台
+    ⭐ 109,677 | 🔤 TypeScript
+
+## B. 本月新建、涨得最快的新仓库（9月创建，按星排序）
+
+1. **lnkiai/m3e-canvas** ⭐ 7,114 | TS — 浏览器画 Material 3 界面，一键转 vibe-coding 提示词
+2. **ashemag/human-atlas** ⭐ 3,563 | TS — 开源 3D 人体解剖浏览器（2,234 个可选部件）
+3. **Albert-Weasker/niubigeo** ⭐ 2,488 | TS — **开源 AI 品牌可见度 & 竞品报告工具（GEO）**，官网 niubigeo.ai，另带付费服务
+4. **Rion-Wu-tech/wechat-intelligence-hub** ⭐ 2,364 | Python — 本地优先微信情报系统（只读 CLI+可搜索聊天记录+每日简报）
+5. **NVlabs/SoL-Pi** ⭐ 2,113 | TS — 面向 Agent harness 的自动化研究循环
+6. **eternity4719/HowToLiveBetter** ⭐ 2,102 | HTML — 按性价比排序的循证生活指南（标注成本/收益/证据等级）
+7. **yang0/handraw-style** ⭐ 1,990 | HTML — 手绘风格双语提示词 Skill
+8. **openai/NavierStokesAndEuler** ⭐ 1,926 | Lean — 纳维-斯托克斯/欧拉结果的 Lean 形式化证明
+9. **shadcn-ui/lint** ⭐ 1,918 | TS — 面向 Tailwind 设计系统的 Agent 优先 linter
+10. **EverettFish/holo-card-studio** ⭐ 1,559 | Python — 描述→可编辑 Blender 卡片+Three.js 交互页
+11. **Vincentwei1021/anything2explainer** ⭐ 1,482 | TS — 一个主题进去，带旁白动态图形解说视频出来
+12. **KJGX66F/usque-custom-pro** ⭐ 1,218 | JS — Cloudflare WARP/MASQUE 可视化注册与多客户端配置转换
+13. **qingjian-team/qingjian** ⭐ 1,197 | Rust — Rust 拼音输入法，候选词旁带正在学的外语译词
+14. **jtydhr88/screenwriting-skills** ⭐ 1,195 | Python — 编剧/电视剧写作专业 Agent 技能
+
+## 🔥 趋势
+- **今日前三**：Agent 工具链（ECC / claude-code / agent-skills）、本地大模型（colibri）、语音 AI（voicebox）—— **"Agent 技能包（Skills）"已是最大单一赛道**，今天榜上 5 个以上都是 skill/plugin 形态。
+- **值得注意的转向**：`cloudflare/security-audit-skill`、`SnailSploit/Claude-Red` 同时上榜 —— **安全审计技能化**正成为 Agent 落地最明确的可付费场景（跟"代装服务带安全加固=溢价点"是同一信号）。
+- **中文项目抬头**：alibaba/open-code-review、Tencent/WeKnora、qingjian、wechat-intelligence-hub —— 中国开源开始出现在"解决真问题"而不是"复刻美版"的清单里。
+- **对你有用的两条**：① `Albert-Weasker/niubigeo` 是 GEO 赛道开源工具（说明窗口正在关闭）；② `rlaope/oh-my-hermes` 是别人给 Hermes 写的插件包，可白嫖其记忆系统设计。
+
+---
+📁 完整报告已存档：`~/Desktop/hermes/reports/daily-3in1-2026-09-17.md`
+
+To stop or manage this job, send me a new message (e.g. "stop reminder 晨间AI情报三合一").
