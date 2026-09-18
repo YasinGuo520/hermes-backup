@@ -18,6 +18,31 @@ description: 数据采集与浏览器自动化——Scrapling 优先，Playwrigh
         └── 是 → Playwright（见下文「Playwright 浏览器自动化」章节）
 ```
 
+## 最快路径：纯静态 / 服务端渲染文章页 → curl + 标签剥离
+
+不在上面的选型树里：**只要拿到正文文本**（中文 SEO 站、资源站、论坛帖、规则/协议文档）时，最省事的是 `terminal` 里 curl 一次 + 一小段正则剥标签——秒级、零依赖、不需渲染、不占浏览器。
+
+```bash
+curl -sL --max-time 25 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36" "$URL" | python3 -c "
+import sys,re,html
+raw=sys.stdin.buffer.read()
+for enc in ('utf-8','gbk','gb18030'):
+    try: t=raw.decode(enc); break
+    except: t=raw.decode('utf-8','ignore')
+t=re.sub(r'(?is)<(script|style|noscript|head)[^>]*>.*?</\1>',' ',t)
+t=re.sub(r'(?s)<[^>]+>',' ',t); t=html.unescape(t)
+t=re.sub(r'[ \t\xa0]+',' ',t); t=re.sub(r'\n\s*\n+','\n',t); print(t)
+"
+```
+
+要点：
+
+- **必须按 `utf-8 → gbk → gb18030` 顺序试解码** —— 中文站大量用 GBK，用 utf-8 硬解会出乱码且**不报错**，直接污染后续分析
+- 多页批量用 `for u in ...; do ... done` 一次抓完，比逐页开浏览器快一个数量级
+- 正文里的表格/目录树直接就是数据（例：资源站的「课程目录」就贴在正文里，根本不用登录）
+- **不要用这条的场景**：SPA / 需要登录 / 懒加载 / 数据走 XHR → 回到 Playwright 或「拦 XHR」
+- `web_extract` 报后端不支持提取时**不要重试**，直接走这条
+
 ## Scrapling 安装（已就绪）
 
 ```bash
