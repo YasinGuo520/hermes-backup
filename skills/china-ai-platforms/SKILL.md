@@ -13,6 +13,9 @@ triggers:
   - bl命令
   - TTS
   - 配音
+  - ASR
+  - 语音转写
+  - 听不到我说啥
   - 克隆声音
   - 播客
   - 绘本
@@ -37,6 +40,7 @@ related:
 | 图片生成（商品图/封面/绘本插图/小红书配图） | **硅基流动** Qwen-Image / Z-Image / Kolors | 现成 key、curl 直调；百炼 `qwen-image-2.0-pro` 也可 |
 | 豆包/即梦/Seedance（字节闭源模型） | **火山方舟** Ark | 硅基流动没有闭源模型；视频生成是主场景 |
 | TTS 配音 / 克隆音色 / 多人播客 | **阿里百炼** bl CLI | cosyvoice 系列，逐句生成+ffmpeg拼接 |
+| 语音转文字 ASR（语音助手 / 手机 IM 语音输入） | 硅基 Qwen3-ASR 为主，**本地 faster-whisper 兜底** | 云侧欠费会 402 静默失效（功能只循环播失败文案）；本地永不欠费。分层诊断+通道对照见 `references/asr-stt-provider-triage.md` |
 | 儿童故事 / 有声绘本 / 商品详情图 | **阿里百炼** bl CLI | 完整流水线（story.json + 脚本 + 网页模板） |
 | 图生视频 I2V（实拍产品→动效） | **阿里百炼** happyhorse-1.1-i2v | ¥0.06/条最便宜；完整管线见 `ai-video-production` |
 | 视频生成（氛围/T2V） | 硅基流动 Wan2.2 / 火山 Seedance | 硅基便宜但只能氛围画面；Seedance 质量高需充值 |
@@ -48,6 +52,7 @@ related:
 - `references/siliconflow-image.md` — 硅基流动生图：模型表、curl 调用、prompt 技巧、立绘抠图、角色贴纸工作流
 - `references/volcengine-ark.md` — 火山方舟：Key 类型、模型开通、视频/图像任务 API、价格表、常见错误
 - `references/bailian-cli.md` — 阿里百炼 bl CLI：TTS/播客/儿童故事/有声绘本/商品详情图全工作流
+- `references/asr-stt-provider-triage.md` — 语音转写（ASR/STT）分层诊断（采音 vs 转写 vs 守卫）+ 通道对照（硅基 402 / 智谱 glm-asr / 本地 faster-whisper）
 - `references/coze-api.md` — 扣子 Coze API：PAT 认证（1个月过期）、`POST /v3/chat` 实测端点、错误码、bot_id 获取、字节风控登录坑
 - `references/dify-deployment.md` — Dify 社区版国内服务器（3.6G内存）精简 Docker 部署实录：镜像源选型、精简 compose、端口/验证/防火墙坑
 
@@ -59,6 +64,7 @@ related:
 - 百炼 TTS 输出的 `.mp3` 实为 WAV(PCM)，ffmpeg 拼接必须 `-c:a libmp3lame` 转码
 - 硅基流动必须用 curl 不要用 python urllib（本环境 urllib 会 Connection reset）；图片 URL 有效期 24h，必须下载后再发送
 - **硅基 key 验证（2026-09-01 实测）**：`/v1/user/info` 端点已弃用——返回 410 code 20092「endpoint is deprecated」，别拿它测 key 误判。正确验证：`curl -s https://api.siliconflow.cn/v1/models -H "Authorization: Bearer $KEY"` 返回 HTTP 200（模型列表）即 key 有效；或直接 curl `/v1/chat/completions` 发一句 "hi"。返回 401 + `{"code":30014,"message":"Token is invalid."}` = 这把 key 无效（复制不全/旧 key）——去测 `.env` 里那把，别在报错现场猜
+- **余额不足的签名是 402，不是 401**：接口返回 `HTTP 402` + `{"code":30001,"message":"Sorry, your account balance is insufficient"}` = 账户欠费，**与网络/参数/文件格式无关**。它的下游表现常是「功能反复播同一句失败文案」（重试 3 次→播提示→再来），极易被误判成采音/录入问题而查错一整层——**只看状态码不够，必须抄原始 body**；同理 `no audio segment found` = 测试样本是静音（假阴性），换真实语音重测再下结论
 - 硅基 Qwen-Image 每次生成背景色值略有不同：抠图时逐图采样四角像素均值，不能写死色值
 - 生图用途决定背景色：贴纸抠图用深蓝/纯色底；**图生3D用纯黑底**（见 `ai-image-to-3d` 技能）
 - 百炼 `bl video generate` 是同步阻塞调用，并行多条会中断（exit 130）——逐条串行
@@ -73,6 +79,7 @@ related:
 | `scripts/build_audiobook.py` | 百炼有声绘本一键构建（story.json → 分段TTS+配图+网页/mp4/音频） |
 | `scripts/chroma_cut.py` | 色键抠图脚本（角色立绘→透明贴纸，ffmpeg+numpy 零依赖） |
 | `assets/player_template.html` | 绘本翻页播放器模板 |
+| `scripts/probe-stt.sh` | 语音转写(ASR)链路探针：造真实语音 → 按 config 的 provider 打一发 → 打 HTTP 码 + 原始 body（local 通道改验本地 faster-whisper） |
 
 ## 关联技能
 

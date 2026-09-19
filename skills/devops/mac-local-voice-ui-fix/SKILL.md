@@ -38,6 +38,33 @@ metadata:
    - `log show --predicate 'subsystem == "com.apple.TCC"'` 在这台机器上查不到决策，别指望它。
    - 最可靠的取证：**把 Python 侧和浏览器侧的 RMS 摆在一起**。
 
+## 云端 STT 欠费 = 假「没听清」（2026-09-19 修）
+
+症状：她一直循环「刚才那句我没听清，你再说一遍」，听起来像麦克风坏了。
+真相：**音频采到了，是转写接口被 402 顶回来**——这条正好是第一铁律的反例。
+
+- 桥日志铁证：`[stt] listen 第 1/3 次失败（超时 8s）: 402 Client Error: Payment Required for url: .../audio/transcriptions`，
+  而同一批日志里 `[listen] utterance: speech=1440ms, audio=4.4s, rms=0.0444` —— **采音完全正常**。
+- 拿原始回包定性（别猜）：`curl -X POST -H "Authorization: Bearer $K" -F file=@x.wav -F model=... $BASE/audio/transcriptions`
+  → `{"code":30001,"message":"Sorry, your account balance is insufficient"}`。
+  401/wrapper 里 `Token is invalid`=key 无效；400 + `20012 Model does not exist`=模型名不对。
+- 判定顺序：`[stt]` 失败行 + `speech=Xms>0` → **别去查 TCC/Chrome/麦克风**，直接查 provider 余额。
+- 影响面：桥（APEX）与 Hermes 自己（飞书按住说话）**共用 `stt.<provider>` 同一把 key 和模型**，
+  所以桥挂 = 飞书语音输入也静默挂（它失败时不吭声，更隐蔽）。修一处两条链路一起好——**但只在改配置文件的情况下成立**。
+
+一键复测：`~/apex-src/verify-stt.sh [--quick]`（配置段 → 接口直测 → 真说一句走端到端 → 判定 OK/FAIL）。
+写这脚本踩的坑：**取 STT 配置必须用 yaml 读 `stt.<provider>` 段，不能 `grep -A6 "^  openai:"`** ——
+`tts.openai` 也有同名子段且排更前，会抓到 `gpt-4o-mini-tts`，直测就假报 `20012 Model does not exist`（自己制造一个假故障）。
+
+**别把「换本地 whisper」当成最省事的止血**：桥是直连 HTTP 转写接口的（`_stt_config()` → 读 `stt.<provider>` 的
+`base_url/api_key/model` 再 POST `/audio/transcriptions`），`provider: local` 时 `base_url` 为空，桥会直接报
+`stt provider not configured` 而**完全不通**——要走 local 必须改桥代码加本地分支。代价：常驻内存 base 347MB、
+small 745MB（Intel i7 实测），转写时抢 2-4 个核。
+
+选源备忘（按 Yasin 实测用量：一句 ≈20 字 / 5 秒）：硅基 Qwen3-ASR ¥0.05/千字符 ≈ **¥0.001/句（最便宜档）**、
+百炼 qwen3-asr-flash ¥0.00022/秒 ≈ ¥0.0011/句、智谱 glm-asr ¥0.06/分钟 ≈ ¥0.005/句（5 倍）。
+推荐顺序：先让用户充硅基 ¥10（零改动、精度最好、够一年量级）→ 想省钱再谈本地。
+
 ## 修法：把麦克风搬进桥（服务端录音），别去修浏览器
 
 比「让 Chrome 拿到授权」更稳：不依赖任何 GUI 点击，不怕系统更新，麦克风只有一个主人。
