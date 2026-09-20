@@ -26,9 +26,7 @@ Coze：PAT 2026-10-01重生成；POST api.coze.cn/v3/chat，4200=缺bot_id。Dif
 §
 环境坑：①国内服务器禁外网CDN→静态资源本地化；②Hub=python3 http.server 8895 serve ~/Desktop/hermes/hermes-hub/(子页同目录免开端口)；③npm prefix=~/.npm-global/bin
 §
-模型API备忘：max_tokens须6000；视觉仅auxiliary.vision配硅基Qwen3-VL；n8n(5678)无DeepSeek节点→用OpenAI Chat Model节点+baseURL api.deepseek.com/v1
-§
-DeepSeek key sk-ce1a8ba2疑泄漏(09-06)，重置前勿复用；审计见llm-model-audit技能
+模型API备忘：max_tokens须6000；视觉仅auxiliary.vision配硅基Qwen3-VL；n8n(5678)无DeepSeek节点→用OpenAI Chat Model节点+baseURL api.deepseek.com/v1；DeepSeek key sk-ce1a8ba2疑泄漏(09-06)重置前勿复用(审计见llm-model-audit技能)
 §
 玄学工具站：~/Desktop/hermes/{tarot 8901,bazi 8902,face 8903,fortune-wheel 8914}，FastAPI单服务(static+/api→v4-flash)，八字用6tail lunar-python。导航铁律：hub index.html由build_hub.py生成，只改PROJECTS/PORT_KEYS
 §
