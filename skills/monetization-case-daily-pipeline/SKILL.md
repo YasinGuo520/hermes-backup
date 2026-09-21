@@ -247,6 +247,11 @@ enabled_toolsets: [web, terminal, file]
 
 ## 快速变现/接单/日结渠道库（合并自 quick-cash-gig-channels）
 
+> ⭐ **本段是「生存模式 / 快速变现」规则在全库的权威版**，其它技能只保留使用差异，不重复硬规则：
+> 五条硬过滤（今天能准备 / 7天能收钱 / 0资金投入 / 单人交付 / 有现成资源）+ 变现排序
+> （卖服务 > 卖现成产品 > 按单接活 > 代理分销 > ❌做新SaaS）+ 平台验证五步 + 收入打3折。
+> 引用方：`china-market-research`（细分赛道评估的生存模式段）、`project-four-persona-analysis`（生存模式预过滤段）。
+
 触发「怎么快速赚钱/马上变现/接单/日结/兼职」或有短期资金压力时，加载渠道库（不跑每日案例管线）。完整内容见 `references/gig-platform-verification-2026.md`、`references/zhongbao-platforms-2026.md`、`references/tiktok-short-drama-outreach-2026.md` + `templates/wechat-consulting-pitch.md`，铁律速查：
 
 1. **先问约束和期限**：不借钱？不出门？不用闲鱼？多久要入账？——用户常自我设限，方案必须匹配约束，否则白推；把紧迫感变成具体数字（月支出→每天→每小时）

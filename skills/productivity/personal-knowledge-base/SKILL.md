@@ -1,6 +1,6 @@
 ---
 name: personal-knowledge-base
-description: Build and maintain a personal knowledge base inside an Obsidian vault using the Karpathy wiki pattern. Ingest sources, create interlinked notes, file queries, and keep an append-only action log.
+description: "个人知识库(Obsidian wiki)与思维导图(.mm/XMind)资产 — 摄取资料、互链笔记、归档决策、生成导图。Build and maintain a KB in an Obsidian vault: ingest sources, interlink notes, file queries, keep an append-only log, emit FreeMind mind maps."
 trigger: |-
   User asks to create a knowledge base, wiki, or note system
   User asks to save/archive/organize research, ideas, or learnings
@@ -154,17 +154,27 @@ When the source is a short-video or audio platform (no direct transcript API):
    - The platform's topic/hashtag to find community discussions
 
 5. **Synthesize** — combine platform metadata + searched written content into a coherent summary. Note in the frontmatter that content was derived from video metadata + related sources (not a direct transcript)
-4. **Mind map supplement** — for content with a clear hierarchical structure (e.g. numbered paths/levels/steps), generate a FreeMind `.mm` mind map using the `mind-map` skill and save to `raw/assets/`
+4. **Mind map supplement** — for content with a clear hierarchical structure (e.g. numbered paths/levels/steps), generate a FreeMind `.mm` mind map using the FreeMind format in `references/mind-map-freemind-format.md` and save to `raw/assets/`
 5. **Continue with normal ingestion** — index + log + report
 
 ### Supplementary Assets (Mind Maps)
 
 For content that benefits from visual hierarchy (ranked lists, path-based guides, taxonomies):
 
-- Generate a `.mm` file in `_kb/raw/assets/` using the `mind-map` skill
+- Generate a `.mm` file in `_kb/raw/assets/` using the FreeMind format in `references/mind-map-freemind-format.md`
 - Keep the mind map as a 3-4 level max hierarchy for readability
 - Reference it from the clipping note via: `**关联文件**：[[raw/assets/<filename>.mm]]`
 - Also save a copy to `~/Desktop/hermes/` for quick desktop access
+
+## 思维导图资产（FreeMind .mm / XMind）
+
+层级型内容（路径/等级/分类树/排行榜）除了存笔记，还要出一张 `.mm` 导图：XMind 和 FreeMind 都能直接打开，比平铺文字更快看清结构。
+
+- **触发**：「思维导图」「XMind 文件」「知识结构图」，或摄取内容本身是层级（难度分级、优先顺序、分类体系）
+- **存放**：`_kb/raw/assets/<name>.mm`，再从对应笔记用 `**关联文件**：[[raw/assets/<name>.mm]]` 关联；需桌面直取时另存一份到 `~/Desktop/hermes/`
+- **深度**：3-4 层封顶；二级分支 `FOLDED="true"`，首屏只留骨架
+- **格式全文**（XML 模板、深色根→浅色分支配色表、节点属性、XML 转义与 XMind 打不开等坑）：`references/mind-map-freemind-format.md`
+- ⚠️ 不要 `pip install XMind` —— 与现代 XMind 不兼容，产出打不开的文件；纯 XML 才是可靠路径
 
 ## Auto-Archive (Conversation-to-KB)
 

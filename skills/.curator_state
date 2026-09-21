@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260913-183057",
-  "last_run_at": "2026-09-13T18:30:57.198282+00:00",
-  "last_run_duration_seconds": 376.782526,
-  "last_run_summary": "auto: 3 marked stale; llm: Consolidation pass complete. Here's what happened.\n\n## Clusters processed\n\n**1. Divination / 玄学 (2 → 1)** — `xuanxue-ai-tools` was a near-duplicate of `divination-web-tools` (same FastAPI-per-tool architecture, same lunar-python integration…\narchived 4 skill(s):\n  • petdex → hermes-advanced-setup\n  • skill-creator → find-skills\n  • subagent-project-scaffolding → hermes-advanced-setup\n  • xuanxue-ai-tools → divination-web-tools\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin divination-web-tools",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260920-192604",
+  "last_run_at": "2026-09-20T19:26:04.024124+00:00",
+  "last_run_duration_seconds": 202.205394,
+  "last_run_summary": "auto: 5 marked stale, 5 archived, 10 reactivated; llm: ## Consolidation pass — clusters processed\n\n**Archive count: 2** — and I'll be straight about why it isn't 10, because the evidence supports it. This candidate set is *post-consolidation*: 22 of the 30 local skills already declare their own…\narchived 2 skill(s):\n  • mind-map → personal-knowledge-base\n  • voice-barge-in → voice-input\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin personal-knowledge-base",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 13
+  "run_count": 14
 }
