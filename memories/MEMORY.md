@@ -40,14 +40,14 @@ Mac上Hermes=launchd服务ai.hermes.gateway(PPID1，供8642+微信端)不需开�
 §
 语音输入(09-12)：手机飞书按住说话(电脑端不支持)→STT硅基Qwen3-ASR(stt.language显式zh)。TTS=edge zh-CN-XiaoyiNeural。改stt/tts免重启网关。/voice on=回语音。
 §
-维修纪律：证据先行+改代码前立基线、两轮未定位根因即停汇报、长任务离主会话+超60条/new、验收量化。服务器侧改他人代码先立基线；分析中发现的故障只报告别顺手修。细节在Mac端SOUL.md。(memory replace的old_text只定位→须给完整新内容)
+维修纪律：证据先行+改代码前立基线、两轮未定位根因即停汇报、长任务离主会话+超60条/new、验收量化。服务器侧改他人代码先立基线；分析中发现的故障只报告别顺手修。⚠️用户账号/外部服务(Antigravity等)写操作——建会话/调用模型/读凭证/消耗配额——必须先获明确授权，只读侦察≠授权，查完先报告再问。细节在Mac端SOUL.md。
 §
 用户问「选哪个方案/怎么解决」（已给A/B/C）=只在给定选项内给推荐+理由+代价对比，禁发明第四条路、禁顺手执行未批改动（09-15"别绕"）
 §
-服务器浏览器：browser_exec卡死=直连pypi不通→uvx冷启动卡下载。修复：uv.toml指腾讯云pypi镜像+uv tool install browser-use；常驻Chrome供CDP=systemd --user hermes-browser.service(--headless，port 9333)+cdp_url=http://127.0.0.1:9333(须用hermes config set)
+服务器浏览器：browser_exec卡死=直连pypi不通(uvx冷启动卡下载)。修：uv.toml指腾讯云镜像+uv tool install browser-use；常驻Chrome=systemd --user hermes-browser.service(--headless, 9333)，cdp_url须用hermes config set配
 §
-Yasin的Mac=Intel i7-1068NG7/16G/macOS15.0.1（非M系→Gemini官方Mac App装不了），未装node/npm(装CLI先补Node)；替代=Chrome独立窗口或Gemini CLI(1000次/天)。AI分工：DeepSeek主力(便宜/中文/数学)，Gemini只补多模态(图/PDF/超长文)，生视频走火山Seedance(不用Gemini，AI Pro仅3条/天)。免费额度走AI Studio API(1500次/天+1M)>App(32K)。详见overseas-account-setup技能
+Yasin的Mac=Intel i7-1068NG7/16G/macOS15.0.1(非M系→Gemini官方Mac App装不了)，未装node/npm。AI分工：DeepSeek主力(便宜/中文)，Gemini只补多模态(图/PDF/超长文)，生视频走火山Seedance。免费额度走AI Studio API(1500次/天,1M)>App(32K)。详见overseas-account-setup技能
 §
-红线：腾讯云服务器禁装梯子/代理——实据：翻墙直接封禁不警告，即使只当客户端连代理也被封；服务器跑着Hermes+16Agent+量化+工具站，封机代价≫收益。海外模型(Gemini/GPT/Claude)只在Mac侧用(美国节点)，服务器IP调用403 geo；服务器侧只走国内直连DeepSeek/硅基流动。OpenRouter在Mac美国节点下三家全通，免费层50次/天。用户拿到key会直接发来要求实测——要跑真实调用给结论，别只讲步骤。
+红线：腾讯云服务器禁装梯子/代理(实据:翻墙直接封禁不警告，当客户端连代理也被封；服务器跑Hermes+16Agent+量化+工具站，封机代价≫收益)。海外模型(Gemini/GPT/Claude)只在Mac侧用(美国节点)，服务器IP调用403→服务器只走国内DeepSeek/硅基流动。OpenRouter在Mac全通，免费50次/天；用户发key要求实测→要跑真实调用给结论
 §
 升级服务器Hermes：agent跑不了 hermes update/gateway restart(硬黑名单，chmod/heredoc/execute_code/systemd-run包裹全被拒)→唯一正解=用户在飞书发 /update(网关detach跑 hermes update --gateway)。清单见hermes-advanced-setup技能references/update-hermes.md

@@ -96,10 +96,11 @@ description: 海外账号/美区Apple ID/翻墙/礼品卡/AI付费全流程。�
 | 只想用 Gemini 干活 | AI Studio 免费 key，或 **Gemini CLI**（个人 Google 账号登录，1000 次/天） | **¥0** |
 | 要官方订阅 | 美区 Apple ID 走 App Store 内购（AI Pro 年付首年常促销 $99.99） | 首年 ≈¥720 |
 | 想在 Hermes/n8n/服小助 里用 Gemini 模型 | Gemini 官方有 **OpenAI 兼容端点** —— 改端点+key+模型名三处 | 按量（有免费层） |
-| 闲鱼「18 个月会员」 | ❌ 不买（官方压根没有 18 个月这档） | 见下 |
+| 闲鱼「18 个月会员」 | ❌ 不买（官方订阅页无此档；来路不明的转卖/代充一律不碰） | 见下 |
 | 拿到一条来路不明的 key | 先跑 `scripts/gemini-key-probe.sh <KEY> 7897`（**key 有效 ≠ 项目能用**） | ¥0 |
 | GCP $300 试用赠金 | 只抵 **Vertex AI 侧** Gemini，**不覆盖 AI Studio 的 Gemini API** → 除要 Pro 级 API 外不必开 | 免费 90 天 |
 
+- **Antigravity（反重力）是另一条线，≠ Gemini 会员**：用户自持 Pro（18 个月）。它能在 Mac 侧提供 Gemini/第三方模型的包月通道，也能当可脚本调用的后端——**Pro 档实际拿到哪些模型（网上说法互相矛盾，必须实测）、怎么驱动、以及「闲置是不是浪费」的口径**，见 `ai-agent-cli-orchestration` 技能（含 agentapi 三件套实测配方与 Remote Control）。
 - **桌面 App 先查机器再给下载链接**：官方 Gemini for Mac 硬要求 **Apple Silicon**（macOS 15+）。实测用户这台是 **Intel i7-1068NG7** → 装不了，版本/内存达标也没用。查法 `sw_vers` + `uname -m`（**别见着 MacBook Pro 就假设是 M 系**）。Intel 替代：Chrome「创建快捷方式」独立窗口 / Gemini CLI。
 - **闲鱼/淘宝「18 个月 Gemini 会员」** = 赠送资格拼接 / 共享号 / 黑卡代充 / 学生优惠倒卖（Google 正在成批清退）→ 中途失效、隐私裸奔、甚至连累主 Google 账号被封。**绝不把主账号交给别人代充。**
 - **「GPT 能不能调 Gemini」**：ChatGPT 产品内不能、OpenAI 官方 API 不能；但 **OpenAI 格式的任意工具都能调**（官方兼容层）→ 落地就是在 Hermes/n8n/服小助 加一个 Gemini provider/baseURL。
