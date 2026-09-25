@@ -111,3 +111,4 @@ related:
 
 - `overseas-account-setup` — 海外账号/订阅/付费链路（本技能负责「买到了之后怎么用起来」）
 - `china-ai-platforms` — 国内云平台 API 调用（另一条线，别混）
+- `project-four-persona-analysis` — 想让它「干活」而不是「当后端」时：人把一份开发规格文档丢给它跑（GUI + 单次任务 = 订阅的正确用法）。文档怎么写见该技能「交付阶段」一节
