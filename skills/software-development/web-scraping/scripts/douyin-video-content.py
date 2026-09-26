@@ -21,6 +21,8 @@
   - launch 用 headless=False（有头），别新建无痕 headless 实例
   - 不需要用户登录态 → 不必占用采集器那个持久 profile
   - 服务器侧只能做第 ① 步（curl 解析短链拿 aweme_id），渲染必须换机器
+  - 有些视频网页端根本不开放播放：final_url 会带 web_video_404_link、innerText 为空
+    → 脚本会给 verdict: APP_ONLY 并打印 [STOP]，此时换 UA/代理/机器都不会变，直接要截图
 """
 from __future__ import annotations
 
@@ -76,12 +78,20 @@ def main() -> int:
             out["text"] = pg.inner_text("body")[: a.chars]
         except Exception as e:  # noqa: BLE001
             out["text_error"] = str(e)
+        # 平台侧限制：该视频不开放网页播放（换机器/换UA/换代理都不会变）→ 别继续试
+        blob = out.get("text", "") + out["final_url"] + out["title"]
+        if ("web_video_404_link" in blob or "请尝试在抖音内观看" in blob
+                or "抱歉出错了" in blob):
+            out["verdict"] = "APP_ONLY"
         if a.shot:
             pg.screenshot(path=a.shot)
             out["shot"] = a.shot
         b.close()
 
     text = out.get("text", "")
+    if out.get("verdict") == "APP_ONLY":
+        print("[STOP] 该视频不开放网页播放（跳 web_video_404_link / 提示仅在抖音 App 内观看）。"
+              "换机器、换 UA、换代理都不会变 —— 停手，向用户要截图或字幕文案。", file=sys.stderr)
     if "argus" in text.lower() and len(text) < 500:
         print("[WARN] 疑似命中 Argus 风控或 SPA 未渲染：换个真实桌面机重跑", file=sys.stderr)
     print(json.dumps(out, ensure_ascii=False, indent=1))

@@ -87,6 +87,17 @@ browser_navigate(url="https://v.douyin.com/xxx/")
 | 看不到章节要点 | PC 网页版可能没有此功能 | 只在有"第X章"文字的页面才会出现 |
 | `browser_navigate` 报 Connection refused | Camoufox 进程已退出 | 重启 `camofox-browser` |
 
+## 坑点：视频不开放网页播放（"请尝试在抖音内观看"）
+
+2026-09-26 实测。分享页/视频页出现 `抱歉出错了` + `请尝试在抖音内观看` = 该视频**只允许抖音 App 内播放**，不是 IP 或反爬问题。
+
+判定与处理：
+1. `curl -sIL v.douyin.com/xxx` 拿 302 的 `location` 可解析出 video id 和 `social_author_id`（视频ID仍有效）
+2. 分享页 meta description 仍会给出发布时间（如"于20260926发布在抖音"），但 body 是错误页
+3. `www.douyin.com/video/<id>` 会 302 到 `jingxuan?previous_page=web_video_404_link`
+4. **在服务器和家宽 Mac（Tailscale 100.80.117.5）双侧复现同样结果** → 排除 IP 风控；不要再去 Mac 侧重试、不要换 UA/代理
+5. 此时**直接停手**：告诉用户视频抓不到，要截图或字幕文案。不要用同名/近似视频代替（内容不同）
+
 ## 不 work 时（兜底方案）
 
 如果 Camoufox 打不开抖音链接（CAPTCHA/错误），直接问用户要 **截图** 或 **文字描述**，不要试图修 Camoufox，不要换代理，不要 SSH 到远程服务器。

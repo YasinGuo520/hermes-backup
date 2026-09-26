@@ -2,6 +2,8 @@
 
 场景：用户发抖音分享短链（v.douyin.com/xxx），要分析视频内容/数据/评论区。
 
+> **先读本文件再动手。** 下面是本项目已验证的路径 + 一份死路清单。不先读就会把 curl 老接口、第三方解析、无头渲染、移动 UA 分享页挨个试一遍——那些全是死路，实测每条都白烧调用。
+
 ## 执行环境：先选载体，再动手（2026-09-17 实测修订）
 
 | 载体 | 结果 |
@@ -26,6 +28,21 @@ ssh mac@<mac-ts-ip> "cd ~/luopan-collector && ./venv/bin/python /tmp/douyin-vide
 ③ 读 `document.body.innerText`（长页面取前 6000 字符就够）→ 章节要点/标题/互动数据/推荐视频全在里面。
 
 > 若 Hermes 自身所在机器有可用的浏览器 harness，也可直接 `browser_navigate` 打开 `https://www.douyin.com/video/{aweme_id}`，取数方式完全相同。
+
+## 判定：这个视频「能不能在网页看」（先判，再费劲）
+
+有的视频**根本不开放网页播放**（平台侧限制：刚发布、作者设置、互动类作品等）。**先认信号，再决定要不要渲染**：
+
+| 信号 | 含义 |
+|---|---|
+| `www.douyin.com/video/<id>` 最终跳 `jingxuan?previous_page=web_video_404_link` | 该视频没有网页版 |
+| 分享页正文只有 `抱歉出错了` + `请尝试在抖音内观看` | 只许 App 内播放 |
+| 分享页 meta description 仍写「于<日期>发布在抖音，已经收获了N个喜欢」 | **不代表可访问**——ID 有效，只是不给你看内容 |
+| 短链 302 的 `location` 里 `share_track_info.social_author_id` | 作者 ID 仍可解析出来，可用于其它渠道查证 |
+
+**终审 = 真实桌面机的有头系统 Chrome**（见上）。若这条链路仍跳 404：换 UA、换代理、换 headless/headed、换机器或换 IP **都不会变**——不要再试，直接向用户要**截图或字幕文案**，并明说这是平台限制而不是抓取失败。
+
+判定已内置在脚本里：`scripts/douyin-video-content.py` 命中会打印 `[STOP]` 并给出 `verdict: APP_ONLY`。
 
 ## 死路清单（实测，别再浪费时间）
 

@@ -210,3 +210,16 @@ hermes config set approvals.timeout 300
 铁律：**远端/委派 agent 声称的产物，必须自己按绝对路径核一遍**（`ls`/`find` 文件、读回内容、看真实条数），
 别把它的总结当验收结论；它的「已修复/已通过」同样要自己的复现证据。
 自动化跑的验收任务收尾时，务必单独查一次**交付物是否存在**，而不是读它的总结段。
+
+## 十一、复用这台机前必查的两点
+
+**① 「这台机是采集机」≠「那个 profile 有目标站的登录态」。** 拿现成的持久 profile 去跑需要登录的任务前，先验它到底登过谁：
+
+```bash
+cp <profile>/Default/Cookies /tmp/ck.db && /usr/bin/sqlite3 /tmp/ck.db \
+  "select host_key, count(*) from cookies group by host_key order by 2 desc limit 10;"
+```
+
+实测某采集 profile 里只有无关站点的 cookie（登录态没落在这里）→ 拿它跑目标平台，页面就是**未登录态**，很容易误判成「平台不给看」。**先验 cookie，再解释失败原因。**
+
+**② Mac 是本项目「这个页面到底能不能打开」的终审台。** 同一 URL 走三阶梯：服务器 curl → 服务器无头 → **Mac 有头系统 Chrome**。三处结论一致（都跳同一个错误页、或都返回空壳）就是平台侧限制，**到此停手**：不要再换 UA、换代理、headed/headless 来回切、换设备重试，更不要拿「搜到的同名视频」当替代。三阶梯的价值是**一次定性**，不是用来反复试运气的。

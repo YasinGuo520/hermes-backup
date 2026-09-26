@@ -330,6 +330,8 @@ browser = p.chromium.launch(
 - 抖音精选联盟选品脚本（Playwright + openpyxl 输出 Excel，可作模板）：`references/douyin-scraper.md`
 - 抖音视频页内容提取（无需登录，拆解/分析视频用；含短链解析 + 真机渲染路径 + 死路清单 + 「我能不能干」回答骨架）：`references/douyin-page-extraction.md`，一键脚本 `scripts/douyin-video-content.py`
   - 速记：`curl -sL` 解析短链拿 aweme_id（服务器可做）→ **渲染必须换真实桌面机**（Mac 系统 Chrome + `headless=False`）打开 `www.douyin.com/video/<id>` → 读 `document.body.innerText`，平台自带的「章节要点」AI 摘要就是视频内容。分享页 HTML / `aweme/v1/web/aweme/detail/` 一律被 `ArgusSecurityPlugin` 拦，别在那上面耗调用。
+  - **停手条件**：真机渲染后最终 URL 带 `web_video_404_link`、正文只有「抱歉出错了 / 请尝试在抖音内观看」= 该视频不开放网页播放（换机器/UA/代理都不会变）→ 立刻停手要截图，别继续换工具。
+  - agent-reach 技能里那份 Camoufox 版抖音流程是**同题的另一条实现**，其中「不要 SSH 到远程机」只针对**修 Camoufox**，不否定「换真实桌面机渲染」这条规范路径；两处口径冲突时以本技能这份为准。
 - 国内平台后台持续采集架构（本机vs云服务器/风控判定/官方API门槛/跨机操控路径/百应域名与路径复盘）：`references/china-platform-backend-monitoring.md`
 - 本机采集器骨架（持久 profile + 拦 XHR + 上报，可拷贝修改）：`templates/xhr-collector.py`
 - 跨机作业的 shell 传输与超时（zsh 坑 / 别用 inline 引号 → scp 脚本过去跑 / macOS 无 timeout / 后台化三件套 / 精确取 pid）：`references/cross-machine-shell-ops.md`
