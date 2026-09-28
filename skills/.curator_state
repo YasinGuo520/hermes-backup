@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260920-192604",
-  "last_run_at": "2026-09-20T19:26:04.024124+00:00",
-  "last_run_duration_seconds": 202.205394,
-  "last_run_summary": "auto: 5 marked stale, 5 archived, 10 reactivated; llm: ## Consolidation pass — clusters processed\n\n**Archive count: 2** — and I'll be straight about why it isn't 10, because the evidence supports it. This candidate set is *post-consolidation*: 22 of the 30 local skills already declare their own…\narchived 2 skill(s):\n  • mind-map → personal-knowledge-base\n  • voice-barge-in → voice-input\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin personal-knowledge-base",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260927-192706",
+  "last_run_at": "2026-09-27T19:27:06.981555+00:00",
+  "last_run_duration_seconds": 260.708334,
+  "last_run_summary": "auto: 17 marked stale, 1 archived, 2 reactivated; llm: Consolidation pass complete. Three merges executed; the rest of the shelf examined and left intact with reasons below.\n\n## Clusters processed\n\n**Absorbed (3):**\n\n1. **Agent-interop cluster** — `agent-claim-verification` → **`agent-performan…\narchived 3 skill(s):\n  • agent-claim-verification → agent-performance\n  • ai-agent-cli-orchestration → overseas-account-setup\n  • scheduled-content-pipeline → recurring-watch-triage-jobs\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 14
+  "run_count": 15
 }

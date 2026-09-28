@@ -100,13 +100,30 @@ description: 海外账号/美区Apple ID/翻墙/礼品卡/AI付费全流程。�
 | 拿到一条来路不明的 key | 先跑 `scripts/gemini-key-probe.sh <KEY> 7897`（**key 有效 ≠ 项目能用**） | ¥0 |
 | GCP $300 试用赠金 | 只抵 **Vertex AI 侧** Gemini，**不覆盖 AI Studio 的 Gemini API** → 除要 Pro 级 API 外不必开 | 免费 90 天 |
 
-- **Antigravity（反重力）是另一条线，≠ Gemini 会员**：用户自持 Pro（18 个月）。它能在 Mac 侧提供 Gemini/第三方模型的包月通道，也能当可脚本调用的后端——**Pro 档实际拿到哪些模型（网上说法互相矛盾，必须实测）、怎么驱动、以及「闲置是不是浪费」的口径**，见 `ai-agent-cli-orchestration` 技能（含 agentapi 三件套实测配方与 Remote Control）。
+- **Antigravity（反重力）是另一条线，≠ Gemini 会员**：用户自持 Pro（18 个月）。它能在 Mac 侧提供 Gemini/第三方模型的包月通道，也能当可脚本调用的后端——**Pro 档实际拿到哪些模型（网上说法互相矛盾，必须实测）、怎么驱动、以及「闲置是不是浪费」的口径**，见本技能「订阅买到了之后：能怎么用、不能怎么用」一节 + `references/antigravity-agentapi.md`（含 agentapi 三件套实测配方与 Remote Control）。
 - **桌面 App 先查机器再给下载链接**：官方 Gemini for Mac 硬要求 **Apple Silicon**（macOS 15+）。实测用户这台是 **Intel i7-1068NG7** → 装不了，版本/内存达标也没用。查法 `sw_vers` + `uname -m`（**别见着 MacBook Pro 就假设是 M 系**）。Intel 替代：Chrome「创建快捷方式」独立窗口 / Gemini CLI。
 - **闲鱼/淘宝「18 个月 Gemini 会员」** = 赠送资格拼接 / 共享号 / 黑卡代充 / 学生优惠倒卖（Google 正在成批清退）→ 中途失效、隐私裸奔、甚至连累主 Google 账号被封。**绝不把主账号交给别人代充。**
 - **「GPT 能不能调 Gemini」**：ChatGPT 产品内不能、OpenAI 官方 API 不能；但 **OpenAI 格式的任意工具都能调**（官方兼容层）→ 落地就是在 Hermes/n8n/服小助 加一个 Gemini provider/baseURL。
 - 官方入口 URL 全集、免费额度真相（32K vs 1M）、价格表、风险分层、**GCP $300 判定**、**403「项目被拒」排查**、生图/生视频取舍与来源 → `references/gemini-access-and-subscription.md`；验 key 用 `scripts/gemini-key-probe.sh`
 
 用户问「解锁仅限XX节点是什么意思」→ 先解释机制（流媒体/AI封机房IP，机场只对部分节点养干净IP，须手动锁解锁节点别横跳）；IKUUU/追云/飞鸟三家常被问到的实测对比数据也在该文件。
+
+## 订阅买到了之后：能怎么用、不能怎么用（合并自 ai-agent-cli-orchestration）
+
+**触发**：「某某 AI 工具的会员还能用来干嘛」「能不能自动调它」「把 X 接进流水线 / 让 Hermes 用上 Claude」「桌面上装了 XX 能用来干嘛」。本节的边界同样适用于「把另一个 Hermes/别的 agent 接进你的流水线」。
+
+0. **只读侦察随便做，任何「真实调用」都是写操作——动手前先拿授权。** 在用户账号里跑 `new-conversation` 这类命令会在账号里建对象、烧付费配额、在服务端留下**删不掉**的请求记录。「一路查到能调通就顺手验证一下」是这个坑的固定剧本；用户对此零容忍。已跑过：**主动交代全量残留**（跑了什么、哪档模型、代价多大、账号里多了什么），再按第 6 条清理。
+1. **只调官方二进制，不碰 OAuth token 文件。** 官方支持的边界是「外部进程通过 stdin/stdout 调用官方 CLI，消耗同一账号额度」；从磁盘抠 OAuth token 给第三方客户端复用、直连产品后端 = 封号路径。token 只从**运行中进程**的参数/环境里读，且只用于给官方二进制设环境变量——不落盘、不外传、不进对话。
+2. **探针只用零配额命令**（如 `get-*-metadata <不存在的ID>`：不建对象、不烧配额）；真实任务调用**不是**探针，每次试错都在烧用户的付费配额。
+3. **端口与环境变量名从进程/二进制里读，不要猜**：端口 `lsof -nP -iTCP -sTCP:LISTEN -a -p <PID>`；变量名 `strings -a <二进制> | grep -oE "<产品前缀>_[A-Z_]*" | sort -u`。GUI 应用形态的「CLI」常只是 1 行包装器 exec 到桌面 App 内的语言服务器 → **宿主 App 必须在跑 + 机器没睡眠**；Tailscale 显示 `offline` = 什么都做不了，先让用户唤醒机器，别反复重试。
+4. **非 TTY 输出坑**：这类 CLI 常把最终回复只渲染到 TTY，管道/重定向时 stdout 为空但**退出码仍是 0** → 成功判据必须是「退出码 0 **且** 内容非空 **且** 含预期标记」，只看退出码 = 半夜静默失败；必要时用伪终端包一层（macOS `script -q /dev/null <cmd>`）。macOS 没有 GNU `timeout`，包长驻 CLI 用 `(cmd > /tmp/o 2>&1 & P=$!; sleep N; kill $P 2>/dev/null); cat /tmp/o`。
+5. **封号红线（实证，不是理论风险）**：把订阅模型反代出去 / 抠 token 复用，是**已经大规模执行过的清洗**——403 `disabled in this account for violation of Terms of Service`、**连带封禁**（Google AI Studio、GCP 项目创建权限一起回收）、付费订阅者照封、无预警无申诉、影子封禁（配额显示可用但调用失败）不可恢复。判定依据是**请求模式**不是工具本身：人工触发/离散任务=正常；7×24 自动化、高频、并行代理=触发风控。
+   给用户的结论（别讲成「有风险你自己决定」）：**「接进流水线」本身就是问题，换哪种调用方式都一样**；反代 / 包成 OpenAI 兼容 API **绝对不做**；官方二进制 + 本地进程调用只是踩灰线，**别做成常驻/cron/网关**；包月订阅的正确用法是人工用（IDE 干活 + Remote Control 远程盯任务 + 偶尔跑单次任务）。真要自动化流水线 → 走**按量付费的官方 API**。
+   风险收益比：省下的是几十块 API 费；赔上的是主力账号 + 邮箱/云盘/AI Studio/GCP + 已付会员费，且申诉无门。
+6. **越界后清理：先枚举所有残留类别，再动手删。** 宿主 App 有索引表（UI 条目来自它）→ 这类必须 SQL `DELETE` 那一行，只删文件没用；再逐个清本体文件、附属目录（`annotations/`、`brain/`）、临时文件，并确认 LaunchAgents/crontab/新装二进制**零新增**；日志与 shell 历史**只报告不改**。删完**等几十秒再复查一次**（App 在跑，可能把内存态写回索引表），最后明确交代删不掉的（服务端请求记录、已消耗配额）。清理完不做额外动作（别替用户重启 App、别改配置）。
+7. **回报节奏（用户硬要求）**：这类反向工程天然多轮 → 每 2-3 轮给一次一句话进度 + 当前已确证结论；用户中途问「你是在干嘛」= 汇报粒度太粗，立刻切成「我在干 X / 已确证什么（附证据）/ 还差什么」，不要再补一轮调查才回话。消耗了配额要主动交代。
+
+**支持文件**：`references/antigravity-agentapi.md`（Google Antigravity 2.x 实测配方：agentapi 三件套怎么凑、探针阶梯一步定故障层、子命令与模型档位、Remote Control、「Pro 档到底能用什么模型」的口径冲突、订阅能力边界与「闲置是不是浪费」的定案）；`scripts/antigravity-env.sh`（在 Mac 上自动发现 LS 端口/CSRF/project_id 并做零配额连通性探针，多端口自动试）。
 
 ## 「你所在的地区不可用」通用判定：先分清 IP 层 vs 账号层
 
