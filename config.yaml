@@ -22,7 +22,7 @@ auxiliary:
     provider: openai
     model: Qwen/Qwen3-VL-8B-Instruct
     base_url: https://api.siliconflow.cn/v1
-    api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
+    api_key: sk-yebzyjqrmpnjokajzslzwcvwquujddnwgckkllnanmgiwiww
   compression:
     provider: deepseek
     model: deepseek-v4-flash
@@ -197,7 +197,7 @@ stt:
   openai:
     model: Qwen/Qwen3-ASR-1.7B
     base_url: https://api.siliconflow.cn/v1
-    api_key: sk-gawwdwddywiqbybdqkbzjdtwrkymdfkihyjhohzkenbawptj
+    api_key: sk-yebzyjqrmpnjokajzslzwcvwquujddnwgckkllnanmgiwiww
     language: zh
 tts:
   edge:

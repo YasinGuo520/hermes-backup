@@ -605,6 +605,17 @@ find ~/.hermes/state-snapshots -mindepth 1 -maxdepth 1 -type d -mtime +30 -exec 
 5. **cron 钉模型核对**：读 `~/.hermes/cron/jobs.json` 每个 job 的 model/provider（未钉=随全局漂移被 scheduler 静默跳过，见上文「Cron Provider Drift」）。
 6. **扣费来源排查（本机全 clean 时）**：DeepSeek 官方**无 usage 明细 API**（user/usage 等端点全 404），只有 `GET /user/balance` 查余额；控制台用量图是唯一明细源。排查流向：服务器 agent.log → Mac（SSH `mac@100.80.117.5`）agent.log + config + cron → 全盘 grep key 使用点（服务器 `~/Desktop/hermes`、Mac `~/Desktop ~/Library/Application Support ~/.config`）→ 若全 clean → **key 泄漏嫌疑**（key 曾明文贴聊天/硬编码在 server.py）→ 建议重置 key + 全端换新（Hermes .env/config、服小助 ai_cs_package/.env、落地页 server.py、Dify/n8n、Mac .env）。控制台图用 vision_analyze 精确读日期刻度和每日数值（常是 30 天窗，峰值日期≠昨天，别被总览误导）。费用估算/对账模板见上文「费用/扣费排查」与 `references/cost-billing-audit.md`。
 
+### 密钥轮换（key rotation）实操 — 2026-09-28 实测（硅基流动，两机 36 文件）
+
+**触发**：确认/怀疑 key 泄漏、用户直接给新 key 要求替换。
+
+1. **不要只手改主配置**——旧 key 明文散落在备份/快照/DB 里。实测命中 36 个文件：除 `~/.hermes/config.yaml` + `.env` 外还有 `config.yaml.bak-*`、`backups/config/config.yaml.good.*`、`state-snapshots/*/`、`processes.json`、`state.db-wal`、以及项目侧脚本（如 `dify_setup_model2.sh`）。**用 Python `os.walk` 遍历替换**（跳过 `venv/node_modules/__pycache__/logs/cache`，单文件 <30MB，`os.chmod` 保留权限），别用 sed。Mac 侧同法，通过 SSH + heredoc 跑（脚本内避免单引号破坏外层引号）。
+2. **验证三件套**：① 全盘 grep 旧 key = 0 残留；② 新 key 零成本鉴权测试 `curl -s -o /dev/null -w "%{http_code}" https://api.siliconflow.cn/v1/models -H "Authorization: Bearer $KEY"` → 200；③ **旧 key 打同一端点应 401** ——401 = 控制台已删、泄漏通道断了；仍 200 = 旧 key 还活着，**必须去控制台删掉**（只改本地配置不解决外部盗用）。
+3. **真调用实测**（不只看鉴权）：一次 `max_tokens=10` 的 chat（≈¥0.001）确认能推理。**顺手核对模型是否下架**：实测 `Qwen/Qwen3-VL-4B-Instruct` 已报 20012 Model does not exist，而 VL-8B/30B/32B 仍在 —— 代码里写死的模型名先用 `/v1/models` 列清单比对。
+4. **进程内存里的旧值**：`config.yaml` 明文 api_key（vision/stt/image_gen）按调用读盘 → 免重启；`.env` 里的（fallback_providers 的 `key_env`）在 gateway 启动时载入 → **需重启 gateway 才换**。
+5. **验证 gateway 是否已用新 key（免重启判断）**：直接 `vision_analyze` 一张本地图 —— 出分析 = 新 key 已生效；401 = 需重启 gateway。比翻源码猜加载时机快。
+6. **清扣费嫌疑时先确认服务是否真在跑**：本次 face(8903)/bazi(8902)/tarot(8901) 打包成「嫌疑服务」查了一轮，实际它们**根本没进程、也不在 keepalive 保活名单** —— 先 `ss -tlnp | grep -E "890[123]"` + 查 keepalive 数组，能省一轮误判。
+
 ## 远程维修「别人写的」Hermes 应用（2026-09-12 实测：Mac APEX 语音链）
 
 **触发**：用户说「你看看那台机器上的 Hermes，她搞得乱七八糟/搞坏了，你弄好」——目标机上的另一个 Hermes 实例（或它自研的配套应用）坏了，要你远程修。
