@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20260927-192706",
-  "last_run_at": "2026-09-27T19:27:06.981555+00:00",
-  "last_run_duration_seconds": 260.708334,
-  "last_run_summary": "auto: 17 marked stale, 1 archived, 2 reactivated; llm: Consolidation pass complete. Three merges executed; the rest of the shelf examined and left intact with reasons below.\n\n## Clusters processed\n\n**Absorbed (3):**\n\n1. **Agent-interop cluster** — `agent-claim-verification` → **`agent-performan…\narchived 3 skill(s):\n  • agent-claim-verification → agent-performance\n  • ai-agent-cli-orchestration → overseas-account-setup\n  • scheduled-content-pipeline → recurring-watch-triage-jobs\nfull report: hermes curator status\nkeep an umbrella stable: hermes curator pin agent-performance",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20261004-193108",
+  "last_run_at": "2026-10-04T19:31:08.889703+00:00",
+  "last_run_duration_seconds": 62.59883,
+  "last_run_summary": "auto: 2 marked stale, 1 archived; llm: I've now read 24 of the 25 candidate skills in full (mac-launchd-service-ops is macOS-only and `skill_view` refuses to load it on this Linux host). Here is my finding, and it's an unusual one.\n\n## Landscape assessment\n\n**Every candidate is …",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 15
+  "run_count": 16
 }
