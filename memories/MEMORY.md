@@ -36,7 +36,7 @@ Hermes检索降级：web_search超时/web_extract无backend→anysearch MCP(mcp_
 §
 跨机采集铁律：持续采集跑Mac(真IP+真人profile)，机房IP+headless=封号；服务器8920-8940被Agent矩阵占、8941=luopan-monitor，内存紧→采集器别放服务器。抖音罗盘+达人广场共用底座=Mac采集器(Tailscale+SSH)+上报8941+飞书(~/luopan-collector)。细节见web-scraping技能第八章
 §
-Mac上Hermes=launchd服务ai.hermes.gateway(PPID1，供8642+微信端)不需开桌面端；合盖睡眠会停gateway+apex+微信渠道，唤醒后RunAtLoad=false的不自己回。APEX语音UI自研~/apex-src。
+Mac上Hermes=launchd服务ai.hermes.gateway(PPID1，供8642+微信端)不需开桌面端；合盖睡眠会停gateway+apex+微信渠道，唤醒后RunAtLoad=false的不自己回。APEX语音UI自研~/apex-src：2026-10-06起不随开机自启(plist已挪到~/apex-src/launchagents/+launchctl disable两道保险)，只双击「APEX 开.app」手动起、关.app停。
 §
 语音输入(09-12)：手机飞书按住说话(电脑端不支持)→STT硅基Qwen3-ASR(stt.language显式zh)。TTS=edge zh-CN-XiaoyiNeural。改stt/tts免重启网关。/voice on=回语音。
 §

@@ -167,9 +167,27 @@ macOS 把麦克风授权发给「Aqua 会话里那个 python 二进制」，ssh 
 `apex-mute.sh`（只停耳朵）。双击图标用 `osacompile -o "$HOME/Applications/APEX 开.app" -e 'do shell
 script …'`（**别写 `~/Desktop`**，ssh 上下文被 TCC 挡；`~/Applications` 还能直接拖进 Dock）。
 
-关键一步：三个 plist 的 `RunAtLoad` 改 `false`。否则 `bootout` 后**下次登录 launchd 又把它拉起来**，
-用户「我不想常驻」的意图会在重启后失效。改 plist 后必须 `bootout` + `bootstrap`（`kickstart -k` 不重读）；
-因为 `RunAtLoad=false`，bootstrap 后进程不会自己起——脚本里要补 `launchctl kickstart gui/$U/<label>`。
+### 要让「退出」在重启后依然有效：`RunAtLoad=false` 挡不住，得把 plist 挪出 LaunchAgents
+
+**别信「改 `RunAtLoad=false` 就不会自启」——这条结论是错的**（2026-10-06 实测推翻）：
+三个 job 的 `KeepAlive=true`，只要 plist 还躺在 `~/Library/LaunchAgents/`，**登录时 launchd 就把它
+拉起来**（证据：`sysctl kern.boottime` = 07:43:39，三个服务日志 07:44 已在写、`ps` 已见进程）。
+
+**正确做法（两道保险，都已实测）**：
+
+1. **plist 挪出 LaunchAgents 目录** → `~/apex-src/launchagents/`（含 `*.bak-*` 历史备份一起挪，
+   只有 `.plist` 结尾会被 launchd 扫，但挪走更清爽）。登录时扫不到 = 不自启，这是**决定性**的一条。
+2. **加 disable 覆盖** → `launchctl disable gui/$U/<label>`：即使有 plist 被别的路径/备份
+   还原回来，也会被拒（实测 `bootstrap` 回 `Bootstrap failed: 5: Input/output error` = Service is disabled）。
+3. **启动脚本改成 `enable` → `bootstrap` → 启动成功后立刻再 `disable`**：手动能起，登录时保险还在。
+   - `launchctl bootstrap` 不会自动清 disable，**必须先 `launchctl enable`**，否则启动静默失败。
+   - 实测 `disable` **只挡未来的加载，不会杀掉正在跑的 job**；`kill -9` 掉 bridge 后 launchd 几秒内
+     照常自愈拉起（所以「启动后马上再 disable」是安全的，KeepAlive 不受影响）。
+4. `bootout` = 停；`kickstart` = 重启。改 plist **内容**后必须 `bootout` + `bootstrap`（`kickstart -k` 不重读
+   plist）；因为 `RunAtLoad=false`，bootstrap 后进程不会自己起——脚本里要补 `launchctl kickstart gui/$U/<label>`。
+
+**验收话术（诚实版）**：`ssh` 里能验的是「disable 后 bootstrap 被拒 + LaunchAgents 目录零个 plist」；
+真·开机验证只有重启/重新登录才算，别把前者当成后者汇报。
 
 ## macOS TCC 挡住源码（`~/Desktop`）：怎么远程拿到代码
 
@@ -189,8 +207,11 @@ shell/sshd 起的进程读 `~/Desktop` 是 `Operation not permitted`。**GUI 起
 ```bash
 U=$(id -u)
 # 停：KeepAlive=true 的 job 必须 bootout，kill 会立刻复活
+# plist 在 ~/apex-src/launchagents/（2026-10-06 起，不放 LaunchAgents 以免登录自启）
 launchctl bootout gui/$U/ai.hermes.apex-bridge
-launchctl bootstrap gui/$U ~/Library/LaunchAgents/ai.hermes.apex-bridge.plist
+launchctl enable gui/$U/ai.hermes.apex-bridge     # 必须先 enable，否则被 disable 覆盖拒绝
+launchctl bootstrap gui/$U ~/apex-src/launchagents/ai.hermes.apex-bridge.plist
+launchctl disable gui/$U/ai.hermes.apex-bridge    # 手动起完再把保险盖上
 launchctl list | grep -i apex
 ```
 
