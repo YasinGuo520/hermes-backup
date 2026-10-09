@@ -57,3 +57,6 @@ AI高自动化盈利矩阵操典=Obsidian 016篇：无脸YouTube、编程SEO对�
 已蒸馏书籍(入库Obsidian)：墨多《自渡》011篇(心力/课题分离)、钱婧《新收入》、卡尼曼《思考快与慢》、《毛泽东选集》(战略/一人公司)。
 §
 Obsidian唯一记忆网络：Mac ~/Documents/Obsidian Vault 与云端 ~/obsidian-vault 双向同构；本地/云端Hermes+Antigravity+Yasin四方共享。
+§
+私有 GPU 算力中枢与视频工厂（2026-10-09 点亮）：AutoDL NVIDIA RTX 4090 (24GB) + 120GB 内存（内蒙B区/189机/实例ID: 7e4f4ea1e0-bb9a5909，SSH端口 23985）；本地 Antigravity、本地 Hermes、云端腾讯云 Hermes 三端均已配置专用私钥 ~/.ssh/autodl_key 100% 免密直通调度；ComfyUI 6006 端口通过 SSH 隧道直连 Mac 本地 http://127.0.0.1:6006，预装 Wan 2.2 + MiniMax H3 镜像；已在腾讯云部署每日 10:00 autodl_guard.py 自动化检测与 Telegram @YasinGuo_Antigravitybot 10 天防释放预警闭环（防 15 天不开机自动释放）；沉淀全局技能 ai-video-pipeline-factory 与 Obsidian 核心操典 019 篇（019_AI视频大模型全自动生成管线与电商短视频起号实操操典.md，涵盖 5 大高转化电商带货形态）。
+§
