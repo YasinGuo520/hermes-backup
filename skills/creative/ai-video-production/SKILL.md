@@ -619,7 +619,7 @@ echo "全部生成完成"
 → moviepy 合成 + 配音 + 字幕 → 带货视频成品
 ```
 
-详见 `references/bailian-i2v-session.md` 和 `references/jianying-capcut-compatibility.md`。
+详见 `references/bailian-i2v.md` 和 `references/jianying-capcut-compatibility.md`。
 
 ### 百炼 I2V 补充坑（合并自 chaoke-i2v-product-video）
 - **并行生成中断 `exit 130`**：`bl video generate` 是同步阻塞调用，并行跑2条以上时第二条被中断。**逐条串行生成**，每次等前一条完成再跑下一条（单条约60-90秒）。

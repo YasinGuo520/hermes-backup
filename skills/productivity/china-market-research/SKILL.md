@@ -185,9 +185,9 @@ result.slice(0,15).join('\\n');
 
 ## 抖音/中文短视频内容提取
 
-当调研对象的信息存在于抖音/小红书等中文短视频平台时，见 `references/douyin-video-analysis-workflow.md`。
+当调研对象的信息存在于抖音/小红书等中文短视频平台时，见 `web-scraping` 技能的 `references/douyin-page-extraction.md`（**全库唯一权威版**：载体选择 / 「能不能在网页看」的判定 / 死路清单 / 跨平台身份三角验证 / 内容拆解框架 / 二次解读回溯原始素材 / 摄取知识库）。
 
-核心思路：browser_vision 截图分析（绕过 bot 检测）+ browser_console 提取 HTML meta（vision 降级）+ AnySearch 跨平台搜索（Zcool/站酷/B站/话题上下文）→ 三角验证创作者身份 → 结构化分析。
+核心思路：短链解析拿 aweme_id → **真实桌面机有头浏览器**渲染后读 `document.body.innerText`（平台自带的「章节要点」AI 摘要就是内容）→ 三角验证创作者身份 → 结构化分析。⚠️ 服务器无头抓抖音必被字节 Argus 风控拦；`browser_vision`/AX 树那条老路已作废，别再把调用烧在上面。
 
 ## B站视频内容分析
 

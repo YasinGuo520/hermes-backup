@@ -1124,3 +1124,7 @@ for t in [r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='
 
 **实战案例**：`references/coze-viral-copywriter-template.md`（爆款文案带货特工：人设+双工作流+插件列表+定价完整设计）、`references/coze-viral-copywriter-local-tool.md`（配套本地工具模板：两种模式+配置持久化）。
 
+## 竞品档案（电商AI客服赛道）
+
+福客AI（FreeCall AI）深度扒皮——公司底细/产品指标/客户与融资时间线/定价/渠道/弱点→对策：`china-market-research` 技能的 `references/fukeai-deep-dive.md`（全库唯一权威版；本技能原 `references/福客AI竞品深度分析.md` 已并入）。赛道竞品矩阵见同技能 `references/ecommerce-cs-competitors.md`。
+

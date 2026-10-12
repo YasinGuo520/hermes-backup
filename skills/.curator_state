@@ -1,9 +1,9 @@
 {
-  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20261004-193108",
-  "last_run_at": "2026-10-04T19:31:08.889703+00:00",
-  "last_run_duration_seconds": 62.59883,
-  "last_run_summary": "auto: 2 marked stale, 1 archived; llm: I've now read 24 of the 25 candidate skills in full (mac-launchd-service-ops is macOS-only and `skill_view` refuses to load it on this Linux host). Here is my finding, and it's an unusual one.\n\n## Landscape assessment\n\n**Every candidate is …",
+  "last_report_path": "/home/ubuntu/.hermes/logs/curator/20261011-193521",
+  "last_run_at": "2026-10-11T19:35:21.258297+00:00",
+  "last_run_duration_seconds": 305.372159,
+  "last_run_summary": "auto: no changes; llm: Consolidation pass complete. Here's what I found and did.\n\n## Verdict on this library: it is *already* umbrella-ified at the skill layer\n\nBefore touching anything I read all 25 candidates in full. ~20 of them carry explicit absorption marke…",
   "last_run_summary_shown_at": "2026-07-26T02:24:57.114318+00:00",
   "paused": false,
-  "run_count": 16
+  "run_count": 17
 }

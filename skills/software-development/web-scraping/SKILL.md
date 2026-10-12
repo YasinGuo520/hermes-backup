@@ -338,6 +338,7 @@ browser = p.chromium.launch(
 - macOS 当采集机（能力边界表 / 系统 Chrome / SSH 起有头浏览器 / 部署清单 / 换机迁移 / profile History 取证 / 远端采集会话设计 / 交付前必说的现实 / **目标机自带 agent 为何干不了这件事的排查表**）：`references/macos-collection-host.md`
 - 懒加载/无限滚动探针（判定滚动加载 vs 分页按钮 / 找滚动容器 / 试滚验触发）：`scripts/lazy-load-probe.py`
 - 被墙/付费墙/WAF 页面恢复（Wayback/archive.today/Jina/API pivot 梯子 + 假成功清单）：`references/blocked-page-recovery.md` + `scripts/recover_page.py`
+- TikHub 数据 API（抖音/小红书/快手等 25 平台公开数据——端点速查/错误码/免费边界/商品数据源现状/替代通道）：`references/tikhub-api.md`
 
 
 ## 被墙/付费墙/WAF 页面恢复（合并自 blocked-page-recovery）

@@ -290,7 +290,7 @@ sources: [source description]
 ## Reference Files
 
 - `references/macos-calendar-applescript.md` — Create/manage macOS Calendar events via AppleScript
-- `references/douyin-video-ingestion.md` — Extracting content from Douyin videos (no transcript API, login wall bypass via synthesis)
+- 抖音/小红书短视频提取：见 `web-scraping` 技能的 `references/douyin-page-extraction.md`（唯一权威版：载体选择 / 死路清单 / 平台字幕能力对比 / 合成摘要标注 `synthesized: true`）
 - `references/structured-reference-notes.md` — Generating comprehensive reference notes from structured data sources (JSON, CSV, YAML): parsing large files, grouping by category, formatting tables with proper escaping, and writing to the vault
 - `references/sub-agent-role-templates.md` — Fixed job descriptions for delegate_task sub-agents (red-blue validator, six-persona analyst, research, executor, QA reviewer)
 

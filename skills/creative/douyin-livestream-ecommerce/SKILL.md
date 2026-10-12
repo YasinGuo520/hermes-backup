@@ -279,7 +279,7 @@ DeepSeek V4-Flash 定价（2026年7月）：输入（命中）¥0.02/百万token
 
 查：公司底细/定价/技术栈（真LLM vs 规则引擎）/多SKU能力/多平台覆盖/弱点/客户群。数据来源：天眼查/投资界/官网/服务市场/技术测评。
 
-2026年7月市场：电商AI客服已成红海。真LLM Agent只有福客AI、火山Agent、店小蜜新版三家。你的机会：真LLM + 垂直深耕（服装）+ 极致低价。福客AI最大资产是玺承集团客户池，不是技术。详见 `references/fuke-ai-deep-dive.md`。
+2026年7月市场：电商AI客服已成红海。真LLM Agent只有福客AI、火山Agent、店小蜜新版三家。你的机会：真LLM + 垂直深耕（服装）+ 极致低价。福客AI最大资产是玺承集团客户池，不是技术。详见 `china-market-research` 技能的 `references/fukeai-deep-dive.md`（全库唯一权威版）。
 
 ## ⚠️ 执行心理学（此用户关键卡点）
 
@@ -366,7 +366,7 @@ DeepSeek V4-Flash 定价（2026年7月）：输入（命中）¥0.02/百万token
 
 ## 带货视频生产：百炼图生视频(I2V)管线
 
-> 2026-07-11 实测验证。用一张实拍产品图 → 阿里百炼 I2V → 生成5秒动态视频，产品100%一致，成本 ¥0.06/条。详见 `references/bailian-i2v-product-video.md`
+> 2026-07-11 实测验证。用一张实拍产品图 → 阿里百炼 I2V → 生成5秒动态视频，产品100%一致，成本 ¥0.06/条。详见 `ai-video-production` 技能的 `references/bailian-i2v.md`（全库唯一权威版：命令链/参数/四类提示词模板/两段法合成/坑）
 
 ### 核心原则
 
@@ -475,9 +475,9 @@ osascript -e 'tell application "Calendar" to tell calendar "个人" to \
 - `references/prompt-templates.md` — 完整Prompt模板库（带货/短视频/自媒体/通用四大类，含万能公式和精选Prompt）
 - AI系统学习路径完整内容（8大分支，含模型分类/资源渠道/避坑指南）见本SKILL.md「AI系统学习路径」章节（原文案在归档副本 .archive/douyin-livestream-ecommerce 历史版本）
 - `references/okr-timeline-planning.md` — OKR + 30天5阶段进度规划法，含财务倒推公式、货盘配比、每日Checklist模板、飞书Bitable结构
-- `references/bailian-i2v-product-video.md` — 百炼图生视频(I2V)带货素材生产管线：完整命令、提示词模板、成本速查，2026-07-11实测验证
+- 百炼图生视频(I2V)带货素材生产管线：见 `ai-video-production` 技能的 `references/bailian-i2v.md`（全库唯一权威版；本技能原 `references/bailian-i2v-product-video.md` 已并入）
 - `references/ecommerce-ai-saas-product-planning.md` — 电商AI客服SaaS产品规划：定位/竞品/定价/成本/护城河，2026-07-11新建
-- `references/fuke-ai-deep-dive.md` — 福客AI竞品调研：公司底细/产品/融资/弱点分析
+- 福客AI竞品档案（公司底细/产品指标/客户与融资时间线/定价/渠道/弱点→对策）：见 `china-market-research` 技能的 `references/fukeai-deep-dive.md`（全库唯一权威版；本技能原 `references/fuke-ai-deep-dive.md` 已并入）
 - `references/ecommerce-ai-saas-cost-pricing.md` — AI SaaS成本与定价速查：DeepSeek定价/单次对话成本/套餐模板/定价铁律（第二版含修正）
 - `references/ecommerce-ai-saas-three-rate-technical.md` — 三率技术方案速查：投诉率↓/退货率↓/转化率↑ 算法逻辑与实现
 - `references/qianchuan-quanyu-promotion-roi-bidding.md` — 千川全域推广/付费驱动自然流/ROI出价：官方协议原文（整体支付ROI公式、放量vs控成本、互斥逻辑、成本保障条件与官方举例）、保本ROI公式推导、调价纪律、待核实口径项

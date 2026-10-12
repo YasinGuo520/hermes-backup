@@ -86,9 +86,9 @@ related:
 - `ai-video-production` — I2V 视频管线、Wan2.2、视频合成（本技能是平台调用层）
 - `volcengine-ark-api` / `siliconflow-image-gen` / `aliang-bailian` 已并入本技能（原内容在 references/ 对应文件）
 
-## TikHub 数据API速查（2026-09-02 实测）
+## TikHub 数据API（2026-09-02 实测）
 
-TikHub（api.tikhub.io）是抖音/小红书/快手等25平台的公开数据API（1066端点）——**免费只有抖音billboard几个，小红书/快手全付费（402=欠额度）**；拿不到任何平台自己的店铺后台数据。抖音端点解析必看：`data.data` 两层嵌套（热榜 word_list / 账号 user_list）。完整端点表+实测结构见 `references/tikhub-endpoints.md`（参考实现：`~/Desktop/hermes/company-agents/common/tikhub.py`）。
+TikHub（api.tikhub.io）是抖音/小红书/快手等 25 平台的公开数据 API——**免费只有抖音 billboard 几个端点，小红书/快手/视频号全付费（402=欠额度，不是网络错误）**；拿不到任何平台自己的店铺后台数据（订单/GMV 一律 Excel 或官方 API）。解析必看 `data.data` 两层嵌套 + snake_case 字段。**完整端点表/错误码/免费边界/商品数据源现状/替代通道见 `web-scraping` 技能的 `references/tikhub-api.md`**（原 `references/tikhub-endpoints.md`、`references/tikhub-api-facts.md` 已并入该文件）。
 
 ## 腾讯混元3D：2D立绘 → GLB 真3D（合并自 ai-image-to-3d）
 
